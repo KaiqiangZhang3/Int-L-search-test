@@ -1,5 +1,7 @@
 # Depth Checkpoint
 
+Compatibility template: use [`round-report.md`](round-report.md) for new projects with `round_type=depth`. The fields below remain available when migrating an earlier project.
+
 ## Confirmed seeds and limits
 
 {{user_confirmed_seeds_branches_and_depth_budget}}
@@ -35,4 +37,4 @@ For each seed, show the traced path and explain why each useful addition belongs
 
 ## Decision panel
 
-Use [`decision-panel.md`](decision-panel.md). Do not trace a new seed or expand a branch until the user authorizes it.
+Use [`next-round-menu.md`](next-round-menu.md). Do not trace a new seed or expand a branch until the user authorizes it; the next main round does not have to be another depth round.

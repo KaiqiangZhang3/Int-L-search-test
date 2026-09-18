@@ -1,5 +1,7 @@
 # Breadth Checkpoint
 
+Compatibility template: use [`round-report.md`](round-report.md) for new projects with `round_type=breadth` or `round_type=breadth_expansion`. The fields below remain available when migrating an earlier project.
+
 ## Confirmed scope
 
 {{concise_scope_and_mode}}
@@ -10,7 +12,7 @@
 
 ## Candidate overview
 
-- Ordinary range: 15–30 candidates
+- Scale-dependent discovery expectation: {{approved_discovery_profile_and_cap}}
 - Included this round: {{candidate_count}}
 - Full texts reviewed within budget: {{full_text_review_count}}
 
@@ -52,4 +54,4 @@ Do not claim representative multilingual or Global South coverage from the prese
 
 ## Decision panel
 
-Use [`decision-panel.md`](decision-panel.md). Stage 2 must not begin until the user selects branches, seeds, and a tracing budget.
+Use [`next-round-menu.md`](next-round-menu.md). The user may approve another breadth round, a different round type, a side round, synthesis, a writing pause, or closure. Citation tracing still requires approved seeds and a bounded tracing budget.
