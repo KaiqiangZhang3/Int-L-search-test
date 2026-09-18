@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/international-law-search/round-record.schema.json",
+  "title": "International Law Search Round Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "round_id",
+    "kind",
+    "parent_round_id",
+    "round_type",
+    "status",
+    "authorization_decision_id",
+    "research_question",
+    "exclusions",
+    "planned_budget",
+    "actual_budget",
+    "methods",
+    "added_source_keys",
+    "updated_source_keys",
+    "duplicate_source_keys",
+    "unresolved_source_keys",
+    "added_claim_ids",
+    "revised_claim_ids",
+    "report_path",
+    "synthesis_version",
+    "presentation_version",
+    "next_round_options",
+    "budget_extension_decision_id"
+  ],
+  "properties": {
+    "round_id": {
+      "type": "string",
+      "pattern": "^R[1-9][0-9]*(\\.S[1-9][0-9]*)?$"
+    },
+    "kind": {
+      "enum": ["main", "side"]
+    },
+    "parent_round_id": {
+      "type": ["string", "null"],
+      "pattern": "^R[1-9][0-9]*$"
+    },
+    "round_type": {
+      "enum": [
+        "breadth",
+        "breadth_expansion",
+        "depth",
+        "primary_materials",
+        "state_practice",
+        "doctrinal",
+        "gap_filling",
+        "verification",
+        "synthesis"
+      ]
+    },
+    "status": {
+      "enum": ["approved", "active", "paused", "completed", "cancelled"]
+    },
+    "authorization_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "research_question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exclusions": {
+      "$ref": "#/$defs/nonempty_string_array"
+    },
+    "planned_budget": {
+      "$ref": "#/$defs/research_budget"
+    },
+    "actual_budget": {
+      "$ref": "#/$defs/research_budget"
+    },
+    "methods": {
+      "$ref": "#/$defs/nonempty_string_array"
+    },
+    "added_source_keys": {
+      "$ref": "#/$defs/nonempty_string_array"
+    },
+    "updated_source_keys": {
+      "$ref": "#/$defs/nonempty_string_array"
+    },
+    "duplicate_source_keys": {
+      "$ref": "#/$defs/nonempty_string_array"
+    },
+    "unresolved_source_keys": {
+      "$ref": "#/$defs/nonempty_string_array"
+    },
+    "added_claim_ids": {
+      "$ref": "#/$defs/nonempty_string_array"
+    },
+    "revised_claim_ids": {
+      "$ref": "#/$defs/nonempty_string_array"
+    },
+    "report_path": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "synthesis_version": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "presentation_version": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "next_round_options": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/next_round_option"
+      }
+    },
+    "budget_extension_decision_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {"const": "main"}
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "round_id": {"pattern": "^R[1-9][0-9]*$"},
+          "parent_round_id": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {"const": "side"}
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "round_id": {"pattern": "^R[1-9][0-9]*\\.S[1-9][0-9]*$"},
+          "parent_round_id": {
+            "type": "string",
+            "pattern": "^R[1-9][0-9]*$"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonempty_string_array": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "platform_allocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "purpose"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "purpose": {"type": "string", "minLength": 1}
+      }
+    },
+    "language_allocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "language",
+        "purpose",
+        "bibliographic_discovery",
+        "full_text_acquisition",
+        "substantive_review"
+      ],
+      "properties": {
+        "language": {"type": "string", "minLength": 1},
+        "purpose": {"type": "string", "minLength": 1},
+        "bibliographic_discovery": {"type": "integer", "minimum": 0},
+        "full_text_acquisition": {"type": "integer", "minimum": 0},
+        "substantive_review": {"type": "integer", "minimum": 0}
+      }
+    },
+    "research_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bibliographic_discovery",
+        "full_text_acquisition",
+        "substantive_review",
+        "platforms",
+        "query_cap",
+        "time_cap_minutes",
+        "tracing_depth",
+        "seeds",
+        "language_allocations"
+      ],
+      "properties": {
+        "bibliographic_discovery": {"type": "integer", "minimum": 0},
+        "full_text_acquisition": {"type": "integer", "minimum": 0},
+        "substantive_review": {"type": "integer", "minimum": 0},
+        "platforms": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/platform_allocation"},
+          "uniqueItems": true
+        },
+        "query_cap": {"type": "integer", "minimum": 0},
+        "time_cap_minutes": {"type": "number", "minimum": 0},
+        "tracing_depth": {"type": "integer", "minimum": 0},
+        "seeds": {"$ref": "#/$defs/nonempty_string_array"},
+        "language_allocations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/language_allocation"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "next_round_option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "option_id",
+        "round_type",
+        "question_addressed",
+        "retrieval_objects",
+        "starting_seeds",
+        "method",
+        "planned_budget",
+        "expected_output",
+        "exclusions"
+      ],
+      "properties": {
+        "option_id": {"type": "string", "minLength": 1},
+        "round_type": {"$ref": "#/$defs/round_type"},
+        "question_addressed": {"type": "string", "minLength": 1},
+        "retrieval_objects": {"$ref": "#/$defs/nonempty_string_array"},
+        "starting_seeds": {"$ref": "#/$defs/nonempty_string_array"},
+        "method": {"type": "string", "minLength": 1},
+        "planned_budget": {"$ref": "#/$defs/research_budget"},
+        "expected_output": {"type": "string", "minLength": 1},
+        "exclusions": {"$ref": "#/$defs/nonempty_string_array"}
+      }
+    },
+    "round_type": {
+      "enum": [
+        "breadth",
+        "breadth_expansion",
+        "depth",
+        "primary_materials",
+        "state_practice",
+        "doctrinal",
+        "gap_filling",
+        "verification",
+        "synthesis"
+      ]
+    }
+  }
+}

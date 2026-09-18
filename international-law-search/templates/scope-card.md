@@ -45,17 +45,42 @@ Record intended regions, languages, platforms, and perspectives in measurable te
 
 {{quick_standard_or_deep_audit}}
 
+## Research scale
+
+{{orientation_seminar_paper_thesis_chapter_doctoral_corpus_or_custom}}
+
+This profile sets expectations across rounds, not a source quota.
+
 ## Delivery
 
 - Output type: {{retrieval_archive_or_research_report}}
 - File format: {{markdown_word_html_or_other}}
 - Citation style: {{oscola_bluebook_chicago_gbt7714_or_other}}
 
-## Next-round budget
+## Proposed next round
+
+- Round kind and type: {{main_or_side_and_round_type}}
+- Question addressed: {{bounded_round_question}}
+- Expected output: {{round_output}}
+- Stopping checkpoint: {{checkpoint_for_user_review}}
+
+## Three-axis budget
+
+- Bibliographic discovery: {{identity_discovery_cap}}
+- Full-text acquisition: {{acquisition_cap}}
+- Substantive review: {{review_cap}}
+- Named platforms and purposes: {{platform_purpose_allocations}}
+- Query and time caps: {{query_and_time_caps}}
+- Seeds and tracing depth: {{approved_seeds_and_depth}}
+- Language allocations: {{language_specific_budget_allocations}}
+
+These are separate limits. Discovery or acquisition does not imply substantive review.
+
+## Other next-round limits
 
 {{time_platform_query_candidate_review_seed_depth_and_language_limits}}
 
-## First-round directions
+## Next-round directions
 
 {{approved_or_proposed_directions}}
 
