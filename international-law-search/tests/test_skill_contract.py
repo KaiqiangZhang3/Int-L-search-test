@@ -372,6 +372,121 @@ class SkillContractTests(unittest.TestCase):
             r"external (?:query|search).*only after.*approval",
         )
 
+    def test_deliverable_policy_is_traceable_and_non_analytical(self):
+        text = (ROOT / "references/deliverables.md").read_text(encoding="utf-8")
+        lower = text.lower()
+
+        for structured_format in ["csv", "jsonl", "bibtex", "ris", "log", "graph"]:
+            with self.subTest(structured_format=structured_format):
+                self.assertIn(structured_format, lower)
+
+        for phrase in [
+            "word, markdown, or html",
+            "same corpus",
+            "stable source ids",
+            "approved subquestion",
+            "chronology",
+            "theme",
+            "source type",
+            "citation path",
+            "what the source addresses",
+            "why it was included",
+            "access status",
+            "description basis",
+            "retrieval value",
+            "searched and not searched",
+            "full-text gaps",
+            "verification gaps",
+            "stopping reason",
+            "approaches saturation within the approved scope",
+            "must not claim exhaustive",
+        ]:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, lower)
+
+        self.assertRegex(
+            lower,
+            r"each edge separately.*from id.*relation.*to id.*status.*evidence location",
+        )
+        self.assertRegex(
+            lower,
+            r"candidate status.*shown.*even when.*evidence",
+        )
+        self.assertIn("endpoint ids, relation, and status", lower)
+        self.assertNotIn("stable relationship id", lower)
+        self.assertRegex(
+            lower,
+            r"gap entr(?:y|ies).*stable source id.*endpoint ids, relation, and status",
+        )
+
+        for sentence in [
+            "Do not synthesize legal rules.",
+            "Do not resolve scholarly disputes.",
+            "Do not recommend an argument.",
+            "Do not draft academic prose.",
+        ]:
+            with self.subTest(sentence=sentence):
+                self.assertIn(sentence, text)
+
+    def test_reader_report_has_concise_review_fields(self):
+        text = (ROOT / "templates/reader-report.md").read_text(encoding="utf-8")
+
+        expected_sections = [
+            "Scope, stopping reason, and coverage conclusion",
+            "Retrieval-oriented navigation",
+            "Core/canonical sources",
+            "Supplementary/emerging sources",
+            "Key citation paths",
+            "Coverage and gaps",
+        ]
+        self.assertEqual(
+            expected_sections,
+            re.findall(r"(?m)^## (.+)$", text),
+        )
+
+        for field in [
+            "{{coverage_conclusion}}",
+            "{{approved_subquestion_navigation}}",
+            "{{theme_navigation}}",
+            "{{source_type_navigation}}",
+            "{{chronology_navigation}}",
+            "{{citation_path_navigation}}",
+            "{{stable_id}}",
+            "{{access_status}}",
+            "{{description_basis}}",
+            "{{source_description}}",
+            "{{inclusion_reason}}",
+            "{{from_id}}",
+            "{{relation}}",
+            "{{to_id}}",
+            "{{edge_status}}",
+            "{{evidence_location}}",
+            "{{retrieval_value}}",
+            "{{gap_source_id}}",
+            "{{gap_from_id}}",
+            "{{gap_relation}}",
+            "{{gap_to_id}}",
+            "{{gap_edge_status}}",
+        ]:
+            with self.subTest(field=field):
+                self.assertIn(field, text)
+
+        for dimension in [
+            "Approved subquestion",
+            "Platform",
+            "Language",
+            "Period / chronology",
+            "Source class",
+        ]:
+            with self.subTest(dimension=dimension):
+                self.assertRegex(text, rf"(?m)^\| {re.escape(dimension)} \|")
+
+        self.assertIn(
+            "Candidate status must remain visible even when an evidence location is present.",
+            text,
+        )
+        self.assertIn("It must not claim exhaustive coverage.", text)
+
 
 if __name__ == "__main__":
     unittest.main()
