@@ -1,0 +1,49 @@
+{
+  "mode": "standard_interactive",
+  "stage": "depth_round_complete_waiting_for_user",
+  "authorization_id": "decision-depth-1",
+  "active_branches": [
+    "personality",
+    "direct-obligations",
+    "business-human-rights",
+    "international-corporate-governance"
+  ],
+  "vertical_branches": [
+    {
+      "branch_id": "trace-ungp-2011",
+      "seed_key": "un-ungp-2011",
+      "directions": [
+        "backward",
+        "forward",
+        "lateral"
+      ],
+      "authorized_depth": 2,
+      "actual_depth": 2,
+      "status": "budget_paused"
+    },
+    {
+      "branch_id": "trace-alvarez-2011",
+      "seed_key": "article-alvarez-corporations-subjects-2011",
+      "directions": [
+        "backward",
+        "forward",
+        "lateral"
+      ],
+      "authorized_depth": 2,
+      "actual_depth": 2,
+      "status": "budget_paused"
+    }
+  ],
+  "reviewed_without_tracing": [
+    "case-barcelona-traction-1970"
+  ],
+  "suggested_new_seeds": [
+    "article-johns-invisibility-1994"
+  ],
+  "suggested_seeds_require_user_confirmation": true,
+  "stopping": {
+    "decision": "pause_for_user",
+    "reason": "The authorized per-seed depth budget was reached.",
+    "saturation_claimed": false
+  }
+}

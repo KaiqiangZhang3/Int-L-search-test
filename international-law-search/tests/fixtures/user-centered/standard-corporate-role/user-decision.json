@@ -1,0 +1,17 @@
+{
+  "decision_id": "decision-depth-1",
+  "decided_at": "2026-09-18T16:00:00Z",
+  "selected_seeds": [
+    "un-ungp-2011",
+    "article-alvarez-corporations-subjects-2011"
+  ],
+  "deleted_branches": [
+    "investment-law"
+  ],
+  "review_without_tracing": "case-barcelona-traction-1970",
+  "depth_budget": {
+    "maximum_depth_per_seed": 2,
+    "maximum_candidates_per_seed": 12,
+    "maximum_full_text_reviews": 8
+  }
+}

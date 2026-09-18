@@ -1,0 +1,42 @@
+{
+  "mode": "quick",
+  "stage": "quick_delivered",
+  "scope_approval": {
+    "status": "approved",
+    "approved_at": "2026-09-18T14:00:00Z",
+    "scope": "A 10-source starting bibliography on corporate international legal personality in English, emphasizing public international law scholarship and leading primary materials.",
+    "authorized_delivery": true
+  },
+  "source_keys": [
+    "case-barcelona-traction-1970",
+    "article-alvarez-corporations-subjects-2011",
+    "article-clapham-human-rights-obligations-2006",
+    "book-muchlinski-multinational-enterprises-2021",
+    "un-ungp-2011",
+    "treaty-icsid-convention-1965",
+    "article-portmann-legal-personality-2010",
+    "article-johns-invisibility-1994",
+    "report-ilo-mne-declaration-2022",
+    "commentary-peters-beyond-human-rights-2018"
+  ],
+  "user_decisions": [
+    {
+      "decision": "include",
+      "target": "scope:corporate-international-legal-personality",
+      "decided_at": "2026-09-18T14:00:00Z"
+    },
+    {
+      "decision": "hold",
+      "target": "branch:investment-protection",
+      "decided_at": "2026-09-18T14:00:00Z"
+    }
+  ],
+  "upgrade_checkpoint": {
+    "offered_modes": [
+      "standard_interactive",
+      "deep_audit"
+    ],
+    "reuse_existing_ledger": true,
+    "restart_required": false
+  }
+}

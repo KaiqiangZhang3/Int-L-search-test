@@ -81,6 +81,31 @@ class NicaraguaE2EFixtureTests(unittest.TestCase):
                     self.assertTrue(required.issubset(record))
                     self.assertEqual(set(), set(record) - allowed)
 
+    def test_fixture_uses_version_two_access_and_graph_contracts(self):
+        state = json.loads((FIXTURE / "state.json").read_text(encoding="utf-8"))
+        sources = self.load_jsonl("sources.jsonl")
+        edges = self.load_jsonl("edges.jsonl")
+
+        self.assertEqual(2, state["schema_version"])
+        self.assertTrue(state["graph_enabled"])
+        self.assertFalse(state["saturation_enabled"])
+        self.assertEqual("budget_paused", state["rounds"][-1]["budget_status"])
+        self.assertIn("not saturated", state["stopping"]["reason"])
+
+        for source in sources:
+            with self.subTest(source=source["id"]):
+                self.assertNotIn("access_status", source)
+                self.assertIn("availability", source)
+                self.assertIn("review_extent", source)
+                self.assertIsInstance(source["description_basis"], dict)
+                self.assertTrue(source["description_basis"]["locations"])
+                for event in source["retrieval_history"]:
+                    self.assertNotIn("access_status", event)
+                    self.assertIn("availability", event)
+                    self.assertIn("review_extent", event)
+
+        self.assertTrue(all(edge["relation_family"] == "literature" for edge in edges))
+
     def test_fixture_corpus_passes_canonical_validator(self):
         result = subprocess.run(
             [
@@ -90,6 +115,8 @@ class NicaraguaE2EFixtureTests(unittest.TestCase):
                 str(FIXTURE / "sources.jsonl"),
                 "--edges",
                 str(FIXTURE / "edges.jsonl"),
+                "--state",
+                str(FIXTURE / "state.json"),
             ],
             check=False,
             capture_output=True,

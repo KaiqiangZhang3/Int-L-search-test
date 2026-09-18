@@ -17,14 +17,14 @@ Test the skill against a constrained public-international-law retrieval task usi
 
 ## Retrieved nodes
 
-| Material | Type | Access result | Why included |
-| --- | --- | --- | --- |
-| [ICJ, *Nicaragua v. United States*, Merits (1986)](https://www.icj-cij.org/node/103143) | Judgment | Full text read | Seed authority and source of verified citation edges. |
-| [Charter of the United Nations](https://www.un.org/en/node/125814) | Treaty | Full text read | Primary authority cited in the seed judgment. |
-| [UNGA Resolution 2625 (XXV)](https://docs.un.org/en/A/RES/2625(XXV)) | Resolution | Full text read | Primary authority cited in the seed judgment. |
-| [P. P. Rijpkema, “Customary International Law in the Nicaragua Case”](https://doi.org/10.1017/S0167676800001951) | Scholarship | Metadata only | Scholarship discovered in the horizontal round; retained with an accurate access label. |
-| [Roman Kwiecień, “The Nicaragua Judgement and the Use of Force – 30 Years Later”](https://ssrn.com/abstract=3025599) | Scholarship | Abstract only | Later scholarly treatment discovered in the horizontal round. |
-| [ICJ, *Oil Platforms*, Judgment (2003)](https://www.icj-cij.org/node/103215) | Judgment | Full text read | Later authority that cites the seed judgment. |
+| Material | Type | Availability | Review extent | Why included |
+| --- | --- | --- | --- | --- |
+| [ICJ, *Nicaragua v. United States*, Merits (1986)](https://www.icj-cij.org/node/103143) | Judgment | Open full text | Full text substantively reviewed | Seed authority and source of verified citation edges. |
+| [Charter of the United Nations](https://www.un.org/en/node/125814) | Treaty | Open full text | Full text substantively reviewed | Primary authority cited in the seed judgment. |
+| [UNGA Resolution 2625 (XXV)](https://docs.un.org/en/A/RES/2625(XXV)) | Resolution | Open full text | Full text substantively reviewed | Primary authority cited in the seed judgment. |
+| [P. P. Rijpkema, “Customary International Law in the Nicaragua Case”](https://doi.org/10.1017/S0167676800001951) | Scholarship | Metadata only | Metadata verified | Scholarship discovered in the horizontal round; retained with an accurate access label. |
+| [Roman Kwiecień, “The Nicaragua Judgement and the Use of Force – 30 Years Later”](https://ssrn.com/abstract=3025599) | Scholarship | Abstract available | Abstract reviewed | Later scholarly treatment discovered in the horizontal round. |
+| [ICJ, *Oil Platforms*, Judgment (2003)](https://www.icj-cij.org/node/103215) | Judgment | Open full text | Full text substantively reviewed | Later authority that cites the seed judgment. |
 
 ## Verified paths
 
@@ -38,4 +38,4 @@ The exercise covered official ICJ and UN sources plus Cambridge and SSRN discove
 
 ## Result
 
-Pass. The skill supported the intended retrieval-only workflow and preserved the distinction between verified evidence, discoverable metadata, and unread full text. The exercise also confirmed that user-facing summaries can remain concise while the raw corpus retains source identity, access status, discovery provenance, and edge evidence.
+Pass. The skill supported the intended retrieval-only workflow and preserved the distinction between verified evidence, discoverable metadata, and unread full text. The exercise also confirmed that user-facing summaries can remain concise while the raw corpus retains source identity, availability, review extent, discovery provenance, and edge evidence. The version-2 fixture enables the graph while leaving saturation assessment disabled, because the approved budget—not saturation—caused retrieval to stop.

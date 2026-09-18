@@ -1,0 +1,127 @@
+{
+  "mode": "standard_interactive",
+  "stage": "round_1_waiting_for_user",
+  "intake": {
+    "original_request": "I want to research the role of corporations in public international law, perhaps something related to corporate governance.",
+    "ambiguities_presented": [
+      "international legal personality",
+      "direct rights",
+      "direct obligations",
+      "business and human rights",
+      "investment law",
+      "global governance",
+      "international corporate governance"
+    ],
+    "user_direction": "Begin with a bounded map of personality, obligations, and governance; keep investment law visible but do not deepen it."
+  },
+  "scope_approval": {
+    "status": "approved",
+    "approved_at": "2026-09-18T15:00:00Z",
+    "round": "breadth_1",
+    "maximum_candidates": 15,
+    "systematic_citation_tracing": false
+  },
+  "field_map": [
+    {
+      "branch_id": "personality",
+      "label": "Corporate international legal personality",
+      "candidate_count": 4
+    },
+    {
+      "branch_id": "direct-obligations",
+      "label": "Direct corporate obligations",
+      "candidate_count": 3
+    },
+    {
+      "branch_id": "business-human-rights",
+      "label": "Business and human rights governance",
+      "candidate_count": 4
+    },
+    {
+      "branch_id": "investment-law",
+      "label": "Treaty-based investor rights",
+      "candidate_count": 2
+    },
+    {
+      "branch_id": "international-corporate-governance",
+      "label": "International corporate governance",
+      "candidate_count": 2
+    }
+  ],
+  "candidate_seeds": [
+    "case-barcelona-traction-1970",
+    "article-alvarez-corporations-subjects-2011",
+    "article-johns-invisibility-1994",
+    "un-ungp-2011",
+    "book-clapham-non-state-actors-2006",
+    "book-muchlinski-multinational-enterprises-2021",
+    "report-ilo-mne-declaration-2022"
+  ],
+  "annotated_bibliography": [
+    {
+      "source_key": "case-barcelona-traction-1970",
+      "description": "Addresses corporate nationality and diplomatic protection of corporate interests.",
+      "inclusion_reason": "A leading primary authority for the personality and rights branch."
+    },
+    {
+      "source_key": "article-alvarez-corporations-subjects-2011",
+      "description": "Examines the senses in which corporations may be treated as subjects of international law.",
+      "inclusion_reason": "Directly frames the core personality question."
+    },
+    {
+      "source_key": "article-johns-invisibility-1994",
+      "description": "Examines the position of transnational corporations in international law and legal theory.",
+      "inclusion_reason": "Adds a critical conceptual account to the personality branch."
+    },
+    {
+      "source_key": "un-ungp-2011",
+      "description": "States the UN Protect, Respect and Remedy framework and corporate responsibility to respect human rights.",
+      "inclusion_reason": "Anchors the business-and-human-rights governance branch."
+    },
+    {
+      "source_key": "book-clapham-non-state-actors-2006",
+      "description": "Studies human-rights obligations applicable to non-state actors.",
+      "inclusion_reason": "Provides a recognized entry point into direct corporate obligations."
+    },
+    {
+      "source_key": "book-muchlinski-multinational-enterprises-2021",
+      "description": "Surveys domestic and international regulation of multinational enterprises.",
+      "inclusion_reason": "Connects corporate regulation to governance and institutional design."
+    },
+    {
+      "source_key": "report-ilo-mne-declaration-2022",
+      "description": "Provides ILO principles concerning multinational enterprises and social policy.",
+      "inclusion_reason": "Adds an institutional governance instrument beyond the UN Guiding Principles."
+    }
+  ],
+  "selected_seeds": [],
+  "vertical_branches": [],
+  "budget": {
+    "planned": {
+      "queries": 12,
+      "platforms": 6,
+      "candidates": 15,
+      "full_text_reviews": 3,
+      "search_minutes": 45
+    },
+    "actual": {
+      "queries": 10,
+      "platforms": 5,
+      "candidates": 15,
+      "full_text_reviews": 3,
+      "search_minutes": 42
+    }
+  },
+  "decision_panel": {
+    "allowed_actions": [
+      "select_seed",
+      "delete_branch",
+      "review_without_tracing",
+      "expand_branch",
+      "change_language",
+      "upgrade_mode",
+      "stop_and_deliver"
+    ],
+    "requires_user_response_before_depth": true
+  }
+}
