@@ -85,6 +85,7 @@ class SchemaTests(unittest.TestCase):
                 "access_status",
                 "description_basis",
                 "description",
+                "description_retrieval_id",
                 "retrieval_history",
             },
             required,
@@ -103,6 +104,39 @@ class SchemaTests(unittest.TestCase):
         ):
             with self.subTest(field=field):
                 self.assertIn("null", schema["properties"][field]["type"])
+
+    def test_candidate_description_basis_preserves_limited_access_leads(self):
+        schema = self.load("candidate-source-record.schema.json")
+
+        self.assertEqual(
+            {"Full text read"},
+            self.allowed_accesses_for_description_basis(schema, "full_text"),
+        )
+        self.assertEqual(
+            {"Abstract only", "Full text not read", "Full text read"},
+            self.allowed_accesses_for_description_basis(schema, "abstract"),
+        )
+        self.assertIn(
+            "Access failed",
+            self.allowed_accesses_for_description_basis(schema, "metadata"),
+        )
+
+    def test_candidate_description_links_to_a_retrieval_event(self):
+        schema = self.load("candidate-source-record.schema.json")
+
+        self.assertIn("description_retrieval_id", schema["required"])
+        self.assertEqual(
+            "string",
+            schema["properties"]["description_retrieval_id"]["type"],
+        )
+        self.assertEqual(
+            1,
+            schema["properties"]["description_retrieval_id"]["minLength"],
+        )
+        self.assertIn(
+            "event_id",
+            schema["properties"]["retrieval_history"]["items"]["required"],
+        )
 
     def test_source_schema_links_descriptions_to_retrieval_events(self):
         schema = self.load("source-record.schema.json")
@@ -136,7 +170,7 @@ class SchemaTests(unittest.TestCase):
             self.allowed_accesses_for_description_basis(schema, "full_text"),
         )
         self.assertEqual(
-            {"Abstract only", "Full text read"},
+            {"Abstract only", "Full text not read", "Full text read"},
             self.allowed_accesses_for_description_basis(schema, "abstract"),
         )
         self.assertEqual(

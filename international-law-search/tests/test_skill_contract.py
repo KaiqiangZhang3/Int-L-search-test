@@ -92,15 +92,17 @@ class SkillContractTests(unittest.TestCase):
         self.assertEqual(
             [
                 "Full text read",
+                "Full text not read",
                 "Abstract only",
                 "Metadata only",
-                "Full text not read",
                 "Access failed",
             ],
             statuses,
         )
         self.assertRegex(access_section.group(1), r"exactly one.*access status")
         self.assertRegex(access_section.group(1), r"separate.*description basis")
+        self.assertIn("precedence", access_section.group(1).lower())
+        self.assertIn("references/access-and-privacy.md", access_section.group(1))
         self.assertNotRegex(text, r"(?i)use `Full text not read` whenever")
 
     def test_references_are_routed_from_skill(self):
@@ -236,6 +238,139 @@ class SkillContractTests(unittest.TestCase):
             "do not execute",
         ]:
             self.assertIn(phrase, approval.group(1))
+
+    def test_source_strategy_defines_scope_tracks_ranking_and_language_gate(self):
+        text = (ROOT / "references/source-strategy.md").read_text(encoding="utf-8").lower()
+
+        for phrase in [
+            "primary international-law materials",
+            "secondary academic literature",
+            "private international law",
+            "conflict of laws",
+            "general cross-border commercial law",
+            "adaptive platform map",
+            "direct relevance",
+            "citation-network centrality",
+            "unique provenance",
+            "recency",
+            "verifiability",
+            "core/canonical",
+            "supplementary/emerging",
+            "regional",
+            "minority",
+            "global south",
+            "user approval",
+        ]:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+        self.assertRegex(
+            text,
+            r"institutional reports.*working papers.*gray literature",
+        )
+        self.assertRegex(
+            text,
+            r"blogs, news, and ordinary (?:web pages|webpages).*discovery-only",
+        )
+
+    def test_source_strategy_uses_schema_vocabulary_without_prestige_overload(self):
+        text = (ROOT / "references/source-strategy.md").read_text(encoding="utf-8")
+        lower = text.lower()
+
+        self.assertRegex(
+            lower,
+            r"`source_track`.*retrieval branch.*`primary`.*`secondary`.*`mixed`",
+        )
+        self.assertRegex(lower, r"`source_type`.*document format")
+        self.assertRegex(
+            lower,
+            r"`authority_class`.*corpus class.*`primary`.*`authoritative_secondary`"
+            r".*`general_academic`.*`gray_literature`.*`discovery_only`",
+        )
+        self.assertIn("not a scalar prestige score", lower)
+        self.assertRegex(
+            lower,
+            r"`collection_tier`.*separate.*`core/canonical`.*`supplementary/emerging`",
+        )
+
+    def test_access_policy_preserves_truthful_history_and_local_privacy(self):
+        text = (ROOT / "references/access-and-privacy.md").read_text(encoding="utf-8")
+        lower = text.lower()
+
+        access_section = re.search(
+            r"## Access attempts\n\n(.*?)(?=\n## )", text, re.DOTALL
+        )
+        self.assertIsNotNone(access_section)
+        definitions = re.findall(
+            r"(?m)^(\d+)\. `([^`]+)`: ([^\n]+)$", access_section.group(1)
+        )
+        self.assertEqual(
+            [
+                ("1", "Full text read"),
+                ("2", "Full text not read"),
+                ("3", "Abstract only"),
+                ("4", "Metadata only"),
+                ("5", "Access failed"),
+            ],
+            [(number, status) for number, status, _ in definitions],
+        )
+        definition_text = {status: definition.lower() for _, status, definition in definitions}
+        self.assertIn("substantive full text", definition_text["Full text read"])
+        self.assertIn("full text was not examined", definition_text["Full text not read"])
+        self.assertIn("unavailable or intentionally unopened", definition_text["Full text not read"])
+        self.assertIn("no full text is identified or available", definition_text["Abstract only"])
+        self.assertIn("abstract was examined", definition_text["Abstract only"])
+        self.assertIn("neither full text nor abstract was examined", definition_text["Metadata only"])
+        self.assertIn("usable metadata exists", definition_text["Metadata only"])
+        self.assertIn("no usable source content", definition_text["Access failed"])
+        self.assertIn("candidate or limited record", definition_text["Access failed"])
+
+        self.assertIn("apply the first matching status in this precedence", lower)
+        self.assertIn("most informative, highest-precedence outcome", lower)
+        self.assertIn("preserves every route", lower)
+        self.assertRegex(
+            lower,
+            r"full-text copy is identified.*abstract.*`full text not read`",
+        )
+        self.assertRegex(
+            lower,
+            r"no full text is identified.*abstract.*`abstract only`",
+        )
+        self.assertRegex(
+            lower,
+            r"broken discovery lead.*`access failed`",
+        )
+
+        for phrase in [
+            "institutional wi-fi",
+            "authorized browser sessions",
+            "subscriptions",
+            "authoritative public alternatives",
+            "never bypass",
+            "exactly one",
+            "description basis",
+            "separate field",
+            "every access attempt",
+            "retrieval_history",
+            "published citation information",
+            "do not send unpublished",
+            "private annotations",
+            "confidential facts",
+            "publication status is ambiguous",
+            "keep the content local",
+            "ask the user",
+        ]:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, lower)
+
+        self.assertRegex(
+            lower,
+            r"before plan approval.*authorized local.*inspection",
+        )
+        self.assertRegex(
+            lower,
+            r"external (?:query|search).*only after.*approval",
+        )
 
 
 if __name__ == "__main__":

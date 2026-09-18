@@ -7,9 +7,9 @@ import unicodedata
 
 ACCESS_RANK = {
     "Access failed": 0,
-    "Full text not read": 1,
-    "Metadata only": 2,
-    "Abstract only": 3,
+    "Metadata only": 1,
+    "Abstract only": 2,
+    "Full text not read": 3,
     "Full text read": 4,
 }
 
@@ -99,14 +99,18 @@ def validate_retrieval_links(record: dict) -> None:
 
     basis = record.get("description_basis")
     access_status = record.get("access_status")
+    if access_status == "Access failed" and basis != "metadata":
+        raise ValueError("Access failed descriptions require metadata basis")
     if basis == "full_text" and access_status != "Full text read":
         raise ValueError("full_text descriptions require Full text read access")
     if basis == "abstract" and access_status not in {
         "Abstract only",
+        "Full text not read",
         "Full text read",
     }:
         raise ValueError(
-            "abstract descriptions require Abstract only or Full text read access"
+            "abstract descriptions require Abstract only, Full text not read, "
+            "or Full text read access"
         )
 
 

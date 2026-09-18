@@ -313,6 +313,7 @@
           "access_status": {
             "enum": [
               "Abstract only",
+              "Full text not read",
               "Full text read"
             ]
           }

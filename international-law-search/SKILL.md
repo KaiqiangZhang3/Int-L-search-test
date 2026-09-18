@@ -20,12 +20,12 @@ Retrieve international-law sources through a user-approved, auditable plan. Keep
 Assign exactly one mutually exclusive access status per source:
 
 - `Full text read`
+- `Full text not read`
 - `Abstract only`
 - `Metadata only`
-- `Full text not read`
 - `Access failed`
 
-Store a separate description basis as full text, abstract, or metadata. Do not derive one field from the other.
+Apply these labels in the displayed precedence; read [access-and-privacy.md](references/access-and-privacy.md) for the definitions and examples. Store a separate description basis as full text, abstract, or metadata. Do not derive one field from the other.
 
 ## Routing
 

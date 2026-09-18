@@ -102,6 +102,78 @@ class CorpusOpsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "full_text descriptions"):
             module.validate_retrieval_links(incompatible_basis)
 
+    def test_access_failed_requires_metadata_basis(self):
+        module = load_module()
+        metadata_record = {
+            "access_status": "Access failed",
+            "description_basis": "metadata",
+            "description_retrieval_id": "failed-event",
+            "retrieval_history": [
+                {"event_id": "failed-event", "access_status": "Access failed"}
+            ],
+        }
+        module.validate_retrieval_links(metadata_record)
+
+        abstract_record = deepcopy(metadata_record)
+        abstract_record["description_basis"] = "abstract"
+        with self.assertRaisesRegex(ValueError, "metadata basis"):
+            module.validate_retrieval_links(abstract_record)
+
+    def test_full_text_not_read_allows_abstract_basis(self):
+        module = load_module()
+        record = {
+            "access_status": "Full text not read",
+            "description_basis": "abstract",
+            "description_retrieval_id": "abstract-event",
+            "retrieval_history": [
+                {
+                    "event_id": "abstract-event",
+                    "access_status": "Full text not read",
+                }
+            ],
+        }
+        module.validate_retrieval_links(record)
+
+    def test_merge_prefers_full_text_not_read_over_abstract_only(self):
+        module = load_module()
+        left = {
+            "id": "left",
+            "external_ids": {"doi": "10.1000/lotus"},
+            "access_status": "Abstract only",
+            "description": "Database abstract",
+            "description_basis": "abstract",
+            "description_retrieval_id": "abstract-only-event",
+            "retrieval_history": [
+                {
+                    "event_id": "abstract-only-event",
+                    "access_status": "Abstract only",
+                }
+            ],
+        }
+        right = {
+            "id": "right",
+            "external_ids": {"doi": "10.1000/lotus"},
+            "access_status": "Full text not read",
+            "description": "Publisher abstract",
+            "description_basis": "abstract",
+            "description_retrieval_id": "full-text-gap-event",
+            "retrieval_history": [
+                {
+                    "event_id": "full-text-gap-event",
+                    "access_status": "Full text not read",
+                }
+            ],
+        }
+
+        merged = module.merge_records(left, right)
+
+        self.assertEqual("Full text not read", merged["access_status"])
+        self.assertEqual("Publisher abstract", merged["description"])
+        self.assertEqual("abstract", merged["description_basis"])
+        self.assertEqual("full-text-gap-event", merged["description_retrieval_id"])
+        self.assertEqual(2, len(merged["retrieval_history"]))
+        module.validate_retrieval_links(merged)
+
     def test_valid_retrieval_link_merge_deduplicates_identical_event(self):
         module = load_module()
         event = {

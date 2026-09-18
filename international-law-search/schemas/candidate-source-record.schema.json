@@ -10,6 +10,7 @@
     "access_status",
     "description_basis",
     "description",
+    "description_retrieval_id",
     "retrieval_history"
   ],
   "properties": {
@@ -103,6 +104,10 @@
     },
     "description": {
       "type": "string"
+    },
+    "description_retrieval_id": {
+      "type": "string",
+      "minLength": 1
     },
     "retrieval_history": {
       "type": "array",
@@ -215,6 +220,7 @@
           "access_status": {
             "enum": [
               "Abstract only",
+              "Full text not read",
               "Full text read"
             ]
           }
