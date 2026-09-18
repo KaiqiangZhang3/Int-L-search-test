@@ -4,6 +4,8 @@
 
 Use the lightweight source ledger in Quick mode and Standard interactive mode. It is the shared source of truth for reader-facing reports and later mode upgrades. It records enough evidence to preserve identity, provenance, access truthfulness, review limits, relevance, and user choices without forcing a graph, a persistent workspace, or a complete audit log.
 
+Pair the ledger with the compact `templates/session-handoff.md` artifact. The handoff preserves project-level scope, branch, language, budget, mode, and stopping decisions; the ledger preserves source-level decisions. Together they support an upgrade or resumption across sessions without pretending to be a deep-audit workspace.
+
 The JSON contract is `schemas/source-ledger-record.schema.json`. A source may later become a deep-audit canonical record, but the earlier ledger record remains part of its history.
 
 ## Minimum Record

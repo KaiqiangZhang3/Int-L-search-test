@@ -62,6 +62,38 @@ class UserCenteredBenchmarkContractTests(unittest.TestCase):
 
 
 class ModesAndRoundsContractTests(unittest.TestCase):
+    def test_quick_mode_has_a_resumable_cross_session_handoff(self):
+        text = MODES_AND_ROUNDS.read_text(encoding="utf-8").lower()
+        self.assertIn("minimum resumable handoff", text)
+        self.assertIn("session-handoff.md", text)
+        self.assertIn("across sessions", text)
+        self.assertIn("source ledger", text)
+        self.assertIn("project-level decisions", text)
+
+    def test_hard_deadline_uses_a_single_compact_approval_step(self):
+        text = MODES_AND_ROUNDS.read_text(encoding="utf-8").lower()
+        self.assertIn("hard deadline", text)
+        self.assertIn("single compact scope card", text)
+        self.assertIn("candidate count", text)
+        self.assertIn("full-text review count", text)
+
+    def test_scope_card_exposes_delivery_multilingual_and_access_choices(self):
+        text = (ROOT / "templates/scope-card.md").read_text(encoding="utf-8")
+        for field in [
+            "Output type",
+            "File format",
+            "Citation style",
+            "Branch purpose",
+            "Local vocabulary",
+            "Platforms",
+            "Branch budget",
+            "Network context",
+            "Authentication status",
+            "Verified source access",
+        ]:
+            with self.subTest(field=field):
+                self.assertIn(field, text)
+
     def read_contract(self):
         self.assertTrue(
             MODES_AND_ROUNDS.is_file(),

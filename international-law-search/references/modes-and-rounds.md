@@ -17,15 +17,19 @@ Build on information already supplied. Ask one material question at a time rathe
 
 Offer a recommended default with each question when it would help. If the user cannot yet frame the issue, propose a bounded exploratory round whose purpose is to produce a field map and better choices. Never force a definitive research question before exploration can reasonably supply one.
 
+When the user gives a hard deadline, compress readiness without weakening approval. If the topic is missing, ask only for the topic, then present a single compact scope card with recommended defaults. If the topic is already known, go directly to that card. State the tradeoff between candidate count and full-text review count so the time limit does not turn a quantity target into an unsupported review claim.
+
 Before external retrieval, show the concise scope card and obtain approval. Authorized local intake inspection may identify public citations and scope clues, but it does not authorize external retrieval. Approval covers only the stated next round.
 
 ## Working Modes
 
 ### Quick mode
 
-Use Quick mode for orientation or a bounded starting bibliography, normally 10–20 reliable sources grouped by theme and reading priority. Quick mode does not require a citation graph or audit workspace, persistent state, round metrics, or canonical JSONL.
+Use Quick mode for orientation or a bounded starting bibliography, normally 10–20 reliable sources grouped by theme and reading priority. Quick mode does not require a citation graph, audit workspace, full persistent state, round metrics, or canonical JSONL.
 
 Quick-mode scope approval authorizes delivery when the approved budget is complete; a second closure confirmation is unnecessary unless a material choice arises. At delivery, offer an upgrade. An upgrade must reuse the existing source ledger and must not restart completed retrieval. A quick result can become the Stage 1 breadth result in standard mode, or its records can be enriched in deep-audit mode.
+
+Every Quick or Standard project still needs a minimum resumable handoff. Use [`../templates/session-handoff.md`](../templates/session-handoff.md) to preserve the source ledger, project-level decisions, approved scope, branch and language choices, budgets, checkpoint, and unresolved paths across sessions. Save it as a small project artifact when storage is available; otherwise include the completed handoff with delivery so the user can supply it later. This handoff is not a deep-audit log and must remain concise.
 
 ### Standard interactive mode
 

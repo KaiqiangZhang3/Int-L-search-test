@@ -40,6 +40,7 @@ class SkillContractTests(unittest.TestCase):
             "schemas/project-state.schema.json",
             "templates/search-plan.md",
             "templates/reader-report.md",
+            "templates/session-handoff.md",
             "templates/subagent-brief.md",
             "scripts/validate_corpus.py",
         ]

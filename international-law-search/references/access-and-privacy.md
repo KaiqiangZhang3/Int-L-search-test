@@ -6,6 +6,8 @@ Apply this policy before intake inspects any file or collection. Before plan app
 
 After approval, do not assume that paid material is unavailable. Within the approved plan, try the user's current institutional Wi-Fi, authorized browser sessions, connected services, and subscriptions, then authoritative public alternatives where useful. Use only access already authorized by the user or provided by the current environment. Never bypass authentication, authorization, paywalls, or technical access controls.
 
+At project level, distinguish a reported network context from an authenticated session and from verified access to a specific source. Being on university Wi-Fi is an access assumption, not proof that a database session is authenticated; authentication is not proof that a particular full text opened successfully. Ask the user to authenticate only when an approved route requires it, and record source-level availability only after the source route succeeds.
+
 Record source-level access on two independent evidence axes. `availability` records the best verified route currently known:
 
 - `open_full_text`: full text is available through an authorized open or local route.
