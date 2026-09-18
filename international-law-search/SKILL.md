@@ -52,11 +52,14 @@ Record two independent fields for every source. `availability` states the best v
 
 1. Read [access-and-privacy.md](references/access-and-privacy.md) before any local inspection, institutional access, subscription use, or external query.
 2. Read [modes-and-rounds.md](references/modes-and-rounds.md) before intake, mode selection, scope confirmation, any retrieval round, checkpoint, upgrade, or closure.
-3. Read [intake-and-approval.md](references/intake-and-approval.md) before using any legacy intake or approval link; it is a compatibility router.
-4. Read [source-strategy.md](references/source-strategy.md) before searching primary sources and secondary scholarship.
-5. Read [orchestration.md](references/orchestration.md) before delegating branches. The main agent alone owns user decisions, the normalized source ledger, the canonical corpus, and final outputs.
-6. Read [graph-and-saturation.md](references/graph-and-saturation.md) before any user-approved citation expansion or saturation assessment.
-7. Read [deliverables.md](references/deliverables.md) before producing a retrieval archive, research report, or structured export.
+3. Read [source-ledger.md](references/source-ledger.md) before recording, merging, or upgrading quick- or standard-mode results.
+4. Read [multilingual-retrieval.md](references/multilingual-retrieval.md) before designing any substantive non-English or multilingual branch.
+5. Read [intake-and-approval.md](references/intake-and-approval.md) before using any legacy intake or approval link; it is a compatibility router.
+6. Read [source-strategy.md](references/source-strategy.md) before searching primary sources and secondary scholarship.
+7. Read [international-law-sources.md](references/international-law-sources.md) before normalizing type-specific identity, legal status, or version relationships.
+8. Read [orchestration.md](references/orchestration.md) before delegating branches. The main agent alone owns user decisions, the normalized source ledger, the canonical corpus, and final outputs.
+9. Read [graph-and-saturation.md](references/graph-and-saturation.md) before any user-approved citation expansion or saturation assessment.
+10. Read [deliverables.md](references/deliverables.md) before producing a retrieval archive, research report, or structured export.
 
 Read only the references needed for the current stage. Do not load deep-audit mechanics for a quick-mode request unless the user upgrades or asks for those artifacts.
 

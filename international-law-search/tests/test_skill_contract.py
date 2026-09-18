@@ -7,6 +7,23 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class SkillContractTests(unittest.TestCase):
+    def test_entrypoint_routes_references_by_stage_and_mode(self):
+        text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for target in [
+            "references/modes-and-rounds.md",
+            "references/source-ledger.md",
+            "references/multilingual-retrieval.md",
+        ]:
+            with self.subTest(target=target):
+                self.assertIn(target, text)
+        self.assertIn("deep-audit", text.lower())
+
+    def test_default_prompt_describes_user_controlled_research_assistance(self):
+        text = (ROOT / "agents/openai.yaml").read_text(encoding="utf-8")
+        self.assertIn("user", text.lower())
+        self.assertIn("research", text.lower())
+        self.assertNotIn("without substantive legal synthesis", text)
+
     def test_required_package_files_exist(self):
         required = [
             "SKILL.md",

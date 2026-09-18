@@ -74,9 +74,12 @@ the single canonical graph. It:
    as a canonical edge.
 6. Verifies edge evidence, records round evidence and budget status, and
    updates cumulative searched and unsearched coverage.
-7. Runs `$SKILL_ROOT/scripts/validate_corpus.py` on canonical sources, passing
+7. After each canonical merge, runs
+   `$SKILL_ROOT/scripts/validate_corpus.py` on canonical sources, passing
    `--state` and passing `--edges` only when graph support is enabled.
-8. Gives the user concrete choices to continue, redirect, upgrade, pause, or
+8. Repeats canonical validation at every checkpoint before presenting counts
+   or coverage claims to the user.
+9. Gives the user concrete choices to continue, redirect, upgrade, pause, or
    close.
 
 No subagent maintains a competing final ledger, corpus, or graph.
