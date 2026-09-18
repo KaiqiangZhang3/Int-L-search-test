@@ -5,15 +5,35 @@ description: Use when a user needs auditable academic source retrieval on public
 
 # International Law Search
 
-Retrieve international-law sources through a user-approved, auditable plan. Keep user-facing choices and reports concise while preserving detailed provenance in structured records.
+Act as a user-controlled research assistant for international-law retrieval. Keep user-facing choices concise, preserve provenance in structured records, and deepen the work only when the user chooses to do so.
 
 ## Hard Boundaries
 
-- Before the user approves the search plan, permit only authorized local intake inspection governed by the access and privacy rules. Do not begin external retrieval, database searching, or citation expansion before approval. Urgency does not bypass approval; offer a concise provisional plan when time is limited.
-- Do not synthesize legal rules, resolve scholarly disputes, choose an argument, or draft a literature review, research memorandum, article section, or paper. Organize and faithfully describe retrieved sources without turning retrieval into substantive legal analysis.
-- Describe each source only from material actually accessed.
-- Never use model memory as retrieval or verification evidence.
+- Approval of the scope or next round is required before external retrieval or expansion; urgency does not bypass this gate.
+- Before approval, permit only authorized local intake inspection governed by the access and privacy rules. Do not begin external retrieval, database search, or citation expansion before the user approves the relevant scope or round.
+- A retrieval archive organizes and faithfully describes sources without cross-source synthesis.
+- A research report may include source-grounded descriptive synthesis of reviewed materials, including field development, positions, debates, institutions, gaps, and reading paths. Clearly distinguish a source's express position, a pattern supported by multiple sources, and the assistant's cautious inference.
+- Do not present a disputed proposition as settled, choose the user's thesis or argumentative position, resolve a legal controversy, or draft argumentative academic prose.
+- Describe each source only from material actually accessed. Never use model memory as retrieval or verification evidence.
 - Keep unpublished prose, private annotations, confidential facts, and non-public attachments out of external services.
+
+## Choose the Working Mode
+
+- Use **Quick mode** for a bounded starting bibliography, normally 10–20 reliable sources. It does not require a graph or deep-audit workspace.
+- Recommend **Standard interactive mode** for ambiguous or substantial requests. It moves through approved rounds and stops after breadth discovery for the user's branch and seed choices.
+- Use **Deep-audit mode** when the user needs reproducibility, persistent state, complete logs, validated structured data, or a recoverable workspace.
+
+Mode choice belongs to the user. Quick mode, Standard interactive mode, and Deep-audit mode form an upgrade path, not exclusive products. Reuse the existing source ledger when upgrading and do not restart completed retrieval.
+
+## Stage Gates
+
+1. Establish readiness and confirm the next-round scope with the user.
+2. Run breadth discovery only within the approved envelope.
+3. In standard and deep-audit modes, stop after Stage 1 and let the user select branches, user-confirmed seeds, and tracing budgets.
+4. Trace only the selected seeds. Treat new suggested seeds as choices requiring user confirmation.
+5. Offer optional bounded gap filling, then obtain closure authorization before final delivery. Quick-mode scope approval also authorizes its bounded delivery.
+
+Use the checkpoint templates for short, concrete decisions. Do not expose internal query mechanics unless the user asks.
 
 ## Access Records
 
@@ -30,16 +50,19 @@ Apply these labels in the displayed precedence; read [access-and-privacy.md](ref
 ## Routing
 
 1. Read [access-and-privacy.md](references/access-and-privacy.md) before any local inspection, institutional access, subscription use, or external query.
-2. Read [intake-and-approval.md](references/intake-and-approval.md) before inspecting authorized context, scoping the request, or requesting approval for a written search plan.
-3. Read [source-strategy.md](references/source-strategy.md) before searching primary sources and secondary scholarship.
-4. Read [orchestration.md](references/orchestration.md) before delegating branches. The main agent alone owns the canonical corpus and final merge.
-5. Read [graph-and-saturation.md](references/graph-and-saturation.md) before citation expansion. Treat five levels as a usual guardrail and dynamic saturation as the stopping principle.
-6. Read [deliverables.md](references/deliverables.md) before producing reader-facing or structured outputs.
+2. Read [modes-and-rounds.md](references/modes-and-rounds.md) before intake, mode selection, scope confirmation, any retrieval round, checkpoint, upgrade, or closure.
+3. Read [intake-and-approval.md](references/intake-and-approval.md) before using any legacy intake or approval link; it is a compatibility router.
+4. Read [source-strategy.md](references/source-strategy.md) before searching primary sources and secondary scholarship.
+5. Read [orchestration.md](references/orchestration.md) before delegating branches. The main agent alone owns user decisions, the normalized source ledger, the canonical corpus, and final outputs.
+6. Read [graph-and-saturation.md](references/graph-and-saturation.md) before any user-approved citation expansion or saturation assessment.
+7. Read [deliverables.md](references/deliverables.md) before producing a retrieval archive, research report, or structured export.
+
+Read only the references needed for the current stage. Do not load deep-audit mechanics for a quick-mode request unless the user upgrades or asks for those artifacts.
 
 ## Reapproval Triggers
 
-After approval, continue within the plan. Return to the user when a branch materially changes scope, needs a new language or jurisdiction, encounters a coverage-critical access gap, exhausts the approved budget before dynamic saturation, or warrants expansion beyond the usual depth guardrail.
+Return to the user before any material change to scope, mode, language, jurisdiction, selected seed, tracing depth, or budget. Also pause when access failures materially impair coverage or a valuable path lies outside the approved round.
 
 ## Completion Standard
 
-Deliver a resumable corpus with verified identities, honest access labels, evidence-bearing relationships, search provenance, unresolved gaps, concise source descriptions, retrieval-oriented navigation, and an in-scope coverage statement. Claim only that retrieval approaches saturation within the approved scope.
+Provide the output authorized for the current mode with verified identities, honest access labels, concise explanations of what each source does and why it is included, search provenance, unresolved gaps, and an accurate coverage statement. User-facing information must remain concise and reviewable; detailed provenance belongs in structured records or optional attachments.
