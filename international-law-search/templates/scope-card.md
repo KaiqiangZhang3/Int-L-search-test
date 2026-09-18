@@ -24,6 +24,8 @@ For every substantive language branch, record:
 - Local vocabulary: {{terms_names_and_variants}}
 - Platforms: {{approved_platforms}}
 - Branch budget: {{query_candidate_and_review_limits}}
+- Branch access assumptions: {{open_subscription_authenticated_and_full_text_conditions}}
+- Text authority relationship: {{original_authentic_official_publisher_or_unofficial_translation}}
 
 For institutional or subscription access, distinguish:
 

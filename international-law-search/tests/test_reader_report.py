@@ -23,6 +23,25 @@ def markdown_headings(text: str) -> list[str]:
 
 
 class ReaderFirstReportContractTests(unittest.TestCase):
+    def test_archive_has_a_repeatable_source_item_and_mixed_request_response(self):
+        template = (ROOT / "templates/reader-report.md").read_text(encoding="utf-8")
+        deliverables = (ROOT / "references/deliverables.md").read_text(
+            encoding="utf-8"
+        )
+        archive = template.split("# 国际法检索档案", 1)[1]
+        for field in [
+            "{{normalized_citation_and_stable_link}}",
+            "{{reader_facing_availability_label}}",
+            "{{reader_facing_review_extent_label}}",
+            "{{description_supported_by_reviewed_material}}",
+            "{{inclusion_reason}}",
+        ]:
+            with self.subTest(field=field):
+                self.assertIn(field, archive)
+        self.assertIn("## Mixed requests", deliverables)
+        self.assertIn("neutral argument paths", deliverables)
+        self.assertIn("user chooses the position", deliverables)
+
     def test_deliverable_contract_supports_reader_choices_and_report_boundaries(self):
         contract = (ROOT / "references/deliverables.md").read_text(encoding="utf-8")
 

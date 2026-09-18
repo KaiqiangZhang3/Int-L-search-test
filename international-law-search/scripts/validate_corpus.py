@@ -65,6 +65,72 @@ def _load_state(path: Path) -> tuple[Optional[dict], list[str]]:
         errors.append(f"{path.name}: graph_enabled must be a boolean")
     if not isinstance(state.get("saturation_enabled"), bool):
         errors.append(f"{path.name}: saturation_enabled must be a boolean")
+    decisions = state.get("decision_log")
+    branches = state.get("branches")
+    if not isinstance(decisions, list):
+        errors.append(f"{path.name}: decision_log must be an array")
+        decisions = []
+    if branches is not None and not isinstance(branches, list):
+        errors.append(f"{path.name}: branches must be an array")
+        branches = []
+    decisions_by_id = {}
+    for decision in decisions:
+        if not isinstance(decision, dict):
+            errors.append(f"{path.name}: each decision_log item must be an object")
+            continue
+        decision_id = decision.get("decision_id")
+        if not isinstance(decision_id, str) or not decision_id.strip():
+            errors.append(f"{path.name}: decision_id must be a non-empty string")
+        elif decision_id in decisions_by_id:
+            errors.append(f"{path.name}: duplicate decision_id {decision_id!r}")
+        else:
+            decisions_by_id[decision_id] = decision
+    for branch in branches or []:
+        if not isinstance(branch, dict) or branch.get("retrieval_mode") != "vertical":
+            continue
+        branch_id = branch.get("branch_id")
+        authorization_id = branch.get("authorization_decision_id")
+        decision = decisions_by_id.get(authorization_id)
+        if decision is None or decision.get("kind") != "approve_trace":
+            errors.append(
+                f"{path.name}: vertical branch {branch_id!r} lacks an approved "
+                "trace authorization"
+            )
+            continue
+        if decision.get("branch_id") != branch_id:
+            errors.append(
+                f"{path.name}: vertical branch {branch_id!r} does not match its "
+                "authorization branch_id"
+            )
+        if decision.get("seed_id") != branch.get("vertical_seed_id"):
+            errors.append(
+                f"{path.name}: vertical branch {branch_id!r} seed does not match "
+                "its authorization"
+            )
+        if branch.get("tracing_direction") not in decision.get("directions", []):
+            errors.append(
+                f"{path.name}: vertical branch {branch_id!r} direction does not "
+                "match its authorization"
+            )
+        approved_budget = branch.get("approved_budget")
+        decision_budget = decision.get("budget")
+        if (
+            not isinstance(decision_budget, dict)
+            or not decision_budget
+            or approved_budget != decision_budget
+        ):
+            errors.append(
+                f"{path.name}: vertical branch {branch_id!r} budget does not "
+                "match its authorization"
+            )
+        elif (
+            "depth_cap" in decision_budget
+            and branch.get("max_authorized_depth") != decision_budget["depth_cap"]
+        ):
+            errors.append(
+                f"{path.name}: vertical branch {branch_id!r} depth does not "
+                "match its authorization budget"
+            )
     return state, errors
 
 

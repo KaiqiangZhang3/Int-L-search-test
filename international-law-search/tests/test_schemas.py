@@ -537,6 +537,49 @@ class SchemaTests(unittest.TestCase):
             schema["properties"]["stopping"]["required"],
         )
 
+    def test_state_schema_requires_a_resumable_user_decision_log(self):
+        schema = self.load("project-state.schema.json")
+        decision_log = schema["properties"]["decision_log"]
+        decision = decision_log["items"]
+
+        self.assertIn("decision_log", schema["required"])
+        self.assertEqual(
+            {
+                "decision_id",
+                "kind",
+                "decided_by",
+                "decided_at",
+                "round_id",
+            },
+            set(decision["required"]),
+        )
+        self.assertTrue(
+            {
+                "select_seed",
+                "approve_trace",
+                "branch_delete",
+                "budget_change",
+                "pause",
+                "resume",
+                "close",
+            }.issubset(decision["properties"]["kind"]["enum"])
+        )
+        self.assertTrue(
+            {"branch_id", "seed_id", "directions", "budget"}.issubset(
+                decision["properties"]
+            )
+        )
+        approval_rule = next(
+            rule
+            for rule in decision["allOf"]
+            if rule["if"]["properties"]["kind"].get("const") == "approve_trace"
+        )
+        self.assertTrue(
+            {"branch_id", "seed_id", "directions", "budget"}.issubset(
+                approval_rule["then"]["required"]
+            )
+        )
+
     def test_state_schema_requires_cumulative_searched_and_unsearched_coverage(self):
         schema = self.load("project-state.schema.json")
 
@@ -584,6 +627,8 @@ class SchemaTests(unittest.TestCase):
                 "branch_id",
                 "source_track",
                 "retrieval_mode",
+                "authorization_decision_id",
+                "approved_budget",
                 "vertical_seed_id",
                 "tracing_direction",
                 "known_id_snapshot",
@@ -603,6 +648,9 @@ class SchemaTests(unittest.TestCase):
                 "platforms",
                 "languages",
                 "pending_items",
+                "open_paths",
+                "status_reason",
+                "status_changed_at",
             },
             set(branch["required"]),
         )
@@ -618,6 +666,7 @@ class SchemaTests(unittest.TestCase):
             ["string", "null"],
             branch["properties"]["vertical_seed_id"]["type"],
         )
+        self.assertIn("authorization_decision_id", branch["required"])
         self.assertEqual(
             ["backward", "forward", "lateral", None],
             branch["properties"]["tracing_direction"]["enum"],
@@ -638,6 +687,24 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual(
             "null",
             horizontal_rule["then"]["properties"]["tracing_direction"]["type"],
+        )
+        self.assertEqual(
+            "null",
+            horizontal_rule["then"]["properties"]["authorization_decision_id"][
+                "type"
+            ],
+        )
+        vertical_rule = next(
+            rule
+            for rule in branch["allOf"]
+            if rule["if"]["properties"]["retrieval_mode"].get("const")
+            == "vertical"
+        )
+        self.assertEqual(
+            "string",
+            vertical_rule["then"]["properties"]["authorization_decision_id"][
+                "type"
+            ],
         )
         self.assertNotIn("kind", branch["properties"])
         self.assertEqual(

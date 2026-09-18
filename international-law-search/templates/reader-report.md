@@ -86,11 +86,23 @@
 
 ## 分类检索结果
 
-对每项来源分别填写规范化引文、稳定链接、阅读建议、获取情况、实际审阅、主要内容、收录原因和适合何时阅读。描述仅以该来源的 `description_basis` 为依据。
+### {{theme}}
+
+- {{normalized_citation_and_stable_link}} [{{stable_source_id}}]
+  - 阅读建议：{{priority_read_directional_or_background}}
+  - 获取情况：{{reader_facing_availability_label}}
+  - 实际审阅：{{reader_facing_review_extent_label}}
+  - 主要内容：{{description_supported_by_reviewed_material}}
+  - 收录原因：{{inclusion_reason}}
+  - 适合何时阅读：{{reading_context}}
+
+逐项重复上述结构。描述仅以该来源的 `description_basis` 为依据。
 
 ## 发现路径
 
 {{queries_platforms_seeds_and_citation_paths_needed_for_review}}
+
+只写可外传的公开检索路径，不显示本地文件路径、私人笔记内容或私有来源标识。
 
 ## 档案检索范围与限制
 

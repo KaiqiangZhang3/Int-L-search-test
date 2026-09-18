@@ -106,6 +106,8 @@ class ValidateCorpusCliTests(unittest.TestCase):
                 "schema_version": 2,
                 "graph_enabled": False,
                 "saturation_enabled": False,
+                "decision_log": [],
+                "branches": [],
             },
         )
 
@@ -119,10 +121,82 @@ class ValidateCorpusCliTests(unittest.TestCase):
                 "schema_version": 2,
                 "graph_enabled": True,
                 "saturation_enabled": False,
+                "decision_log": [],
+                "branches": [],
             },
         )
 
         self.assert_failure(result, "state.json", "graph_enabled requires --edges")
+
+    def test_vertical_branch_requires_matching_trace_authorization(self):
+        state = {
+            "schema_version": 2,
+            "graph_enabled": False,
+            "saturation_enabled": False,
+            "decision_log": [
+                {
+                    "decision_id": "decision-trace-1",
+                    "kind": "approve_trace",
+                    "decided_by": "user",
+                    "decided_at": "2026-09-18T00:00:00Z",
+                    "round_id": "round-1",
+                    "branch_id": "vertical-1",
+                    "seed_id": "source-1",
+                    "directions": ["backward"],
+                    "budget": {"depth_cap": 2, "source_cap": 20},
+                }
+            ],
+            "branches": [
+                {
+                    "branch_id": "vertical-1",
+                    "retrieval_mode": "vertical",
+                    "vertical_seed_id": "source-1",
+                    "tracing_direction": "forward",
+                    "authorization_decision_id": "decision-trace-1",
+                    "approved_budget": {"depth_cap": 2, "source_cap": 20},
+                    "max_authorized_depth": 2,
+                }
+            ],
+        }
+
+        result = self.run_validator([source_record("source-1")], state=state)
+
+        self.assert_failure(result, "state.json", "direction does not match")
+
+    def test_vertical_branch_budget_must_match_trace_authorization(self):
+        state = {
+            "schema_version": 2,
+            "graph_enabled": False,
+            "saturation_enabled": False,
+            "decision_log": [
+                {
+                    "decision_id": "decision-trace-1",
+                    "kind": "approve_trace",
+                    "decided_by": "user",
+                    "decided_at": "2026-09-18T00:00:00Z",
+                    "round_id": "round-1",
+                    "branch_id": "vertical-1",
+                    "seed_id": "source-1",
+                    "directions": ["backward"],
+                    "budget": {"depth_cap": 2, "source_cap": 20},
+                }
+            ],
+            "branches": [
+                {
+                    "branch_id": "vertical-1",
+                    "retrieval_mode": "vertical",
+                    "vertical_seed_id": "source-1",
+                    "tracing_direction": "backward",
+                    "authorization_decision_id": "decision-trace-1",
+                    "approved_budget": {"depth_cap": 2, "source_cap": 10},
+                    "max_authorized_depth": 2,
+                }
+            ],
+        }
+
+        result = self.run_validator([source_record("source-1")], state=state)
+
+        self.assert_failure(result, "state.json", "budget does not match")
 
     def test_rejects_retrieval_provenance_as_an_edge(self):
         edge = verified_edge()

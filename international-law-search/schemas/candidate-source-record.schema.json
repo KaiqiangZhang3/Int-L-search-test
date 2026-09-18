@@ -239,8 +239,35 @@
           "value": {
             "type": "string",
             "minLength": 1
+          },
+          "privacy_classification": {
+            "enum": [
+              "public_citation_extract",
+              "private_note_reference"
+            ]
+          },
+          "externalizable": {
+            "type": "boolean"
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"method": {"const": "local_seed"}}},
+            "then": {"required": ["privacy_classification", "externalizable"]}
+          },
+          {
+            "if": {
+              "required": ["privacy_classification"],
+              "properties": {
+                "privacy_classification": {"const": "private_note_reference"}
+              }
+            },
+            "then": {
+              "required": ["externalizable"],
+              "properties": {"externalizable": {"const": false}}
+            }
+          }
+        ]
       }
     }
   },

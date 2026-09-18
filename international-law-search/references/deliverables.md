@@ -39,6 +39,14 @@ Give each such statement inline stable source citations. Do not use an abstract 
 
 Use [`../templates/reader-report.md`](../templates/reader-report.md) for the paired research-report and retrieval-archive structures.
 
+## Mixed requests
+
+When the user requests an allowed research report together with thesis selection
+or argumentative ghostwriting, accept the report portion and state the boundary
+briefly. Offer neutral argument paths with their respective evidence and
+limitations, but make clear that the user chooses the position. Do not reject
+the entire request merely because one requested component crosses the boundary.
+
 ## Separate substantive and retrieval gaps
 
 A research gap must be stated by reviewed literature or supported by the reviewed body of sources. A retrieval gap records an unsearched or inaccessible language, platform, period, jurisdiction, source class, or branch. Never convert a retrieval gap into a claim that the literature is silent.
@@ -46,6 +54,23 @@ A research gap must be stated by reviewed literature or supported by the reviewe
 Report the stopping reason accurately. A budget stop is `Paused—not saturated`, not evidence of saturation. Never claim exhaustive or comprehensive coverage.
 
 ## Traceability and export checks
+
+Treat an external query, outbound log, subagent payload, and reader-facing
+delivery as an export. Before any such action, create a JSONL or Markdown
+manifest containing the exact outbound text, identifiers, and links. Each
+JSONL item must declare `privacy_classification: public_citation_extract` for
+published citation material or `privacy_classification: public_research_output`
+for reader-facing prose derived only from externalizable public sources, plus
+`externalizable: true`. A Markdown manifest must declare the applicable public
+classification and `externalizable: true` in opening YAML-style front matter.
+For Word or HTML, validate a JSONL or Markdown representation containing every
+outward-facing text and link field.
+
+Run `$SKILL_ROOT/scripts/validate_export_manifest.py MANIFEST` before the
+outbound action. It rejects missing privacy declarations,
+`private_note_reference`, `externalizable=false`, `file://` URIs, and absolute
+local paths. Do not export when it reports an error, and do not weaken or omit
+the manifest to obtain a passing result.
 
 Before export, run `$SKILL_ROOT/scripts/validate_reader_report.py REPORT --language LANGUAGE --final`. It deterministically rejects unresolved template markers, unresolved manual-review items, declared synthesis without source citations, and a Chinese report that opens with machine-state sections. It does not judge legal correctness.
 

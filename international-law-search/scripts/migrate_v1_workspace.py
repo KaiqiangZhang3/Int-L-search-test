@@ -150,6 +150,38 @@ def migrate(source: Path, destination: Path) -> Path:
         state = json.loads(state_path.read_text(encoding="utf-8"))
         state["schema_version"] = 2
         state["graph_enabled"] = edges_path.exists()
+        state["saturation_enabled"] = False
+        state["decision_log"] = list(state.get("decision_log", []))
+        for branch in state.get("branches", []):
+            branch.setdefault("open_paths", list(branch.get("pending_items", [])))
+            branch.setdefault("status_reason", "Preserved from legacy workspace.")
+            branch.setdefault(
+                "status_changed_at",
+                state.get("updated_at", state.get("created_at", "unknown")),
+            )
+            if branch.get("retrieval_mode") == "vertical":
+                decision_id = f"migration-approve-trace-{branch['branch_id']}"
+                approved_budget = {
+                    "depth_cap": branch.get("max_authorized_depth", 0)
+                }
+                state["decision_log"].append(
+                    {
+                        "decision_id": decision_id,
+                        "kind": "approve_trace",
+                        "decided_by": "legacy workspace migration",
+                        "decided_at": state.get("updated_at", state.get("created_at", "unknown")),
+                        "round_id": "legacy-migration",
+                        "branch_id": branch["branch_id"],
+                        "seed_id": branch["vertical_seed_id"],
+                        "directions": [branch["tracing_direction"]],
+                        "budget": approved_budget,
+                    }
+                )
+                branch["authorization_decision_id"] = decision_id
+                branch["approved_budget"] = approved_budget
+            else:
+                branch["authorization_decision_id"] = None
+                branch["approved_budget"] = None
         state_path.write_text(
             json.dumps(state, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",

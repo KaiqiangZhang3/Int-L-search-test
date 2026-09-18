@@ -37,6 +37,7 @@ class WorkspaceTests(unittest.TestCase):
             self.assertEqual(2, state["schema_version"])
             self.assertFalse(state["graph_enabled"])
             self.assertFalse(state["saturation_enabled"])
+            self.assertEqual([], state["decision_log"])
             self.assertEqual("planning", state["status"])
             with self.assertRaises(FileExistsError):
                 module.initialize(target, "pil-search")

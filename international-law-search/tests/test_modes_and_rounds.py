@@ -87,6 +87,8 @@ class ModesAndRoundsContractTests(unittest.TestCase):
             "Local vocabulary",
             "Platforms",
             "Branch budget",
+            "Branch access assumptions",
+            "Text authority relationship",
             "Network context",
             "Authentication status",
             "Verified source access",

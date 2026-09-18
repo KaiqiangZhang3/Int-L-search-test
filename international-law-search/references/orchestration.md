@@ -55,6 +55,20 @@ subagent cannot expand scope, choose final seeds, assign collection tiers,
 declare an edge verified, decide saturation, or publish a user-facing
 conclusion.
 
+Persist every user choice in `decision_log`. Each vertical branch must carry
+an `authorization_decision_id` pointing to its `approve_trace` decision, with
+the same branch, seed, direction, and item, review, depth, and time budget.
+Store that mapping in the branch's `approved_budget`. Use
+`$SKILL_ROOT/scripts/checkpoint_state.py` for breadth pauses, seed approvals,
+budget pauses, failures, and resumptions so state replacement is atomic and
+illegal transitions leave the prior checkpoint intact.
+
+A budget pause or failure checkpoint is incomplete without the branch cursor,
+pending and unresolved items, platform errors, open paths, status reason and
+time, and a complete round-evidence record. Write all of them in the same
+atomic replacement so a resumed branch cannot observe a newer status with an
+older cursor.
+
 ## Main-agent ownership
 
 The main agent owns user decisions and the normalized source ledger in every

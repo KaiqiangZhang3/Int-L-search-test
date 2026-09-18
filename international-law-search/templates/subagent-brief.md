@@ -13,10 +13,19 @@
 - Platforms, languages, source types, and period: {{surfaces}}
 - Branch budget: {{budget}}
 - Approved seed and direction, if vertical: {{seed_and_direction}}
+- Authorization decision ID, if vertical: {{authorization_decision_id}}
 - Known canonical IDs and aliases: {{known_ids}}
 - Current and maximum authorized depth: {{depth}}
 - Graph enabled: {{graph_enabled}}
 - Local-material privacy constraints: {{privacy_constraints}}
+
+For every local-seed discovery fragment, declare
+`privacy_classification` as `public_citation_extract` or
+`private_note_reference` and declare `externalizable` as a boolean. A
+`private_note_reference` must remain `externalizable=false`. Keep its content
+and path local; use only an opaque local ID in internal coordination. Never
+place non-externalizable content, a `file://` URI, or an absolute local path in
+this brief, a query, or a return package.
 
 Initial Stage 1 assignments must be horizontal. Do not trace references,
 footnotes, cited-by results, or lateral relations during Stage 1. A later
@@ -35,6 +44,8 @@ limit is reached, return the open path with `budget_paused`; do not continue.
   `$SKILL_ROOT/schemas/edge-record.schema.json`
 - Access and privacy policy:
   `$SKILL_ROOT/references/access-and-privacy.md`
+- Outbound privacy validator:
+  `$SKILL_ROOT/scripts/validate_export_manifest.py`
 - Graph evidence rules:
   `$SKILL_ROOT/references/graph-and-saturation.md`
 

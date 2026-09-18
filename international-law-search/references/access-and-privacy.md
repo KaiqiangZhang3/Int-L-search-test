@@ -48,3 +48,28 @@ Treat user-authorized PDFs, OCR text, bibliographies, Zotero exports, and projec
 Published citation information may be externalized for retrieval: titles, authors, DOIs, formal citations, case numbers, treaty or document identifiers, and published reference or footnote text.
 
 Do not send unpublished prose, private annotations, confidential facts, non-public attachments, or other private content to external services. When publication status is ambiguous, keep the content local or ask the user for direction before externalizing it. A request to search a local collection does not waive these restrictions.
+
+## Local privacy classification and export gate
+
+Classify every local-seed discovery fragment before it can enter a query,
+subagent brief, log, or deliverable:
+
+- `public_citation_extract` means only published citation information or
+  published reference or footnote text. Set `externalizable=true` only after
+  confirming that the item contains no private material and no local path.
+- `private_note_reference` means private annotations, unpublished prose,
+  confidential facts, ambiguous material, or a reference whose publication
+  status has not been confirmed. It must have `externalizable=false`.
+
+Keep private content and local paths in local-only records. Refer to them
+internally by an opaque local ID; do not copy their prose or path into a
+retrieval assignment. External queries, outbound logs, subagent payloads, and
+reader-facing output are all outbound surfaces. They may contain only records
+classified `public_citation_extract` with `externalizable=true`, and they must
+never contain a `file://` URI or an absolute local path. A public
+classification does not override an explicit `externalizable=false` decision.
+
+Before any outbound action, serialize the exact text, identifiers, and links
+that will leave the local workspace into the export manifest described in
+[`deliverables.md`](deliverables.md), then run the privacy validator. Do not
+send or deliver anything while it reports an error.

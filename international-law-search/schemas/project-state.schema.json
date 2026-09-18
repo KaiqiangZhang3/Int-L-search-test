@@ -13,6 +13,7 @@
     "updated_at",
     "status",
     "approved_plan",
+    "decision_log",
     "branches",
     "rounds",
     "coverage",
@@ -73,6 +74,56 @@
         }
       }
     },
+    "decision_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "decision_id",
+          "kind",
+          "decided_by",
+          "decided_at",
+          "round_id"
+        ],
+        "properties": {
+          "decision_id": {"type": "string", "minLength": 1},
+          "kind": {
+            "enum": [
+              "select_seed",
+              "approve_trace",
+              "branch_delete",
+              "budget_change",
+              "pause",
+              "resume",
+              "close"
+            ]
+          },
+          "decided_by": {"type": "string", "minLength": 1},
+          "decided_at": {"type": "string", "minLength": 1},
+          "round_id": {"type": "string", "minLength": 1},
+          "branch_id": {"type": "string", "minLength": 1},
+          "seed_id": {"type": "string", "minLength": 1},
+          "directions": {
+            "type": "array",
+            "items": {"enum": ["backward", "forward", "lateral"]},
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "budget": {
+            "$ref": "#/$defs/approvedBudget"
+          }
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"kind": {"const": "approve_trace"}}},
+            "then": {
+              "required": ["branch_id", "seed_id", "directions", "budget"]
+            }
+          }
+        ]
+      }
+    },
     "branches": {
       "type": "array",
       "items": {
@@ -82,6 +133,8 @@
           "branch_id",
           "source_track",
           "retrieval_mode",
+          "authorization_decision_id",
+          "approved_budget",
           "vertical_seed_id",
           "tracing_direction",
           "known_id_snapshot",
@@ -100,7 +153,10 @@
           "queries",
           "platforms",
           "languages",
-          "pending_items"
+          "pending_items",
+          "open_paths",
+          "status_reason",
+          "status_changed_at"
         ],
         "properties": {
           "branch_id": {
@@ -118,6 +174,15 @@
             "enum": [
               "horizontal",
               "vertical"
+            ]
+          },
+          "authorization_decision_id": {
+            "type": ["string", "null"]
+          },
+          "approved_budget": {
+            "oneOf": [
+              {"$ref": "#/$defs/approvedBudget"},
+              {"type": "null"}
             ]
           },
           "vertical_seed_id": {
@@ -275,7 +340,14 @@
               "type": "string"
             },
             "uniqueItems": true
-          }
+          },
+          "open_paths": {
+            "type": "array",
+            "items": {"type": "string"},
+            "uniqueItems": true
+          },
+          "status_reason": {"type": ["string", "null"]},
+          "status_changed_at": {"type": ["string", "null"]}
         },
         "allOf": [
           {
@@ -289,6 +361,12 @@
             "then": {
               "properties": {
                 "vertical_seed_id": {
+                  "type": "null"
+                },
+                "authorization_decision_id": {
+                  "type": "null"
+                },
+                "approved_budget": {
                   "type": "null"
                 },
                 "tracing_direction": {
@@ -310,6 +388,13 @@
                 "vertical_seed_id": {
                   "type": "string",
                   "minLength": 1
+                },
+                "authorization_decision_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "approved_budget": {
+                  "$ref": "#/$defs/approvedBudget"
                 },
                 "tracing_direction": {
                   "enum": [
@@ -602,6 +687,17 @@
     }
   },
   "$defs": {
+    "approvedBudget": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "source_cap": {"type": "integer", "minimum": 0},
+        "full_text_review_cap": {"type": "integer", "minimum": 0},
+        "depth_cap": {"type": "integer", "minimum": 0},
+        "time_minutes": {"type": "integer", "minimum": 0}
+      }
+    },
     "coverageDimension": {
       "type": "object",
       "additionalProperties": false,

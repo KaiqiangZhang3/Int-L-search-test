@@ -95,6 +95,8 @@ class MigrationTests(unittest.TestCase):
             migrated_log = read_jsonl(result / "logs" / "retrieval.jsonl")
 
             self.assertEqual(2, migrated_state["schema_version"])
+            self.assertFalse(migrated_state["saturation_enabled"])
+            self.assertEqual([], migrated_state["decision_log"])
             for field in ("approved_plan", "rounds", "coverage", "stopping"):
                 self.assertEqual(original_state[field], migrated_state[field])
             self.assertEqual(
@@ -119,6 +121,43 @@ class MigrationTests(unittest.TestCase):
                 {"method": "source", "value": "source-001 (bibliography)"},
                 source_002["discovery_history"],
             )
+
+    def test_migration_creates_trace_authorization_for_legacy_vertical_branch(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "project"
+            destination = Path(tmp) / "project-v2"
+            shutil.copytree(FIXTURE, source)
+            state_path = source / "state.json"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["branches"] = [
+                {
+                    "branch_id": "legacy-vertical",
+                    "retrieval_mode": "vertical",
+                    "vertical_seed_id": "source-001",
+                    "tracing_direction": "backward",
+                }
+            ]
+            state_path.write_text(json.dumps(state) + "\n", encoding="utf-8")
+
+            result = module.migrate(source, destination)
+            migrated = json.loads(
+                (result / "state.json").read_text(encoding="utf-8")
+            )
+            branch = migrated["branches"][0]
+            decision = migrated["decision_log"][0]
+
+            self.assertEqual(
+                decision["decision_id"], branch["authorization_decision_id"]
+            )
+            self.assertEqual("approve_trace", decision["kind"])
+            self.assertEqual("source-001", decision["seed_id"])
+            self.assertEqual(["backward"], decision["directions"])
+            self.assertEqual(
+                decision["budget"], branch["approved_budget"]
+            )
+            original = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertNotIn("authorization_decision_id", original["branches"][0])
 
 
 if __name__ == "__main__":

@@ -11,11 +11,45 @@
     "approved_at": "2026-09-17",
     "plan_path": "approved-search-plan.md"
   },
+  "decision_log": [
+    {
+      "decision_id": "decision-select-nicaragua-seed",
+      "kind": "select_seed",
+      "decided_by": "Evaluation user",
+      "decided_at": "2026-09-17",
+      "round_id": "round-horizontal-1",
+      "seed_id": "icj-nicaragua-1986"
+    },
+    {
+      "decision_id": "decision-approve-backward-trace",
+      "kind": "approve_trace",
+      "decided_by": "Evaluation user",
+      "decided_at": "2026-09-17",
+      "round_id": "round-horizontal-1",
+      "branch_id": "vertical-backward",
+      "seed_id": "icj-nicaragua-1986",
+      "directions": ["backward"],
+      "budget": {"depth_cap": 1}
+    },
+    {
+      "decision_id": "decision-approve-forward-trace",
+      "kind": "approve_trace",
+      "decided_by": "Evaluation user",
+      "decided_at": "2026-09-17",
+      "round_id": "round-horizontal-1",
+      "branch_id": "vertical-forward",
+      "seed_id": "icj-nicaragua-1986",
+      "directions": ["forward"],
+      "budget": {"depth_cap": 1}
+    }
+  ],
   "branches": [
     {
       "branch_id": "horizontal-discovery",
       "source_track": "mixed",
       "retrieval_mode": "horizontal",
+      "authorization_decision_id": null,
+      "approved_budget": null,
       "vertical_seed_id": null,
       "tracing_direction": null,
       "known_id_snapshot": [
@@ -56,11 +90,16 @@
         "English"
       ],
       "pending_items": []
+      ,"open_paths": [],
+      "status_reason": "Approved breadth branch completed.",
+      "status_changed_at": "2026-09-17"
     },
     {
       "branch_id": "vertical-backward",
       "source_track": "primary",
       "retrieval_mode": "vertical",
+      "authorization_decision_id": "decision-approve-backward-trace",
+      "approved_budget": {"depth_cap": 1},
       "vertical_seed_id": "icj-nicaragua-1986",
       "tracing_direction": "backward",
       "known_id_snapshot": [
@@ -93,11 +132,16 @@
         "English"
       ],
       "pending_items": []
+      ,"open_paths": [],
+      "status_reason": "Approved backward trace completed.",
+      "status_changed_at": "2026-09-17"
     },
     {
       "branch_id": "vertical-forward",
       "source_track": "primary",
       "retrieval_mode": "vertical",
+      "authorization_decision_id": "decision-approve-forward-trace",
+      "approved_budget": {"depth_cap": 1},
       "vertical_seed_id": "icj-nicaragua-1986",
       "tracing_direction": "forward",
       "known_id_snapshot": [
@@ -128,6 +172,9 @@
         "English"
       ],
       "pending_items": []
+      ,"open_paths": [],
+      "status_reason": "Approved forward trace completed.",
+      "status_changed_at": "2026-09-17"
     }
   ],
   "rounds": [

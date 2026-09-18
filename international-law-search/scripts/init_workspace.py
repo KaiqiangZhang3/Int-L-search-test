@@ -22,6 +22,7 @@ def _build_workspace(
         "updated_at": now,
         "status": "planning",
         "approved_plan": None,
+        "decision_log": [],
         "branches": [],
         "rounds": [],
         "coverage": {
