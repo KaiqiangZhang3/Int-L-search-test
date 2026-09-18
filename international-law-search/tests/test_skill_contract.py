@@ -18,6 +18,7 @@ class SkillContractTests(unittest.TestCase):
             "references/graph-and-saturation.md",
             "references/deliverables.md",
             "schemas/source-record.schema.json",
+            "schemas/candidate-source-record.schema.json",
             "schemas/edge-record.schema.json",
             "schemas/project-state.schema.json",
             "templates/search-plan.md",
@@ -62,6 +63,24 @@ class SkillContractTests(unittest.TestCase):
         self.assertRegex(text, r"structured (records|files|artifacts).*(provenance|detail)|provenance.*structured")
         self.assertIn("dynamic saturation", text)
         self.assertIn("main agent", text)
+
+    def test_approval_gate_allows_only_authorized_local_intake_inspection(self):
+        text = (ROOT / "SKILL.md").read_text(encoding="utf-8").lower()
+        self.assertIn("authorized local intake inspection", text)
+        self.assertRegex(
+            text,
+            r"do not begin external retrieval, database search(?:ing)?, or citation expansion before.*approv",
+        )
+
+        routing = re.search(r"## routing\n\n(.*?)(?=\n## )", text, re.DOTALL)
+        self.assertIsNotNone(routing)
+        access_position = routing.group(1).index("references/access-and-privacy.md")
+        intake_position = routing.group(1).index("references/intake-and-approval.md")
+        self.assertLess(access_position, intake_position)
+        self.assertRegex(
+            routing.group(1),
+            r"access-and-privacy\.md.*before any local inspection",
+        )
 
     def test_access_status_and_description_basis_are_separate(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
@@ -125,6 +144,98 @@ class SkillContractTests(unittest.TestCase):
         self.assertGreaterEqual(len(values["short_description"]), 25)
         self.assertLessEqual(len(values["short_description"]), 64)
         self.assertIn("$international-law-search", values["default_prompt"])
+
+    def test_intake_requires_adaptive_questions_and_explicit_approval(self):
+        intake = (ROOT / "references/intake-and-approval.md").read_text(encoding="utf-8").lower()
+        for phrase in [
+            "ask one material question at a time",
+            "topic, question, draft, or seed corpus",
+            "read `access-and-privacy.md` before inspecting",
+            "wait for explicit approval",
+            "atomically set",
+        ]:
+            self.assertIn(phrase, intake)
+        self.assertRegex(
+            intake,
+            r"do not begin external retrieval, database search(?:ing)?, or citation expansion before approval",
+        )
+
+    def test_search_plan_separates_approved_choices_from_execution_detail(self):
+        template = (ROOT / "templates/search-plan.md").read_text(encoding="utf-8")
+        approved = re.search(
+            r"## User-approved scope and method\n\n(.*?)(?=\n## )",
+            template,
+            re.DOTALL,
+        )
+        appendix = re.search(
+            r"## Internal execution appendix\n\n(.*?)(?=\n## )",
+            template,
+            re.DOTALL,
+        )
+        approval = re.search(r"## Approval\n\n(.*)$", template, re.DOTALL)
+        self.assertIsNotNone(approved)
+        self.assertIsNotNone(appendix)
+        self.assertIsNotNone(approval)
+
+        for field in [
+            "Source tracks:",
+            "Languages and reasons:",
+            "Access assumptions:",
+            "Initial resource budget:",
+            "Depth guardrail:",
+            "Excluded issues:",
+            "Output formats:",
+        ]:
+            self.assertIn(field, approved.group(1))
+
+        self.assertIn("Exact query strings:", appendix.group(1))
+        self.assertIn("Branch mechanics:", appendix.group(1))
+        self.assertIn("within the approved envelope", appendix.group(1))
+        for field in [
+            "`source_track`:",
+            "`retrieval_mode`:",
+            "Starting depth:",
+            "Maximum authorized depth:",
+        ]:
+            self.assertIn(field, appendix.group(1))
+
+        self.assertIn("Status: `{{pending_or_approved}}`", approval.group(1))
+        self.assertNotIn("Status: `pending`", approval.group(1))
+        self.assertIn("Approved by: {{user}}", approval.group(1))
+        self.assertIn("Approved at: {{timestamp}}", approval.group(1))
+        self.assertIn("Update all three fields atomically before execution.", approval.group(1))
+
+    def test_approval_checkpoint_requires_plan_and_workspace_state_agreement(self):
+        intake = (ROOT / "references/intake-and-approval.md").read_text(encoding="utf-8").lower()
+        template = (ROOT / "templates/search-plan.md").read_text(encoding="utf-8").lower()
+
+        for phrase in [
+            "one coordinated checkpoint",
+            "`state.json`",
+            "`state.status` to `approved`",
+            "`state.approved_plan`",
+            "`approved_by`, `approved_at`, and `plan_path`",
+            "re-read the plan artifact and `state.json`",
+            "verify that both artifacts agree",
+            "interrupted or inconsistent",
+            "do not execute",
+        ]:
+            self.assertIn(phrase, intake)
+
+        approval = re.search(r"## approval\n\n(.*)$", template, re.DOTALL)
+        self.assertIsNotNone(approval)
+        for phrase in [
+            "workspace state: {{workspace_state_path}}",
+            "plan path: {{plan_path}}",
+            "one coordinated checkpoint",
+            "`state.status=approved`",
+            '"approved_by": "{{user}}"',
+            '"approved_at": "{{timestamp}}"',
+            '"plan_path": "{{plan_path}}"',
+            "re-read both artifacts",
+            "do not execute",
+        ]:
+            self.assertIn(phrase, approval.group(1))
 
 
 if __name__ == "__main__":

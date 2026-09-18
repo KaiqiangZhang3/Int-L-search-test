@@ -1,114 +1,88 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/international-law-search/source-record.schema.json",
-  "title": "International Law Search Source Record",
+  "$id": "https://example.invalid/international-law-search/candidate-source-record.schema.json",
+  "title": "International Law Search Candidate Source Record",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "id",
-    "external_ids",
-    "title",
-    "creators",
-    "date",
-    "publication",
-    "source_type",
-    "fields",
-    "subquestions",
-    "authority_class",
-    "collection_tier",
-    "relevance",
-    "access_status",
-    "stable_url",
-    "local_path",
-    "retrieval_history",
-    "language",
-    "description",
-    "inclusion_reason",
-    "description_basis",
-    "description_retrieval_id",
+    "candidate_id",
     "discovery_history",
-    "verification"
+    "access_status",
+    "description_basis",
+    "description",
+    "retrieval_history"
   ],
   "properties": {
-    "id": {
+    "candidate_id": {
       "type": "string",
       "minLength": 1
-    },
-    "external_ids": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "aliases": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      },
-      "uniqueItems": true
     },
     "title": {
-      "type": "string",
-      "minLength": 1
-    },
-    "creators": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "date": {
       "type": [
         "string",
         "null"
       ]
     },
-    "publication": {
+    "creators": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "external_ids": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "raw_citation_text": {
       "type": [
         "string",
         "null"
       ]
     },
     "source_type": {
-      "type": "string",
-      "minLength": 1
-    },
-    "fields": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true
-    },
-    "subquestions": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "minItems": 1,
-      "uniqueItems": true
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "authority_class": {
+      "type": [
+        "string",
+        "null"
+      ],
       "enum": [
         "primary",
         "authoritative_secondary",
         "general_academic",
         "gray_literature",
-        "discovery_only"
+        "discovery_only",
+        null
       ]
     },
-    "collection_tier": {
-      "enum": [
-        "core/canonical",
-        "supplementary/emerging"
+    "language": {
+      "type": [
+        "string",
+        "null"
       ]
     },
     "relevance": {
+      "type": [
+        "string",
+        "null"
+      ],
       "enum": [
         "high",
         "medium",
-        "low"
+        "low",
+        null
       ]
     },
     "access_status": {
@@ -120,17 +94,15 @@
         "Access failed"
       ]
     },
-    "stable_url": {
-      "type": [
-        "string",
-        "null"
+    "description_basis": {
+      "enum": [
+        "full_text",
+        "abstract",
+        "metadata"
       ]
     },
-    "local_path": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "description": {
+      "type": "string"
     },
     "retrieval_history": {
       "type": "array",
@@ -182,27 +154,6 @@
         }
       }
     },
-    "language": {
-      "type": "string",
-      "minLength": 2
-    },
-    "description": {
-      "type": "string"
-    },
-    "inclusion_reason": {
-      "type": "string"
-    },
-    "description_basis": {
-      "enum": [
-        "full_text",
-        "abstract",
-        "metadata"
-      ]
-    },
-    "description_retrieval_id": {
-      "type": "string",
-      "minLength": 1
-    },
     "discovery_history": {
       "type": "array",
       "minItems": 1,
@@ -227,55 +178,6 @@
           "value": {
             "type": "string",
             "minLength": 1
-          }
-        }
-      }
-    },
-    "verification": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "identity",
-        "metadata_cross_checked",
-        "human_review_required"
-      ],
-      "properties": {
-        "identity": {
-          "enum": [
-            "verified",
-            "candidate",
-            "conflict"
-          ]
-        },
-        "metadata_cross_checked": {
-          "type": "boolean"
-        },
-        "human_review_required": {
-          "type": "boolean"
-        },
-        "notes": {
-          "type": "string"
-        }
-      }
-    },
-    "merge_conflicts": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "value",
-            "source_record_id"
-          ],
-          "properties": {
-            "value": {},
-            "source_record_id": {
-              "type": "string",
-              "minLength": 1
-            }
           }
         }
       }

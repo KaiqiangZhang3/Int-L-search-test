@@ -67,8 +67,21 @@
         "additionalProperties": false,
         "required": [
           "branch_id",
-          "kind",
+          "source_track",
+          "retrieval_mode",
+          "vertical_seed_id",
+          "tracing_direction",
+          "known_id_snapshot",
           "status",
+          "assignment",
+          "scope",
+          "exclusions",
+          "source_types",
+          "period",
+          "privacy_constraints",
+          "last_checkpoint",
+          "platform_errors",
+          "unresolved_items",
           "current_depth",
           "max_authorized_depth",
           "queries",
@@ -81,9 +94,39 @@
             "type": "string",
             "minLength": 1
           },
-          "kind": {
-            "type": "string",
-            "minLength": 1
+          "source_track": {
+            "enum": [
+              "primary",
+              "secondary",
+              "mixed"
+            ]
+          },
+          "retrieval_mode": {
+            "enum": [
+              "horizontal",
+              "vertical"
+            ]
+          },
+          "vertical_seed_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tracing_direction": {
+            "enum": [
+              "backward",
+              "forward",
+              "lateral",
+              null
+            ]
+          },
+          "known_id_snapshot": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
           },
           "status": {
             "enum": [
@@ -93,6 +136,95 @@
               "complete",
               "failed"
             ]
+          },
+          "assignment": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "exclusions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "source_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "period": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "start",
+              "end"
+            ],
+            "properties": {
+              "start": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "end": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "privacy_constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "last_checkpoint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform_errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "platform",
+                "error",
+                "occurred_at"
+              ],
+              "properties": {
+                "platform": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "error": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "occurred_at": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "unresolved_items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
           },
           "current_depth": {
             "type": "integer",
@@ -130,7 +262,52 @@
             },
             "uniqueItems": true
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "retrieval_mode": {
+                  "const": "horizontal"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "vertical_seed_id": {
+                  "type": "null"
+                },
+                "tracing_direction": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "retrieval_mode": {
+                  "const": "vertical"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "vertical_seed_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "tracing_direction": {
+                  "enum": [
+                    "backward",
+                    "forward",
+                    "lateral"
+                  ]
+                }
+              }
+            }
+          }
+        ]
       }
     },
     "rounds": {
@@ -141,8 +318,13 @@
         "required": [
           "round_id",
           "timestamp",
+          "decision",
+          "decision_reason",
+          "unresolved_gaps",
+          "branch_depth",
+          "attempted_queries_or_paths",
+          "access_failures",
           "counts",
-          "duplicate_ratio",
           "coverage_additions",
           "access_gaps",
           "open_high_value_branches"
@@ -155,16 +337,81 @@
           "timestamp": {
             "type": "string"
           },
+          "decision": {
+            "enum": [
+              "continue",
+              "pause_for_user",
+              "stop"
+            ]
+          },
+          "decision_reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unresolved_gaps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "branch_depth": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "attempted_queries_or_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "access_failures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "platform",
+                "item",
+                "error"
+              ],
+              "properties": {
+                "platform": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "item": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "error": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
           "counts": {
             "type": "object",
             "additionalProperties": false,
             "required": [
+              "candidate_count",
               "new_candidate_count",
               "new_high_relevance_count",
               "new_core_material_count",
-              "duplicate_count"
+              "duplicate_count",
+              "duplicate_ratio"
             ],
             "properties": {
+              "candidate_count": {
+                "type": "integer",
+                "minimum": 0
+              },
               "new_candidate_count": {
                 "type": "integer",
                 "minimum": 0
@@ -180,13 +427,13 @@
               "duplicate_count": {
                 "type": "integer",
                 "minimum": 0
+              },
+              "duplicate_ratio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
               }
             }
-          },
-          "duplicate_ratio": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
           },
           "coverage_additions": {
             "type": "object",

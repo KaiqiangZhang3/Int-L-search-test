@@ -74,6 +74,36 @@ class SchemaTests(unittest.TestCase):
             "object", schema["properties"]["merge_conflicts"]["type"]
         )
 
+    def test_candidate_source_schema_accepts_unresolved_submissions(self):
+        schema = self.load("candidate-source-record.schema.json")
+        required = set(schema["required"])
+
+        self.assertEqual(
+            {
+                "candidate_id",
+                "discovery_history",
+                "access_status",
+                "description_basis",
+                "description",
+                "retrieval_history",
+            },
+            required,
+        )
+        self.assertNotIn("collection_tier", schema["properties"])
+        self.assertNotIn("verification", schema["properties"])
+        for field in (
+            "title",
+            "creators",
+            "external_ids",
+            "raw_citation_text",
+            "source_type",
+            "authority_class",
+            "language",
+            "relevance",
+        ):
+            with self.subTest(field=field):
+                self.assertIn("null", schema["properties"][field]["type"])
+
     def test_source_schema_links_descriptions_to_retrieval_events(self):
         schema = self.load("source-record.schema.json")
         required = set(schema["required"])
@@ -129,6 +159,15 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual(
             1,
             conflict_candidate["properties"]["source_record_id"]["minLength"],
+        )
+
+    def test_canonical_source_requires_a_relevance_level(self):
+        schema = self.load("source-record.schema.json")
+
+        self.assertIn("relevance", schema["required"])
+        self.assertEqual(
+            ["high", "medium", "low"],
+            schema["properties"]["relevance"]["enum"],
         )
 
     def test_edge_schema_requires_evidence_only_for_verified_edges(self):
@@ -188,8 +227,21 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual(
             {
                 "branch_id",
-                "kind",
+                "source_track",
+                "retrieval_mode",
+                "vertical_seed_id",
+                "tracing_direction",
+                "known_id_snapshot",
                 "status",
+                "assignment",
+                "scope",
+                "exclusions",
+                "source_types",
+                "period",
+                "privacy_constraints",
+                "last_checkpoint",
+                "platform_errors",
+                "unresolved_items",
                 "current_depth",
                 "max_authorized_depth",
                 "queries",
@@ -199,6 +251,40 @@ class SchemaTests(unittest.TestCase):
             },
             set(branch["required"]),
         )
+        self.assertEqual(
+            ["primary", "secondary", "mixed"],
+            branch["properties"]["source_track"]["enum"],
+        )
+        self.assertEqual(
+            ["horizontal", "vertical"],
+            branch["properties"]["retrieval_mode"]["enum"],
+        )
+        self.assertEqual(
+            ["string", "null"],
+            branch["properties"]["vertical_seed_id"]["type"],
+        )
+        self.assertEqual(
+            ["backward", "forward", "lateral", None],
+            branch["properties"]["tracing_direction"]["enum"],
+        )
+        self.assertTrue(
+            branch["properties"]["known_id_snapshot"]["uniqueItems"]
+        )
+        horizontal_rule = next(
+            rule
+            for rule in branch["allOf"]
+            if rule["if"]["properties"]["retrieval_mode"].get("const")
+            == "horizontal"
+        )
+        self.assertEqual(
+            "null",
+            horizontal_rule["then"]["properties"]["vertical_seed_id"]["type"],
+        )
+        self.assertEqual(
+            "null",
+            horizontal_rule["then"]["properties"]["tracing_direction"]["type"],
+        )
+        self.assertNotIn("kind", branch["properties"])
         self.assertEqual(
             {
                 "identity_index",
@@ -219,8 +305,13 @@ class SchemaTests(unittest.TestCase):
             {
                 "round_id",
                 "timestamp",
+                "decision",
+                "decision_reason",
+                "unresolved_gaps",
+                "branch_depth",
+                "attempted_queries_or_paths",
+                "access_failures",
                 "counts",
-                "duplicate_ratio",
                 "coverage_additions",
                 "access_gaps",
                 "open_high_value_branches",
@@ -228,16 +319,29 @@ class SchemaTests(unittest.TestCase):
             set(round_record["required"]),
         )
         self.assertEqual(
+            ["continue", "pause_for_user", "stop"],
+            round_record["properties"]["decision"]["enum"],
+        )
+        self.assertEqual(
+            1, round_record["properties"]["decision_reason"]["minLength"]
+        )
+        self.assertEqual(
             {
+                "candidate_count",
                 "new_candidate_count",
                 "new_high_relevance_count",
                 "new_core_material_count",
                 "duplicate_count",
+                "duplicate_ratio",
             },
             set(round_record["properties"]["counts"]["required"]),
         )
-        self.assertEqual(0, round_record["properties"]["duplicate_ratio"]["minimum"])
-        self.assertEqual(1, round_record["properties"]["duplicate_ratio"]["maximum"])
+        self.assertNotIn("duplicate_ratio", round_record["properties"])
+        ratio = round_record["properties"]["counts"]["properties"][
+            "duplicate_ratio"
+        ]
+        self.assertEqual(0, ratio["minimum"])
+        self.assertEqual(1, ratio["maximum"])
         self.assertEqual(
             1, schema["properties"]["stopping"]["properties"]["reason"]["minLength"]
         )
