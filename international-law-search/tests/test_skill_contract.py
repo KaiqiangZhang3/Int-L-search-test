@@ -100,28 +100,31 @@ class SkillContractTests(unittest.TestCase):
             r"access-and-privacy\.md.*before any local inspection",
         )
 
-    def test_access_status_and_description_basis_are_separate(self):
+    def test_availability_review_extent_and_description_basis_are_separate(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         access_section = re.search(
             r"## Access Records\n\n(.*?)(?=\n## )", text, re.DOTALL
         )
         self.assertIsNotNone(access_section)
-        statuses = re.findall(r"(?m)^- `([^`]+)`$", access_section.group(1))
-        self.assertEqual(
-            [
-                "Full text read",
-                "Full text not read",
-                "Abstract only",
-                "Metadata only",
-                "Access failed",
-            ],
-            statuses,
-        )
-        self.assertRegex(access_section.group(1), r"exactly one.*access status")
-        self.assertRegex(access_section.group(1), r"separate.*description basis")
-        self.assertIn("precedence", access_section.group(1).lower())
+        for value in [
+            "open_full_text",
+            "subscription_full_text",
+            "identified_inaccessible",
+            "abstract_available",
+            "metadata_only",
+            "access_failure",
+            "full_text_substantively_reviewed",
+            "selected_sections_reviewed",
+            "abstract_reviewed",
+            "metadata_verified",
+            "not_reviewed",
+        ]:
+            with self.subTest(value=value):
+                self.assertIn(value, access_section.group(1))
+        self.assertIn("two independent fields", access_section.group(1))
+        self.assertIn("Do not derive one axis from the other", access_section.group(1))
+        self.assertIn("description_basis", access_section.group(1))
         self.assertIn("references/access-and-privacy.md", access_section.group(1))
-        self.assertNotRegex(text, r"(?i)use `Full text not read` whenever")
 
     def test_references_are_routed_from_skill(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
@@ -299,45 +302,26 @@ class SkillContractTests(unittest.TestCase):
             r"## Access attempts\n\n(.*?)(?=\n## )", text, re.DOTALL
         )
         self.assertIsNotNone(access_section)
-        definitions = re.findall(
-            r"(?m)^(\d+)\. `([^`]+)`: ([^\n]+)$", access_section.group(1)
-        )
-        self.assertEqual(
-            [
-                ("1", "Full text read"),
-                ("2", "Full text not read"),
-                ("3", "Abstract only"),
-                ("4", "Metadata only"),
-                ("5", "Access failed"),
-            ],
-            [(number, status) for number, status, _ in definitions],
-        )
-        definition_text = {status: definition.lower() for _, status, definition in definitions}
-        self.assertIn("substantive full text", definition_text["Full text read"])
-        self.assertIn("full text was not examined", definition_text["Full text not read"])
-        self.assertIn("unavailable or intentionally unopened", definition_text["Full text not read"])
-        self.assertIn("no full text is identified or available", definition_text["Abstract only"])
-        self.assertIn("abstract was examined", definition_text["Abstract only"])
-        self.assertIn("neither full text nor abstract was examined", definition_text["Metadata only"])
-        self.assertIn("usable metadata exists", definition_text["Metadata only"])
-        self.assertIn("no usable source content", definition_text["Access failed"])
-        self.assertIn("candidate or limited record", definition_text["Access failed"])
+        for value in [
+            "open_full_text",
+            "subscription_full_text",
+            "identified_inaccessible",
+            "abstract_available",
+            "metadata_only",
+            "access_failure",
+            "full_text_substantively_reviewed",
+            "selected_sections_reviewed",
+            "abstract_reviewed",
+            "metadata_verified",
+            "not_reviewed",
+        ]:
+            with self.subTest(value=value):
+                self.assertIn(value, access_section.group(1))
 
-        self.assertIn("apply the first matching status in this precedence", lower)
-        self.assertIn("most informative, highest-precedence outcome", lower)
-        self.assertIn("preserves every route", lower)
-        self.assertRegex(
-            lower,
-            r"full-text copy is identified.*abstract.*`full text not read`",
-        )
-        self.assertRegex(
-            lower,
-            r"no full text is identified.*abstract.*`abstract only`",
-        )
-        self.assertRegex(
-            lower,
-            r"broken discovery lead.*`access failed`",
-        )
+        self.assertIn("two independent evidence axes", lower)
+        self.assertIn("do not derive either axis from the other", lower)
+        self.assertIn("does not mean that the text was read", lower)
+        self.assertIn("does not erase review completed through another route", lower)
 
         for phrase in [
             "institutional wi-fi",
@@ -345,9 +329,8 @@ class SkillContractTests(unittest.TestCase):
             "subscriptions",
             "authoritative public alternatives",
             "never bypass",
-            "exactly one",
-            "description basis",
-            "separate field",
+            "description_basis",
+            "separately",
             "every access attempt",
             "retrieval_history",
             "published citation information",
@@ -370,7 +353,7 @@ class SkillContractTests(unittest.TestCase):
             r"external (?:query|search).*only after.*approval",
         )
 
-    def test_deliverable_policy_is_traceable_and_non_analytical(self):
+    def test_deliverable_policy_is_reader_first_and_mode_specific(self):
         text = (ROOT / "references/deliverables.md").read_text(encoding="utf-8")
         lower = text.lower()
 
@@ -380,110 +363,53 @@ class SkillContractTests(unittest.TestCase):
 
         for phrase in [
             "word, markdown, or html",
-            "same corpus",
-            "stable source ids",
-            "approved subquestion",
+            "same source records",
             "chronology",
             "theme",
             "source type",
-            "citation path",
             "what the source addresses",
-            "why it was included",
-            "access status",
-            "description basis",
-            "retrieval value",
-            "searched and not searched",
-            "full-text gaps",
-            "verification gaps",
+            "why it is included",
+            "actual review extent",
+            "source-grounded descriptive synthesis",
+            "source statement",
+            "multi-source trend",
+            "cautious inference",
+            "research gap",
+            "retrieval gap",
             "stopping reason",
-            "approaches saturation within the approved scope",
-            "must not claim exhaustive",
+            "never claim exhaustive",
         ]:
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, lower)
 
-        self.assertRegex(
-            lower,
-            r"each edge separately.*from id.*relation.*to id.*status.*evidence location",
-        )
-        self.assertRegex(
-            lower,
-            r"candidate status.*shown.*even when.*evidence",
-        )
-        self.assertIn("endpoint ids, relation, and status", lower)
-        self.assertNotIn("stable relationship id", lower)
-        self.assertRegex(
-            lower,
-            r"gap entr(?:y|ies).*stable source id.*endpoint ids, relation, and status",
-        )
+        self.assertIn("must not infer a shared trend", lower)
+        self.assertIn("do not present a dispute as settled", lower)
+        self.assertIn("choose the user's thesis", lower)
+        self.assertIn("draft argumentative academic prose", lower)
+        self.assertIn("scripts/validate_reader_report.py", lower)
 
-        for sentence in [
-            "Do not synthesize legal rules.",
-            "Do not resolve scholarly disputes.",
-            "Do not recommend an argument.",
-            "Do not draft academic prose.",
-        ]:
-            with self.subTest(sentence=sentence):
-                self.assertIn(sentence, text)
-
-    def test_reader_report_has_concise_review_fields(self):
+    def test_reader_report_leads_with_research_understanding_and_reading_path(self):
         text = (ROOT / "templates/reader-report.md").read_text(encoding="utf-8")
 
-        expected_sections = [
-            "Scope, stopping reason, and coverage conclusion",
-            "Retrieval-oriented navigation",
-            "Core/canonical sources",
-            "Supplementary/emerging sources",
-            "Key citation paths",
-            "Coverage and gaps",
-        ]
-        self.assertEqual(
-            expected_sections,
-            re.findall(r"(?m)^## (.+)$", text),
-        )
-
+        headings = re.findall(r"(?m)^## (.+)$", text)
+        self.assertEqual(["问题界定", "研究脉络", "主要立场与争论"], headings[:3])
+        self.assertLess(headings.index("推荐阅读路径"), headings.index("检索范围与限制"))
         for field in [
-            "{{coverage_conclusion}}",
-            "{{approved_subquestion_navigation}}",
-            "{{theme_navigation}}",
-            "{{source_type_navigation}}",
-            "{{chronology_navigation}}",
-            "{{citation_path_navigation}}",
-            "{{stable_id}}",
-            "{{access_status}}",
-            "{{description_basis}}",
-            "{{source_description}}",
+            "{{research_question_scope_and_exclusions}}",
+            "{{source_id}}",
+            "{{normalized_citation_and_stable_link}}",
+            "{{reader_facing_availability_label}}",
+            "{{reader_facing_review_extent_label}}",
+            "{{description_supported_by_reviewed_material}}",
             "{{inclusion_reason}}",
-            "{{from_id}}",
-            "{{relation}}",
-            "{{to_id}}",
-            "{{edge_status}}",
-            "{{evidence_location}}",
-            "{{retrieval_value}}",
-            "{{gap_source_id}}",
-            "{{gap_from_id}}",
-            "{{gap_relation}}",
-            "{{gap_to_id}}",
-            "{{gap_edge_status}}",
+            "{{reading_context}}",
+            "{{searched_questions_platforms_languages_periods_and_source_classes}}",
+            "{{unsearched_questions_platforms_languages_periods_and_source_classes}}",
         ]:
             with self.subTest(field=field):
                 self.assertIn(field, text)
-
-        for dimension in [
-            "Approved subquestion",
-            "Platform",
-            "Language",
-            "Period / chronology",
-            "Source class",
-        ]:
-            with self.subTest(dimension=dimension):
-                self.assertRegex(text, rf"(?m)^\| {re.escape(dimension)} \|")
-
-        self.assertIn(
-            "Candidate status must remain visible even when an evidence location is present.",
-            text,
-        )
-        self.assertIn("It must not claim exhaustive coverage.", text)
+        self.assertIn("国际法检索档案", text)
+        self.assertIn("不作跨来源综合", text)
 
 
 if __name__ == "__main__":

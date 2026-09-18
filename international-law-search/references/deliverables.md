@@ -1,60 +1,61 @@
 # Deliverables
 
-Generate every deliverable from the canonical corpus, graph, and project state. Do not maintain a separate hand-edited reader list. Reader-facing and structured files must represent the same corpus at the same export checkpoint. Every displayed source must retain its stable source ID; identify a relationship by its endpoint IDs, relation, and status because the edge schema has no relationship ID.
+Use the shared source ledger as the single source of truth. Reader-facing and structured outputs must describe the same source records at the same export checkpoint. Deep-audit outputs additionally derive graph, coverage, and event details from canonical project state; quick and standard outputs do not require a graph or audit workspace.
 
-## Select outputs
+## Confirm the user's output choices
 
-Use the formats approved in the search plan. Offer the reader-facing report as Word, Markdown, or HTML, as selected by the user. Keep the report concise enough for human review; place operational detail in the structured layer.
+Offer a reader-facing result in Word, Markdown, or HTML. Support OSCOLA, Bluebook, Chicago, and GB/T 7714 citation styles, plus a user-supplied style. Preserve normalized citations and stable links regardless of style.
 
-The structured layer may include:
+The user may order material by theme, chronology, authority, relevance, reading priority, scholarly position, or source type. Default to **theme plus reading priority**, adding a timeline only when chronology materially helps understanding. Keep the main result concise enough for human review.
 
-- Source records as JSONL or CSV.
-- Edge records or other graph data.
-- BibTeX or RIS citation exports.
-- Retrieval and access logs.
-- Verification state, unresolved items, and coverage data.
+Offer, rather than automatically attach, structured files such as CSV or XLSX bibliography tables, BibTeX, RIS, JSONL, retrieval logs, validation results, graph data, and project state. The user's requested format controls delivery; mode alone does not force machine attachments.
 
-Derive structured exports directly from canonical records. Preserve stable source IDs in formats that support custom fields and provide an explicit ID mapping when a format cannot carry them natively. Preserve edge evidence and status in graph exports rather than flattening candidate and verified relationships together.
+## Choose the reader-facing product
 
-## Reader-facing report
+### Retrieval archive
 
-Use [`../templates/reader-report.md`](../templates/reader-report.md) as the content model for Word, Markdown, and HTML. Include only material that helps the user inspect and navigate the retrieval result:
+A retrieval archive organizes and describes sources individually. It may group sources by theme, source type, chronology, or discovery path, but it must not infer a shared trend, reconcile positions, identify a substantive literature gap from absence in the search, or provide cross-source synthesis.
 
-- A retrieval-oriented thematic overview of the source groups found.
-- Concise navigation by approved subquestion, theme, source type, chronology, and selected citation path.
-- For each selected source, its stable ID, citation, access status, description basis, what the source addresses, and why it was included.
-- Selected key citation paths and each path's retrieval value. List each edge separately with from ID, canonical relation, to ID, status, and evidence location. Candidate status must remain shown even when an evidence location exists; evidence does not upgrade the edge.
-- Coverage showing what was searched and not searched by approved subquestion, platform, language, period or chronology, and source class. Derive this table directly from the cumulative `coverage` object in project state; do not reconstruct it from the latest round or hand-edit it.
-- Full-text gaps, verification gaps, unresolved identities, and candidate edges that materially affect review.
-- The stopping reason and a constrained coverage conclusion. Use `Approaches saturation within the approved scope` only when the reasoned saturation review supports it. Otherwise use a clear `Paused—not saturated` or `In progress—not saturated` status and state the reason. The report must not claim exhaustive or comprehensive coverage.
+For each selected source, explain in natural language:
 
-Select sources and paths for review value; do not reproduce the full corpus in narrative form. Keep exact queries, complete provenance, access-attempt history, and the full graph in structured outputs unless a detail is necessary to understand a material gap.
+- what the source addresses;
+- why it is included;
+- when the user should read it;
+- its normalized citation and stable link;
+- its reader-facing availability and actual review extent; and
+- its stable source ID outside the opening sections.
 
-## Description and analysis boundary
+### Research report
 
-Describe an individual item only from the material identified by its `description_basis` and `description_retrieval_id`. A faithful source description may state what the source addresses and why it was included. It may not attribute a conclusion that was not present in the material accessed.
+A research report may provide **source-grounded descriptive synthesis** of material actually reviewed. Lead with field understanding in this order: problem definition, research development, and principal positions or disputes. Put the recommended reading path before retrieval coverage and limitations. Keep source IDs, machine enums, validation state, and graph mechanics out of the opening.
 
-The report may group sources and explain retrieval paths. Coverage language describes the retrieval process, not the substantive state of the law.
+The report must distinguish three statement types:
 
-Do not synthesize legal rules.
-Do not resolve scholarly disputes.
-Do not recommend an argument.
-Do not draft academic prose.
-Do not turn thematic navigation into a literature review.
+1. A source statement says what one identified source expresses.
+2. A multi-source trend states only a pattern supported by every cited source.
+3. A cautious inference identifies the assistant's limited inference and its evidentiary basis.
 
-## Traceability check
+Give each such statement inline stable source citations. Do not use an abstract to characterize a full argument, and do not use metadata alone to describe a source's position. Do not present a dispute as settled, choose the user's thesis or argumentative position, synthesize an unsupported legal rule, or draft argumentative academic prose.
 
-Before export, run `$SKILL_ROOT/scripts/validate_corpus.py` with `--sources`
-and `--edges` pointing to the exact canonical checkpoint used to generate the
-deliverables. Schema validation alone is not sufficient because it cannot
-enforce corpus-wide identity, endpoint, edge direction, and retrieval-link
-invariants. Do not export while the script reports any error.
+Use [`../templates/reader-report.md`](../templates/reader-report.md) for the paired research-report and retrieval-archive structures.
 
-After that validation succeeds, confirm that:
+## Separate substantive and retrieval gaps
 
-1. Each reported source resolves by stable ID to one canonical source record.
-2. Each reported path resolves to canonical nodes and graph edges. Relationship traceability uses endpoint IDs, relation, and status; verified edges retain their evidence locations and candidate edges remain labeled.
-3. Access status and description basis match the canonical record.
-4. Coverage and stopping reason match the approved plan and project state at the export checkpoint.
-5. Word, Markdown, HTML, and structured exports selected for the run were generated from the same corpus checkpoint.
-6. Every gap entry carries either a stable source ID or the edge's endpoint IDs, relation, and status. Do not create an untraceable free-form gap list.
+A research gap must be stated by reviewed literature or supported by the reviewed body of sources. A retrieval gap records an unsearched or inaccessible language, platform, period, jurisdiction, source class, or branch. Never convert a retrieval gap into a claim that the literature is silent.
+
+Report the stopping reason accurately. A budget stop is `Paused—not saturated`, not evidence of saturation. Never claim exhaustive or comprehensive coverage.
+
+## Traceability and export checks
+
+Before export, run `$SKILL_ROOT/scripts/validate_reader_report.py REPORT --language LANGUAGE --final`. It deterministically rejects unresolved template markers, unresolved manual-review items, declared synthesis without source citations, and a Chinese report that opens with machine-state sections. It does not judge legal correctness.
+
+In deep-audit mode, also run `$SKILL_ROOT/scripts/validate_corpus.py` with `--sources` and, when graph data is enabled, the applicable edge input at the exact canonical checkpoint. Schema validation alone is not sufficient because it cannot enforce corpus-wide identity, endpoint, relationship, and retrieval-link invariants. Do not export while an applicable validator reports an error.
+
+Before delivery, confirm that:
+
+1. Every reported source resolves to one ledger or canonical source record.
+2. Every description is supported by the recorded description basis and actual review extent.
+3. Every declared source statement, multi-source trend, and cautious inference cites its supporting source IDs.
+4. Availability, review extent, scope, gaps, and stopping reason match the export checkpoint.
+5. All selected formats were generated from that same checkpoint.
+6. Any optional relationship shown in a deep-audit attachment retains its endpoints, relation, status, and evidence location.
