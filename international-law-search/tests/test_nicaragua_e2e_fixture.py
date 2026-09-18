@@ -6,11 +6,10 @@ import sys
 import unittest
 
 
-REPOSITORY = Path(__file__).resolve().parents[2]
-FIXTURE = REPOSITORY / "docs/superpowers/evals/fixtures/nicaragua-e2e"
-E2E = REPOSITORY / "docs/superpowers/evals/2026-09-17-international-law-search-e2e.md"
-VALIDATOR = REPOSITORY / "international-law-search/scripts/validate_corpus.py"
-SCHEMAS = REPOSITORY / "international-law-search/schemas"
+ROOT = Path(__file__).resolve().parents[1]
+FIXTURE = ROOT / "tests/fixtures/deep-audit/nicaragua-e2e"
+VALIDATOR = ROOT / "scripts/validate_corpus.py"
+SCHEMAS = ROOT / "schemas"
 
 
 class NicaraguaE2EFixtureTests(unittest.TestCase):
@@ -30,9 +29,6 @@ class NicaraguaE2EFixtureTests(unittest.TestCase):
         plan_path = FIXTURE / "approved-search-plan.md"
         state = json.loads((FIXTURE / "state.json").read_text(encoding="utf-8"))
         plan = plan_path.read_text(encoding="utf-8")
-        e2e = E2E.read_text(encoding="utf-8")
-
-        self.assertIn("fixtures/nicaragua-e2e/", e2e)
         self.assertIn("Status: `approved`", plan)
         approved_by = re.search(r"Approved by: (.+)", plan).group(1)
         approved_at = re.search(r"Approved at: (.+)", plan).group(1)

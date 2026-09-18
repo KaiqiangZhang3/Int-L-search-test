@@ -1,0 +1,343 @@
+{
+  "schema_version": 2,
+  "graph_enabled": true,
+  "saturation_enabled": false,
+  "project_id": "nicaragua-live-e2e",
+  "created_at": "2026-09-17",
+  "updated_at": "2026-09-17",
+  "status": "complete",
+  "approved_plan": {
+    "approved_by": "Evaluation user",
+    "approved_at": "2026-09-17",
+    "plan_path": "approved-search-plan.md"
+  },
+  "decision_log": [
+    {
+      "decision_id": "decision-select-nicaragua-seed",
+      "kind": "select_seed",
+      "decided_by": "Evaluation user",
+      "decided_at": "2026-09-17",
+      "round_id": "round-horizontal-1",
+      "seed_id": "icj-nicaragua-1986"
+    },
+    {
+      "decision_id": "decision-approve-backward-trace",
+      "kind": "approve_trace",
+      "decided_by": "Evaluation user",
+      "decided_at": "2026-09-17",
+      "round_id": "round-horizontal-1",
+      "branch_id": "vertical-backward",
+      "seed_id": "icj-nicaragua-1986",
+      "directions": ["backward"],
+      "budget": {"depth_cap": 1}
+    },
+    {
+      "decision_id": "decision-approve-forward-trace",
+      "kind": "approve_trace",
+      "decided_by": "Evaluation user",
+      "decided_at": "2026-09-17",
+      "round_id": "round-horizontal-1",
+      "branch_id": "vertical-forward",
+      "seed_id": "icj-nicaragua-1986",
+      "directions": ["forward"],
+      "budget": {"depth_cap": 1}
+    }
+  ],
+  "branches": [
+    {
+      "branch_id": "horizontal-discovery",
+      "source_track": "mixed",
+      "retrieval_mode": "horizontal",
+      "authorization_decision_id": null,
+      "approved_budget": null,
+      "vertical_seed_id": null,
+      "tracing_direction": null,
+      "known_id_snapshot": [
+        "icj-nicaragua-1986"
+      ],
+      "status": "complete",
+      "assignment": "Discover a small English-language scholarship sample and official sources on approved platforms.",
+      "scope": "Shallow discovery around the Nicaragua merits judgment.",
+      "exclusions": [
+        "Multilingual coverage",
+        "Database-wide coverage",
+        "Subject-wide coverage"
+      ],
+      "source_types": [
+        "judgment",
+        "treaty",
+        "resolution",
+        "scholarship"
+      ],
+      "period": {
+        "start": null,
+        "end": "2026-09-17"
+      },
+      "privacy_constraints": [],
+      "last_checkpoint": "2026-09-17",
+      "platform_errors": [],
+      "unresolved_items": [],
+      "current_depth": 0,
+      "max_authorized_depth": 1,
+      "queries": [],
+      "platforms": [
+        "ICJ",
+        "UN",
+        "Cambridge",
+        "SSRN"
+      ],
+      "languages": [
+        "English"
+      ],
+      "pending_items": []
+      ,"open_paths": [],
+      "status_reason": "Approved breadth branch completed.",
+      "status_changed_at": "2026-09-17"
+    },
+    {
+      "branch_id": "vertical-backward",
+      "source_track": "primary",
+      "retrieval_mode": "vertical",
+      "authorization_decision_id": "decision-approve-backward-trace",
+      "approved_budget": {"depth_cap": 1},
+      "vertical_seed_id": "icj-nicaragua-1986",
+      "tracing_direction": "backward",
+      "known_id_snapshot": [
+        "icj-nicaragua-1986"
+      ],
+      "status": "complete",
+      "assignment": "Verify primary authorities cited by the seed judgment.",
+      "scope": "One backward citation-following level from the approved seed.",
+      "exclusions": [],
+      "source_types": [
+        "treaty",
+        "resolution"
+      ],
+      "period": {
+        "start": null,
+        "end": "1986"
+      },
+      "privacy_constraints": [],
+      "last_checkpoint": "2026-09-17",
+      "platform_errors": [],
+      "unresolved_items": [],
+      "current_depth": 1,
+      "max_authorized_depth": 1,
+      "queries": [],
+      "platforms": [
+        "ICJ",
+        "UN"
+      ],
+      "languages": [
+        "English"
+      ],
+      "pending_items": []
+      ,"open_paths": [],
+      "status_reason": "Approved backward trace completed.",
+      "status_changed_at": "2026-09-17"
+    },
+    {
+      "branch_id": "vertical-forward",
+      "source_track": "primary",
+      "retrieval_mode": "vertical",
+      "authorization_decision_id": "decision-approve-forward-trace",
+      "approved_budget": {"depth_cap": 1},
+      "vertical_seed_id": "icj-nicaragua-1986",
+      "tracing_direction": "forward",
+      "known_id_snapshot": [
+        "icj-nicaragua-1986"
+      ],
+      "status": "complete",
+      "assignment": "Verify a later ICJ judgment that cites the seed judgment.",
+      "scope": "One forward citation-following level from the approved seed.",
+      "exclusions": [],
+      "source_types": [
+        "judgment"
+      ],
+      "period": {
+        "start": "1986",
+        "end": "2026-09-17"
+      },
+      "privacy_constraints": [],
+      "last_checkpoint": "2026-09-17",
+      "platform_errors": [],
+      "unresolved_items": [],
+      "current_depth": 1,
+      "max_authorized_depth": 1,
+      "queries": [],
+      "platforms": [
+        "ICJ"
+      ],
+      "languages": [
+        "English"
+      ],
+      "pending_items": []
+      ,"open_paths": [],
+      "status_reason": "Approved forward trace completed.",
+      "status_changed_at": "2026-09-17"
+    }
+  ],
+  "rounds": [
+    {
+      "round_id": "round-horizontal-1",
+      "timestamp": "2026-09-17",
+      "budget_status": "within_budget",
+      "decision": "continue",
+      "decision_reason": "The approved vertical citation-following round remained.",
+      "unresolved_gaps": [],
+      "branch_depth": {
+        "horizontal-discovery": 0
+      },
+      "attempted_queries_or_paths": [
+        "English-language horizontal discovery on ICJ, UN, Cambridge, and SSRN"
+      ],
+      "access_failures": [],
+      "counts": {
+        "candidate_count": 2,
+        "new_candidate_count": 2,
+        "new_high_relevance_count": 0,
+        "new_core_material_count": 0,
+        "duplicate_count": 0,
+        "duplicate_ratio": 0
+      },
+      "coverage_additions": {
+        "source_types": [
+          "scholarship"
+        ],
+        "themes": [
+          "Nicaragua judgment scholarship"
+        ],
+        "languages": [
+          "English"
+        ],
+        "platforms": [
+          "Cambridge",
+          "SSRN"
+        ]
+      },
+      "access_gaps": [
+        "cambridge-rijpkema-record: metadata only",
+        "ssrn-kwiecien-record: abstract only"
+      ],
+      "open_high_value_branches": [
+        "Backward and forward citation tracing from icj-nicaragua-1986"
+      ]
+    },
+    {
+      "round_id": "round-vertical-1",
+      "timestamp": "2026-09-17",
+      "budget_status": "budget_paused",
+      "decision": "stop",
+      "decision_reason": "The approved round and depth budget was exhausted; the network was not assessed as saturated.",
+      "unresolved_gaps": [
+        "Multilingual, database-wide, and subject-wide coverage were not attempted."
+      ],
+      "branch_depth": {
+        "vertical-backward": 1,
+        "vertical-forward": 1
+      },
+      "attempted_queries_or_paths": [
+        "Backward citations from Nicaragua paragraphs 176, 188, and 193",
+        "Forward citation from Oil Platforms paragraphs 43 and 76"
+      ],
+      "access_failures": [],
+      "counts": {
+        "candidate_count": 3,
+        "new_candidate_count": 3,
+        "new_high_relevance_count": 3,
+        "new_core_material_count": 3,
+        "duplicate_count": 0,
+        "duplicate_ratio": 0
+      },
+      "coverage_additions": {
+        "source_types": [
+          "judgment",
+          "treaty",
+          "resolution"
+        ],
+        "themes": [
+          "Authorities cited by Nicaragua",
+          "Later ICJ judgment citing Nicaragua"
+        ],
+        "languages": [
+          "English"
+        ],
+        "platforms": [
+          "ICJ",
+          "UN"
+        ]
+      },
+      "access_gaps": [],
+      "open_high_value_branches": [
+        "Unsearched multilingual, database-wide, and subject-wide surfaces"
+      ]
+    }
+  ],
+  "coverage": {
+    "subquestions": {
+      "searched": [
+        "Shallow citation network around the 1986 Nicaragua merits judgment"
+      ],
+      "unsearched": [
+        "Subject-wide treatment beyond the approved smoke test"
+      ]
+    },
+    "platforms": {
+      "searched": [
+        "ICJ",
+        "UN",
+        "Cambridge",
+        "SSRN"
+      ],
+      "unsearched": [
+        "Other databases and platforms"
+      ]
+    },
+    "languages": {
+      "searched": [
+        "English"
+      ],
+      "unsearched": [
+        "Non-English materials"
+      ]
+    },
+    "periods": {
+      "searched": [
+        "Seed judgment and selected cited and later authorities"
+      ],
+      "unsearched": [
+        "Comprehensive chronology"
+      ]
+    },
+    "authority_classes": {
+      "searched": [
+        "primary",
+        "general_academic"
+      ],
+      "unsearched": [
+        "authoritative_secondary",
+        "gray_literature",
+        "discovery_only"
+      ]
+    }
+  },
+  "deduplication": {
+    "identity_index": {
+      "icj-node-103143": "icj-nicaragua-1986",
+      "un-charter": "un-charter",
+      "a-res-2625-xxv": "unga-2625-xxv",
+      "doi-10.1017-s0167676800001951": "cambridge-rijpkema-record",
+      "ssrn-3025599": "ssrn-kwiecien-record",
+      "icj-node-103215": "icj-oil-platforms-2003"
+    },
+    "unresolved_record_ids": [],
+    "last_merged_at": "2026-09-17"
+  },
+  "stopping": {
+    "decision": "stop",
+    "reason": "The approved round and depth budget was exhausted; the network was not saturated.",
+    "open_high_value_branches": [
+      "Multilingual, database-wide, and subject-wide retrieval"
+    ]
+  }
+}
