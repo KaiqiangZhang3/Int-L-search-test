@@ -43,9 +43,11 @@ Mode choice belongs to the user. The assistant may recommend a mode and explain 
 
 Confirm only what is needed for the next round: research question, inclusions, exclusions, languages, access assumptions, mode, next-round budget, and first directions. Do not put exact query strings or branch mechanics in the user-facing scope card. The user may approve, revise, or request one bounded exploratory round.
 
+When more than one language is material, follow [`multilingual-retrieval.md`](multilingual-retrieval.md). Every substantive language is an independently designed branch with a distinct purpose and user-approved budget; do not treat one branch as a translation of a fixed English baseline. When regional, Global South, or perspective coverage matters, define measurable targets in the scope card rather than promising representation in general terms.
+
 ### Stage 1: Breadth discovery
 
-Map the field without systematic citation tracing. In an ordinary standard round, collect 15–30 candidates across relevant source types, positions, periods, regions, and languages, while reviewing full text only within the approved budget. Present a provisional field map, 5–10 candidate seeds, access and retrieval gaps, planned and actual resource use, and the decision panel.
+Map the field without systematic citation tracing. In an ordinary standard round, collect 15–30 candidates across relevant source types, positions, periods, regions, and languages, while reviewing full text only within the approved budget. Present a provisional field map, 5–10 candidate seeds, access and retrieval gaps, planned and actual resource use, each language branch's actual contribution and remaining gap, and the decision panel.
 
 After the breadth checkpoint, the assistant **must stop**. Stage 2 cannot begin until the user selects or confirms branches and user-confirmed seeds. Do not silently convert influential sources into tracing instructions.
 

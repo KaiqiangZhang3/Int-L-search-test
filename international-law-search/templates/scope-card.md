@@ -18,6 +18,12 @@
 
 {{access_assumptions}}
 
+## Coverage targets (when relevant)
+
+Record intended regions, languages, platforms, and perspectives in measurable terms. If Global South coverage is material, name the relevant regions or perspectives and allocate a branch budget; do not use “Global South” as an unbounded label.
+
+{{regional_language_platform_and_perspective_targets}}
+
 ## Mode
 
 {{quick_standard_or_deep_audit}}

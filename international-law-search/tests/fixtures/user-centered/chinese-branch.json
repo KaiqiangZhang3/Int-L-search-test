@@ -1,0 +1,31 @@
+{
+  "language": "zh",
+  "purpose": "Identify Chinese scholarship and practice-facing commentary on corporate roles in public international law that English-language discovery may miss.",
+  "local_vocabulary": [
+    "跨国公司 国际法主体资格",
+    "企业 国际法义务",
+    "公司治理 国际法",
+    "工商业与人权"
+  ],
+  "platforms": [
+    "CNKI",
+    "PKULaw",
+    "Wanfang"
+  ],
+  "access_assumptions": [
+    "Institutional access may expose subscription full text.",
+    "Unavailable full text must be reported separately from review extent."
+  ],
+  "budget": {
+    "queries": 8,
+    "candidates": 12,
+    "full_text_reviews": 4
+  },
+  "authority_relationship": "Chinese scholarship is searched as an independent analytical tradition; official Chinese treaty texts are authoritative only when the relevant institution or treaty regime designates them as authentic.",
+  "actual_contribution": {
+    "candidates_added": 0,
+    "full_text_reviews_completed": 0,
+    "distinct_perspectives_added": []
+  },
+  "remaining_gap": "Not assessed before the branch is run."
+}

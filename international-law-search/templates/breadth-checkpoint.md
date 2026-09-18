@@ -33,6 +33,16 @@ Present 5–10 high-value seed choices. For each, state what it does, why it mat
 | Full-text reviews | {{planned_reviews}} | {{actual_reviews}} |
 | Language allocations | {{planned_language_budget}} | {{actual_language_use}} |
 
+## Multilingual, regional, and Global South coverage
+
+Report actual additions against every applicable target from the scope card. Use counts plus short qualitative labels where counts alone would obscure whether a branch added a distinct source type, institution, region, or perspective.
+
+| Branch or coverage target | Planned purpose and budget | Actual additions | Distinct contribution | Remaining coverage gaps |
+| --- | --- | ---: | --- | --- |
+| {{language_region_platform_or_perspective}} | {{planned_purpose_and_budget}} | {{candidate_and_review_counts}} | {{distinct_material_or_viewpoint_added}} | {{unsearched_inaccessible_or_underrepresented_area}} |
+
+Do not claim representative multilingual or Global South coverage from the presence of a single non-English source. State when a target was attempted but produced no relevant addition.
+
 ## Gaps and constraints
 
 - Research gaps in the literature: {{literature_gaps}}
