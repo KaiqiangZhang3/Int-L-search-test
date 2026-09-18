@@ -16,6 +16,7 @@ def _build_workspace(
     state = {
         "schema_version": 2,
         "graph_enabled": graph_enabled,
+        "saturation_enabled": False,
         "project_id": project_id,
         "created_at": now,
         "updated_at": now,

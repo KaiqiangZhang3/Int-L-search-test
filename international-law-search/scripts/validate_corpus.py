@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import re
 import sys
-from typing import Iterable
+from typing import Iterable, Optional
 
 from corpus_ops import identity_key, validate_retrieval_links
 
@@ -16,6 +16,10 @@ DRAFT_PLACEHOLDER = re.compile(
     r"^\s*(?:TODO|TBD)(?:\s*(?::|-).*)?\s*$",
     re.IGNORECASE,
 )
+RELATION_FAMILIES = {
+    "literature": {"cites", "responds_to", "criticizes", "extends"},
+    "institutional": {"amends", "implements", "interprets", "same_proceeding"},
+}
 
 
 def _location(path: Path, line_number: int) -> str:
@@ -44,6 +48,24 @@ def _load_jsonl(path: Path) -> tuple[list[tuple[int, dict]], list[str]]:
             continue
         records.append((line_number, record))
     return records, errors
+
+
+def _load_state(path: Path) -> tuple[Optional[dict], list[str]]:
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        return None, [f"{path.name}: unable to read valid state JSON: {exc}"]
+    if not isinstance(state, dict):
+        return None, [f"{path.name}: project state must be an object"]
+
+    errors = []
+    if state.get("schema_version") != 2:
+        errors.append(f"{path.name}: schema_version must be 2")
+    if not isinstance(state.get("graph_enabled"), bool):
+        errors.append(f"{path.name}: graph_enabled must be a boolean")
+    if not isinstance(state.get("saturation_enabled"), bool):
+        errors.append(f"{path.name}: saturation_enabled must be a boolean")
+    return state, errors
 
 
 def _validate_sources(
@@ -100,6 +122,7 @@ def _validate_edges(
         source_id = edge.get("source_id")
         target_id = edge.get("target_id")
         relation = edge.get("relation")
+        relation_family = edge.get("relation_family")
         status = edge.get("status")
         record_scope = edge.get("record_scope")
 
@@ -114,6 +137,13 @@ def _validate_edges(
         if relation == "cited_by":
             errors.append(
                 f"{location}: canonical edges must use cites direction, not cited_by"
+            )
+        elif relation_family not in RELATION_FAMILIES:
+            errors.append(f"{location}: unsupported relation_family")
+        elif relation not in RELATION_FAMILIES[relation_family]:
+            errors.append(
+                f"{location}: unsupported relation {relation!r} for "
+                f"{relation_family!r} family"
             )
         if status == "candidate":
             errors.append(f"{location}: candidate edge is outside the final corpus")
@@ -135,10 +165,23 @@ def _validate_edges(
     return errors
 
 
-def validate_corpus(sources_path: Path, edges_path: Path) -> tuple[int, int, list[str]]:
+def validate_corpus(
+    sources_path: Path,
+    edges_path: Optional[Path] = None,
+    state_path: Optional[Path] = None,
+) -> tuple[int, int, list[str]]:
     source_records, errors = _load_jsonl(sources_path)
-    edge_records, edge_load_errors = _load_jsonl(edges_path)
-    errors.extend(edge_load_errors)
+    edge_records = []
+
+    if state_path is not None:
+        state, state_errors = _load_state(state_path)
+        errors.extend(state_errors)
+        if state is not None and state.get("graph_enabled") is True and edges_path is None:
+            errors.append(f"{state_path.name}: graph_enabled requires --edges")
+
+    if edges_path is not None:
+        edge_records, edge_load_errors = _load_jsonl(edges_path)
+        errors.extend(edge_load_errors)
 
     source_ids, source_errors = _validate_sources(sources_path, source_records)
     errors.extend(source_errors)
@@ -151,13 +194,24 @@ def parse_args(argv=None):
         description="Validate canonical source and verified-edge JSONL files."
     )
     parser.add_argument("--sources", type=Path, required=True)
-    parser.add_argument("--edges", type=Path, required=True)
+    parser.add_argument(
+        "--edges",
+        type=Path,
+        help="Optional verified-edge JSONL file when relationship graphs are enabled.",
+    )
+    parser.add_argument(
+        "--state",
+        type=Path,
+        help="Optional version-2 project state used to enforce graph optionality.",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv=None) -> int:
     args = parse_args(argv)
-    source_count, edge_count, errors = validate_corpus(args.sources, args.edges)
+    source_count, edge_count, errors = validate_corpus(
+        args.sources, args.edges, args.state
+    )
     if errors:
         for error in errors:
             print(error, file=sys.stderr)

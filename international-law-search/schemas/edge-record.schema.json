@@ -8,6 +8,7 @@
     "source_id",
     "target_id",
     "record_scope",
+    "relation_family",
     "relation",
     "status"
   ],
@@ -26,15 +27,23 @@
         "canonical"
       ]
     },
+    "relation_family": {
+      "enum": [
+        "literature",
+        "institutional"
+      ]
+    },
     "relation": {
       "enum": [
         "cites",
         "cited_by",
+        "responds_to",
+        "criticizes",
+        "extends",
+        "amends",
+        "implements",
         "interprets",
-        "same_case_series",
-        "same_issue",
-        "response_to",
-        "discovered_from"
+        "same_proceeding"
       ]
     },
     "status": {
@@ -69,6 +78,73 @@
     }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "relation_family": {
+            "const": "literature"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "relation": {
+            "enum": [
+              "cites",
+              "cited_by",
+              "responds_to",
+              "criticizes",
+              "extends"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "relation_family": {
+            "const": "institutional"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "relation": {
+            "enum": [
+              "amends",
+              "implements",
+              "interprets",
+              "same_proceeding"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "relation": {
+            "enum": [
+              "responds_to",
+              "criticizes",
+              "extends",
+              "interprets"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "evidence"
+        ],
+        "properties": {
+          "evidence": {
+            "type": "object"
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {
@@ -120,11 +196,13 @@
           "relation": {
             "enum": [
               "cites",
+              "responds_to",
+              "criticizes",
+              "extends",
+              "amends",
+              "implements",
               "interprets",
-              "same_case_series",
-              "same_issue",
-              "response_to",
-              "discovered_from"
+              "same_proceeding"
             ]
           }
         }

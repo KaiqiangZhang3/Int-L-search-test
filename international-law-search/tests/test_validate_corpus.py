@@ -19,15 +19,24 @@ def source_record(source_id, *, doi=None):
         "creators": ["Author"],
         "date": "2026",
         "publication": "Journal",
-        "access_status": "Metadata only",
+        "availability": "metadata_only",
+        "review_extent": "metadata_verified",
         "description": "Identifies the source's subject and retrieval value.",
         "inclusion_reason": "Directly addresses the approved search question.",
-        "description_basis": "metadata",
+        "description_basis": {
+            "kind": "metadata",
+            "locations": ["Publisher record"],
+        },
         "description_retrieval_id": f"retrieval-{source_id}",
         "retrieval_history": [
             {
                 "event_id": f"retrieval-{source_id}",
-                "access_status": "Metadata only",
+                "platform": "Publisher",
+                "retrieved_at": "2026-09-18T00:00:00Z",
+                "availability": "metadata_only",
+                "review_extent": "metadata_verified",
+                "stable_url": None,
+                "local_path": None,
             }
         ],
     }
@@ -37,6 +46,7 @@ def verified_edge(source_id="source-1", target_id="source-2"):
     return {
         "source_id": source_id,
         "target_id": target_id,
+        "relation_family": "literature",
         "relation": "cites",
         "status": "verified",
         "record_scope": "canonical",
@@ -45,7 +55,7 @@ def verified_edge(source_id="source-1", target_id="source-2"):
 
 
 class ValidateCorpusCliTests(unittest.TestCase):
-    def run_validator(self, sources, edges):
+    def run_validator(self, sources, edges=None, state=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             source_path = root / "sources.jsonl"
@@ -54,19 +64,19 @@ class ValidateCorpusCliTests(unittest.TestCase):
                 "".join(json.dumps(item) + "\n" for item in sources),
                 encoding="utf-8",
             )
-            edge_path.write_text(
-                "".join(json.dumps(item) + "\n" for item in edges),
-                encoding="utf-8",
-            )
+            command = [sys.executable, str(SCRIPT), "--sources", str(source_path)]
+            if edges is not None:
+                edge_path.write_text(
+                    "".join(json.dumps(item) + "\n" for item in edges),
+                    encoding="utf-8",
+                )
+                command.extend(["--edges", str(edge_path)])
+            if state is not None:
+                state_path = root / "state.json"
+                state_path.write_text(json.dumps(state) + "\n", encoding="utf-8")
+                command.extend(["--state", str(state_path)])
             return subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT),
-                    "--sources",
-                    str(source_path),
-                    "--edges",
-                    str(edge_path),
-                ],
+                command,
                 check=False,
                 capture_output=True,
                 text=True,
@@ -88,6 +98,41 @@ class ValidateCorpusCliTests(unittest.TestCase):
 
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("Validated 2 sources and 1 verified edge", result.stdout)
+
+    def test_graph_disabled_state_does_not_require_an_edge_file(self):
+        result = self.run_validator(
+            [source_record("source-1")],
+            state={
+                "schema_version": 2,
+                "graph_enabled": False,
+                "saturation_enabled": False,
+            },
+        )
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("Validated 1 sources and 0 verified edges", result.stdout)
+
+    def test_graph_enabled_state_requires_an_edge_file(self):
+        result = self.run_validator(
+            [source_record("source-1")],
+            state={
+                "schema_version": 2,
+                "graph_enabled": True,
+                "saturation_enabled": False,
+            },
+        )
+
+        self.assert_failure(result, "state.json", "graph_enabled requires --edges")
+
+    def test_rejects_retrieval_provenance_as_an_edge(self):
+        edge = verified_edge()
+        edge["relation"] = "discovered_from"
+        result = self.run_validator(
+            [source_record("source-1"), source_record("source-2")],
+            [edge],
+        )
+
+        self.assert_failure(result, "edges.jsonl:1", "unsupported relation")
 
     def test_rejects_duplicate_source_ids_with_line_number(self):
         result = self.run_validator(

@@ -1,118 +1,93 @@
 # Retrieval Orchestration
 
-## When to delegate
+## Delegate only independent work
 
-Keep a small, single-surface search in the main agent. Use subagents when the
-approved plan contains independent surfaces that benefit from parallel or
-specialized retrieval, such as different legal subquestions, source types,
-platforms, languages, or citation branches.
+Keep a small, single-surface search in the main agent. Delegate when approved
+languages, platforms, source types, legal subquestions, or citation branches
+form independent assignments. Every branch records its mode, stage, scope,
+budget, exclusions, and expected return contract.
 
-Each branch has two independent dimensions:
+Initial Stage 1 breadth discovery is horizontal only and must not launch vertical tracing,
+including hidden reference-list or cited-by expansion. Stop
+after the breadth result so the user can choose themes, approved seeds, and a
+tracing budget. After that approval, horizontal gap filling and vertical
+tracing may run concurrently within the selected scope.
 
+Do not delegate merely to increase agent count. A branch needs a distinct
+surface, independently useful output, and limited overlap.
+
+## Mode-aware return contracts
+
+Quick and standard branches return concise candidate rows compatible with
+`$SKILL_ROOT/schemas/source-ledger-record.schema.json`. They include identity,
+availability, review extent, reader description, inclusion reason, discovery
+provenance, access attempts, and unresolved issues. They do not need canonical
+IDs, candidate-edge lifecycles, corpus-wide validation, or a graph.
+
+Deep-audit branches return candidate nodes conforming to
+`$SKILL_ROOT/schemas/candidate-source-record.schema.json`. When
+`graph_enabled=true`, a branch may also return optional edges conforming to
+`$SKILL_ROOT/schemas/edge-record.schema.json`, with `record_scope=candidate`
+and `status=candidate`. When graph support is disabled, it returns no edge
+file. Retrieval provenance belongs in each source's `discovery_history`, not
+in an edge.
+
+For every mode, provide exact discovery provenance, access attempts, coverage
+additions, unresolved citations, metadata conflicts, failures, and remaining
+high-value paths. Never describe unread material as full text.
+
+## Branch brief
+
+Create delegated work from `$SKILL_ROOT/templates/subagent-brief.md`. Supply:
+
+- The approved question, scope, exclusions, mode, and current stage.
 - `source_track`: `primary`, `secondary`, or `mixed`.
 - `retrieval_mode`: `horizontal` or `vertical`.
+- Approved platforms, languages, source types, period, and branch budget.
+- For a vertical branch, the approved seed, direction, current depth, and
+  maximum authorized depth.
+- Known canonical IDs and aliases when deep-audit deduplication applies.
+- The applicable lightweight or deep-audit schema contract.
+- Access, evidence, and local-material privacy restrictions.
 
-Horizontal and vertical retrieval modes may run at the same time:
-
-- **Horizontal discovery** searches across approved platforms, databases,
-  languages, source classes, and query variants. Its purpose is breadth and
-  coverage comparison.
-- **Vertical tracing** follows backward citations, forward citers, and lateral
-  relationships from a specified seed or core node. Its purpose is to expose
-  the source's citation neighborhood and promising paths at the current depth.
-
-Do not delegate merely to increase agent count. Define branches so that each
-has an identifiable surface, useful independent output, and limited overlap.
-
-## Branch contract
-
-`$SKILL_ROOT` means the directory containing `SKILL.md`. Create every
-delegated task from `$SKILL_ROOT/templates/subagent-brief.md`. Give the
-subagent:
-
-- The approved retrieval question, scope, and exclusions.
-- Its `source_track`, `retrieval_mode`, and horizontal surface or vertical
-  seed and tracing direction.
-- Approved platforms, languages, source types, and time range.
-- Known canonical IDs and aliases to reduce duplicate retrieval.
-- Current depth and maximum authorized depth.
-- `$SKILL_ROOT/schemas/candidate-source-record.schema.json` and
-  `$SKILL_ROOT/schemas/edge-record.schema.json`.
-- Required access labels, provenance fields, and evidence rules.
-- Any local-material privacy restrictions that apply to the branch.
-
-A subagent returns only candidate nodes conforming to
-`$SKILL_ROOT/schemas/candidate-source-record.schema.json` and candidate edges
-conforming to `$SKILL_ROOT/schemas/edge-record.schema.json` with `status` set
-to `candidate` and `record_scope` set to `candidate`. It also returns exact
-discovery provenance, evidence locations, access attempts, unresolved
-citations, coverage additions, and remaining high-value branches. It must not
-edit the canonical corpus, declare an edge verified, assign a collection tier,
-decide saturation, or publish a user-facing conclusion. Each candidate edge
-endpoint may independently use a known canonical ID supplied in the brief or a
-`candidate_id submitted in the same return`. One endpoint may be canonical
-while the other is a candidate.
-
-Subagents must not fabricate records, describe unread material as full text,
-synthesize legal rules, resolve scholarly disputes, choose an argument, or
-draft academic prose.
+A vertical assignment without an approved seed and budget is invalid. A
+subagent cannot expand scope, choose final seeds, assign collection tiers,
+declare an edge verified, decide saturation, or publish a user-facing
+conclusion.
 
 ## Main-agent ownership
 
-The main agent alone owns the canonical corpus and graph. After each branch
-returns, the main agent:
+The main agent owns user decisions and the normalized source ledger in every
+mode. In deep-audit mode it also owns the canonical corpus and, when enabled,
+the single canonical graph. It:
 
-1. Validates nodes against the candidate schema and edges against the edge
-   schema.
-2. Normalizes identities and merges duplicates by identifiers and metadata.
-3. Converts accepted candidates into canonical records conforming to
-   `$SKILL_ROOT/schemas/source-record.schema.json`, assigns both canonical
-   `relevance and collection_tier`, and resolves each edge endpoint
-   independently. It preserves a known canonical ID and remaps a
-   same-return `candidate_id` to its new canonical ID.
-4. Preserves conflicting metadata and flags unresolved identity questions for
-   human review.
-5. Checks edge evidence before changing an edge from `candidate` to
-   `verified`. It normalizes inverse `cited_by` submissions to `cites`, sets
-   accepted graph records to `record_scope=canonical`, and never stores
-   `cited_by` in the canonical graph.
-6. Confirms every accepted canonical record has both `relevance` and
-   `collection_tier` before running round metrics, then records round evidence,
-   updates branch state, and updates cumulative searched and unsearched
-   coverage in project state.
-7. After each canonical merge and at every checkpoint, runs
-   `$SKILL_ROOT/scripts/validate_corpus.py` with the canonical source and edge
-   JSONL paths. A failed validation blocks metrics, state advancement, and
-   export until the line-specific errors are corrected. Candidate edges stay
-   outside these final-corpus files.
-8. Decides, with a written reason, whether to continue, reassign, pause for
-   reapproval, or stop.
+1. Validates each return against the contract named in the brief.
+2. Normalizes identities, preserves separate discovery histories, and merges
+   duplicates without discarding attributed conflicts.
+3. In deep-audit mode, converts accepted candidates to canonical source
+   records and assigns `relevance and collection_tier` before running round metrics.
+4. Resolves each edge endpoint independently. It preserves a known canonical
+   ID and remaps a `candidate_id submitted in the same return` to the accepted
+   canonical ID.
+5. Stores only `citing_node cites cited_node` for citations. It may normalize
+   a candidate `cited_by` lead to that direction, but never stores `cited_by`
+   as a canonical edge.
+6. Verifies edge evidence, records round evidence and budget status, and
+   updates cumulative searched and unsearched coverage.
+7. Runs `$SKILL_ROOT/scripts/validate_corpus.py` on canonical sources, passing
+   `--state` and passing `--edges` only when graph support is enabled.
+8. Gives the user concrete choices to continue, redirect, upgrade, pause, or
+   close.
 
-No subagent maintains a competing final graph. If multiple branches return the
-same item, retain their separate discovery histories while merging the item
-into one canonical node.
+No subagent maintains a competing final ledger, corpus, or graph.
 
-## Authorization and depth gate
+## Authorization, failure, and resumption
 
-Before dispatching a vertical branch, compare its proposed depth with the
-branch's maximum authorized depth. If the next round would exceed the
-authorized depth, do not dispatch it. Save the promising branch and ask the
-user to reapprove an expanded depth or resource budget. Continuing high-value
-discoveries explain why expansion may be useful; they do not override the
-approval boundary.
+Never cross an approved depth, item cap, platform budget, or time budget. A
+branch that reaches its cap becomes `budget_paused`; preserve its open paths
+and ask the user whether to extend it. Budget exhaustion is not saturation.
 
-Also seek reapproval for material scope drift, a necessary new language or
-jurisdiction, a serious access gap, or exhaustion of the approved budget
-before the corpus approaches saturation.
-
-## Failure isolation and resumption
-
-A failed branch must not discard completed work from other branches. Record
-its last successful checkpoint, attempted queries or paths, platform errors,
-and unresolved items. Retry the branch, reassign it, or disclose the remaining
-gap.
-
-If a database is unavailable, log the failure and try authoritative public
-alternatives within the approved scope. Preserve an unresolvable citation as
-a candidate record with its original citation text and provenance. After an
-interruption, resume only unfinished branches from saved state.
+Record the last successful checkpoint, attempted queries or paths, platform
+errors, and unresolved items. A failed branch must not discard completed work
+elsewhere. Retry, reassign, or disclose the gap within the approved scope, and
+resume only unfinished work after interruption.

@@ -436,12 +436,14 @@ class SchemaTests(unittest.TestCase):
         verified_rule = next(
             rule
             for rule in schema["allOf"]
-            if rule["if"]["properties"]["status"].get("const") == "verified"
+            if rule["if"]["properties"].get("status", {}).get("const")
+            == "verified"
         )
         candidate_rule = next(
             rule
             for rule in schema["allOf"]
-            if rule["if"]["properties"]["status"].get("const") == "candidate"
+            if rule["if"]["properties"].get("status", {}).get("const")
+            == "candidate"
         )
         self.assertIn("evidence", verified_rule["then"]["required"])
         self.assertNotIn("required", candidate_rule["then"])
@@ -466,12 +468,65 @@ class SchemaTests(unittest.TestCase):
         )
         self.assertIn("cited_by", schema["properties"]["relation"]["enum"])
 
+    def test_edge_schema_separates_relation_families_from_provenance(self):
+        schema = self.load("edge-record.schema.json")
+        relations = set(schema["properties"]["relation"]["enum"])
+
+        self.assertIn("relation_family", schema["required"])
+        self.assertEqual(
+            {"literature", "institutional"},
+            set(schema["properties"]["relation_family"]["enum"]),
+        )
+        self.assertTrue(
+            {"cites", "cited_by", "responds_to", "criticizes", "extends"}
+            .issubset(relations)
+        )
+        self.assertTrue(
+            {"amends", "implements", "interprets", "same_proceeding"}
+            .issubset(relations)
+        )
+        self.assertNotIn("discovered_from", relations)
+        self.assertNotIn("same_issue", relations)
+
+    def test_judgmental_relations_require_locatable_textual_evidence(self):
+        schema = self.load("edge-record.schema.json")
+        judgmental = {"responds_to", "criticizes", "extends", "interprets"}
+        rule = next(
+            item
+            for item in schema["allOf"]
+            if set(
+                item.get("if", {})
+                .get("properties", {})
+                .get("relation", {})
+                .get("enum", [])
+            )
+            == judgmental
+        )
+
+        self.assertIn("evidence", rule["then"]["required"])
+        self.assertEqual(
+            "object", rule["then"]["properties"]["evidence"]["type"]
+        )
+
     def test_state_schema_tracks_approval_rounds_branches_and_stopping(self):
         schema = self.load("project-state.schema.json")
         required = set(schema["required"])
 
         self.assertTrue(
-            {"approved_plan", "branches", "rounds", "stopping"}.issubset(required)
+            {
+                "schema_version",
+                "graph_enabled",
+                "saturation_enabled",
+                "approved_plan",
+                "branches",
+                "rounds",
+                "stopping",
+            }.issubset(required)
+        )
+        self.assertEqual(2, schema["properties"]["schema_version"]["const"])
+        self.assertEqual("boolean", schema["properties"]["graph_enabled"]["type"])
+        self.assertEqual(
+            "boolean", schema["properties"]["saturation_enabled"]["type"]
         )
         self.assertEqual(
             ["continue", "pause_for_user", "stop"],
@@ -605,6 +660,7 @@ class SchemaTests(unittest.TestCase):
             {
                 "round_id",
                 "timestamp",
+                "budget_status",
                 "decision",
                 "decision_reason",
                 "unresolved_gaps",
@@ -621,6 +677,11 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual(
             ["continue", "pause_for_user", "stop"],
             round_record["properties"]["decision"]["enum"],
+        )
+        self.assertIn("budget_status", round_record["required"])
+        self.assertEqual(
+            ["within_budget", "budget_paused"],
+            round_record["properties"]["budget_status"]["enum"],
         )
         self.assertEqual(
             1, round_record["properties"]["decision_reason"]["minLength"]

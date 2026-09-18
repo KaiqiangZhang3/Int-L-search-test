@@ -1,106 +1,88 @@
-# Citation Graph Expansion and Dynamic Saturation
+# Optional Relationship Graph and Saturation Review
 
-## Expansion directions
+## Enable deliberately
 
-Start from approved seeds and newly identified core materials. Expand in three
-directions:
+The relationship graph is optional, including in deep-audit mode. Enable it
+only when the user approves citation tracing or network coverage. Stage 1 does
+not construct it. Set `graph_enabled=true` only after graph work is selected;
+otherwise validate the canonical sources without an edge file.
 
-- **Backward:** inspect footnotes, reference lists, cited cases, treaties, and
-  institutional documents.
-- **Forward:** locate later cases, documents, and scholarship that cite the
-  node through authoritative citation records or verified full text.
-- **Lateral:** inspect the same issue, case or procedural series, author
-  network, or identifiable scholarly exchange.
+Formal saturation review is separately optional. Set
+`saturation_enabled=true` only when the approved project calls for multi-round
+coverage assessment. Neither a graph nor saturation analysis is required for
+a quick bibliography, standard interactive search, or ordinary deep-audit
+corpus.
 
-Candidate submissions may use these relationships: `cites`, `cited_by`,
-`interprets`, `same_case_series`, `same_issue`, `response_to`, and
-`discovered_from`. Thematic resemblance alone is not evidence of a
-relationship.
+## Relationship families
 
-## Edge status and evidence
+Store only directed, evidenced relationships between materials:
 
-Subagents submit every relationship with `record_scope=candidate` and
-`status=candidate`. The main agent may
-mark it `verified` only after checking an evidence location. Acceptable
-locations include a page, paragraph, footnote, reference entry, or database
-citation record. Store the evidence source and precise location in the edge
-record. When the location is absent or ambiguous, keep the edge as
-`candidate`; do not infer or upgrade it.
+- **Literature:** `cites`, `responds_to`, `criticizes`, and `extends`.
+- **Institutional:** `amends`, `implements`, `interprets`, and
+  `same_proceeding`.
 
-Direction matters. Regardless of whether a discovery source reports `cites`
-or `cited_by`, canonical graph storage stores only `citing_node cites cited_node`.
-It derives `cited_node cited_by citing_node` for inverse navigation; the
-derived relationship is never a second stored edge and never another
-discovery. A citation does not by itself support `interprets` or `response_to`.
-After endpoint resolution and inverse normalization, the main agent sets
-`record_scope=canonical`; canonical records never use `cited_by`.
+`cited_by` is allowed only as an incoming candidate lead. Canonical storage
+stores only `citing_node cites cited_node`; the inverse is never a second stored edge.
+Thematic similarity is a tag or candidate grouping, not an edge.
 
-## Depth guardrail
+Retrieval provenance is not a relationship edge. Queries, platforms, seeds,
+footnotes, bibliographies, local files, and subagents belong in source
+`discovery_history` and retrieval logs. There is no `discovered_from` edge.
 
-Five levels is the usual depth guardrail. It is neither a quota nor an
-automatic stopping rule: a branch may saturate earlier, and a high-value
-branch may justify going deeper. Track depth per branch because horizontal
-discovery and separate vertical paths may progress at different rates.
+## Evidence and status
 
-Never cross the maximum depth authorized in the approved plan. When the next
-round would exceed that depth, pause the branch, preserve its open paths, and
-request reapproval with the marginal-yield evidence and expected value of the
-extra depth.
+Subagents submit graph records with `record_scope=candidate` and
+`status=candidate`. The main agent changes an edge to `verified` only after
+checking a locatable page, paragraph, footnote, reference entry, or database
+citation record. Store the evidence source and precise location.
+
+A citation record supports `cites`; it does not by itself support
+`responds_to`, `criticizes`, `extends`, or `interprets`. Those judgmental
+relations require locatable textual evidence even while candidate status is
+retained. Missing or ambiguous evidence stays unresolved and is not promoted.
+
+## Depth and budget stops
+
+Backward, forward, and lateral tracing begins only from an approved seed.
+Five levels is a possible guardrail, not a target or stopping rule. Track each
+branch independently and never exceed its authorized depth or item budget.
+
+When a cap is reached, set the branch status and round budget status to
+`budget_paused`, preserve untraced paths, and offer the user an extension.
+`budget_paused` cannot establish saturation, even when the final authorized
+round had low yield or many duplicates.
 
 ## Round evidence
 
-After each retrieval round, record:
+After every authorized round record:
 
-- Candidate count and unique new-candidate count.
-- New high-relevance and new core-material counts.
-- Newly covered source classes, themes, languages, and platforms.
-- Duplicate count or duplicate ratio.
-- Important sources without full-text access.
-- Untraced high-value citation branches.
-- Branch depth, queries or paths attempted, and access failures.
+- Candidate and unique-new counts.
+- New high-relevance and core-material counts.
+- Duplicate count or ratio.
+- Coverage additions by source type, theme, language, and platform.
+- Access gaps and platform failures.
+- Open high-value branches, branch depth, and attempted paths.
+- `budget_status` as `within_budget` or `budget_paused`.
 
-After recording the round, update the cumulative `coverage` object in project
-state. For subquestions, platforms, languages, periods, and authority classes,
-move completed approved surfaces to `searched`, retain approved but unfinished
-surfaces in `unsearched`, and preserve both arrays across rounds. Round-level
-`coverage_additions` is evidence for this update, not a replacement for the
-cumulative object.
+`$SKILL_ROOT/scripts/round_metrics.py` returns only counts, coverage additions,
+access gaps, and open paths from canonicalized source IDs. The caller adds
+budget status and the reasoned continue, pause, or stop decision. Metrics do
+not decide saturation.
 
-Inputs to `$SKILL_ROOT/scripts/round_metrics.py` are already canonicalized
-source records, and comparison uses their canonical `id`. The script returns
-a state-compatible evidence fragment containing `counts`, dimensioned
-`coverage_additions`, `access_gaps`, and `open_high_value_branches`. It
-produces evidence only: it never declares saturation, makes a stopping
-decision, or authorizes another round.
+## Formal saturation assessment
 
-The caller adds the branch ID, round number, timestamp, branch depth, attempts,
-access failures, and the reasoned decision, reason, and gaps. To form a full
-round state, encode the round number in `round_id`, use the branch ID as a key
-in `branch_depth`, and store the remaining values as `timestamp`,
-`attempted_queries_or_paths`, `access_failures`, `decision`,
-`decision_reason`, and `unresolved_gaps`, as defined by
-`$SKILL_ROOT/schemas/project-state.schema.json`.
+Run this assessment only when `saturation_enabled=true`. Review multiple
+authorized rounds together; one low-yield round is insufficient. Consider:
 
-## Reasoned saturation review
+- Marginal yield of new high-relevance and core sources across rounds.
+- Duplicate trends and repeated returns to existing nodes.
+- Coverage of approved subquestions, source classes, languages, periods, and
+  platforms.
+- Access failures and their likely effect on coverage.
+- Remaining high-value paths and whether they are still expanding.
 
-Dynamic saturation is a reasoned decision by the main agent, not a fixed
-numeric threshold. Review multiple rounds and the approved coverage dimensions
-together. Evidence that the corpus approaches saturation may include:
-
-- Consecutive rounds yield few new high-relevance or core sources.
-- Results are increasingly duplicates or low-relevance peripheral items.
-- Core citation paths repeatedly return to existing canonical nodes.
-- Approved subquestions, source classes, languages, periods, and platforms
-  have reasonable coverage.
-- No untraced high-value branch remains in rapid expansion.
-
-No single indicator is sufficient. A low-yield round does not justify stopping
-when a major platform failed, a required source class is uncovered, or a
-high-value branch remains open. Conversely, a branch may stop before depth
-five when its evidence shows saturation. Branches may saturate independently.
-
-For each continuation, pause, or stop decision, write the evidence considered,
-the unresolved gaps, and the reason. If the approved budget ends before
-saturation, report present coverage and remaining high-value work and seek
-reapproval. Never claim exhaustive coverage; state only that the corpus
-approaches saturation within the approved scope.
+Do not infer saturation while a material platform failed, a required class is
+uncovered, or a high-value path remains untraced. If budget ends first, report
+the achieved coverage and remaining work as paused, not saturated. Any final
+wording is limited to "approaches saturation within the approved scope"; never
+claim exhaustive coverage.

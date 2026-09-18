@@ -29,7 +29,8 @@ def canonical_record(record_id, relevance, collection_tier):
         "authority_class": "general_academic",
         "relevance": relevance,
         "collection_tier": collection_tier,
-        "access_status": "Metadata only",
+        "availability": "metadata_only",
+        "review_extent": "metadata_verified",
         "stable_url": None,
         "local_path": None,
         "retrieval_history": [
@@ -37,7 +38,8 @@ def canonical_record(record_id, relevance, collection_tier):
                 "event_id": f"retrieval-{record_id}",
                 "platform": "Example Index",
                 "retrieved_at": "2026-09-17T00:00:00Z",
-                "access_status": "Metadata only",
+                "availability": "metadata_only",
+                "review_extent": "metadata_verified",
                 "stable_url": None,
                 "local_path": None,
             }
@@ -45,7 +47,10 @@ def canonical_record(record_id, relevance, collection_tier):
         "language": "en",
         "description": "Metadata-only candidate used for metric testing.",
         "inclusion_reason": "Included to test round evidence.",
-        "description_basis": "metadata",
+        "description_basis": {
+            "kind": "metadata",
+            "locations": ["Publisher record"],
+        },
         "description_retrieval_id": f"retrieval-{record_id}",
         "discovery_history": [{"method": "query", "value": "test query"}],
         "verification": {
@@ -126,6 +131,8 @@ class RoundMetricTests(unittest.TestCase):
         self.assertEqual(["full-text:C"], result["access_gaps"])
         self.assertEqual(["forward:A"], result["open_high_value_branches"])
         self.assertNotIn("decision", result)
+        self.assertNotIn("saturation", result)
+        self.assertNotIn("budget_status", result)
 
         state_schema = json.loads(
             (ROOT / "schemas" / "project-state.schema.json").read_text(
@@ -196,6 +203,33 @@ class RoundMetricTests(unittest.TestCase):
         self.assertEqual(1, result["counts"]["new_core_material_count"])
         self.assertEqual(1, result["counts"]["duplicate_count"])
         self.assertEqual(0.5, result["counts"]["duplicate_ratio"])
+
+    def test_orchestration_is_mode_and_stage_aware(self):
+        orchestration = (ROOT / "references" / "orchestration.md").read_text(
+            encoding="utf-8"
+        )
+        brief = (ROOT / "templates" / "subagent-brief.md").read_text(
+            encoding="utf-8"
+        )
+        combined = orchestration + brief
+
+        self.assertIn("Initial Stage 1", orchestration)
+        self.assertIn("must not launch vertical tracing", orchestration)
+        self.assertIn("source-ledger-record.schema.json", combined)
+        self.assertIn("deep-audit", combined)
+        self.assertIn("optional edges", combined)
+        self.assertIn("approved seed", combined)
+
+    def test_graph_guidance_distinguishes_budget_pause_from_saturation(self):
+        graph = (ROOT / "references" / "graph-and-saturation.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("budget_paused", graph)
+        self.assertIn("cannot establish saturation", graph)
+        self.assertIn("saturation_enabled", graph)
+        self.assertIn("retrieval provenance", graph.lower())
+        self.assertIn("not a relationship edge", graph.lower())
 
 
 if __name__ == "__main__":
