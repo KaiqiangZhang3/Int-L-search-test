@@ -10,20 +10,137 @@ class SchemaTests(unittest.TestCase):
     def load(self, name):
         return json.loads((ROOT / "schemas" / name).read_text(encoding="utf-8"))
 
-    def allowed_accesses_for_description_basis(self, schema, basis):
-        all_accesses = set(schema["properties"]["access_status"]["enum"])
+    def assert_access_combination_allowed(self, schema, record):
+        self.assertIn(record["availability"], schema["properties"]["availability"]["enum"])
+        allowed_reviews = set(schema["properties"]["review_extent"]["enum"])
+        kind = record["description_basis"]["kind"]
         for rule in schema.get("allOf", []):
-            basis_rule = rule.get("if", {}).get("properties", {}).get(
-                "description_basis", {}
+            kind_rule = (
+                rule.get("if", {})
+                .get("properties", {})
+                .get("description_basis", {})
+                .get("properties", {})
+                .get("kind", {})
+            )
+            if kind_rule.get("const") == kind:
+                allowed_reviews &= set(
+                    rule["then"]["properties"]["review_extent"]["enum"]
+                )
+        self.assertIn(record["review_extent"], allowed_reviews)
+
+    def canonical_record(self, **overrides):
+        record = {
+            "id": "source-1",
+            "external_ids": {"doi": "10.1000/example"},
+            "title": "Example",
+            "creators": ["Researcher"],
+            "date": "2026",
+            "publication": "Journal",
+            "source_type": "journal_article",
+            "fields": ["international law"],
+            "subquestions": ["corporate roles"],
+            "authority_class": "general_academic",
+            "collection_tier": "core/canonical",
+            "relevance": "high",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
+            "stable_url": "https://example.test/source-1",
+            "local_path": None,
+            "retrieval_history": [
+                {
+                    "event_id": "event-1",
+                    "platform": "Publisher",
+                    "retrieved_at": "2026-09-18T00:00:00Z",
+                    "availability": "metadata_only",
+                    "review_extent": "metadata_verified",
+                    "stable_url": "https://example.test/source-1",
+                    "local_path": None,
+                }
+            ],
+            "language": "en",
+            "description": "The article addresses corporate roles.",
+            "inclusion_reason": "It directly addresses the research question.",
+            "description_basis": {
+                "kind": "metadata",
+                "locations": ["Publisher record"],
+            },
+            "description_retrieval_id": "event-1",
+            "discovery_history": [{"method": "query", "value": "corporate role"}],
+            "verification": {
+                "identity": "verified",
+                "metadata_cross_checked": True,
+                "human_review_required": False,
+            },
+        }
+        record.update(overrides)
+        return record
+
+    def test_subscription_full_text_can_coexist_with_abstract_review(self):
+        schema = self.load("source-record.schema.json")
+        record = self.canonical_record(
+            availability="subscription_full_text",
+            review_extent="abstract_reviewed",
+            description_basis={
+                "kind": "abstract",
+                "locations": ["Publisher abstract"],
+            },
+            retrieval_history=[
+                {
+                    "event_id": "event-1",
+                    "platform": "Publisher",
+                    "retrieved_at": "2026-09-18T00:00:00Z",
+                    "availability": "subscription_full_text",
+                    "review_extent": "abstract_reviewed",
+                    "stable_url": "https://example.test/source-1",
+                    "local_path": None,
+                }
+            ],
+        )
+
+        self.assert_access_combination_allowed(schema, record)
+
+    def allowed_reviews_for_description_basis(self, schema, basis):
+        all_reviews = set(schema["properties"]["review_extent"]["enum"])
+        for rule in schema.get("allOf", []):
+            basis_rule = (
+                rule.get("if", {})
+                .get("properties", {})
+                .get("description_basis", {})
+                .get("properties", {})
+                .get("kind", {})
             )
             if basis_rule.get("const") == basis:
                 return set(
-                    rule["then"]["properties"]["access_status"].get(
-                        "enum",
-                        [rule["then"]["properties"]["access_status"].get("const")],
-                    )
+                    rule["then"]["properties"]["review_extent"]["enum"]
                 )
-        return all_accesses
+        return all_reviews
+
+    def allowed_reviews_for_retrieval_route(self, schema, availability):
+        event = schema["properties"]["retrieval_history"]["items"]
+        all_reviews = set(event["properties"]["review_extent"]["enum"])
+        for rule in event.get("allOf", []):
+            route_rule = (
+                rule.get("if", {})
+                .get("properties", {})
+                .get("availability", {})
+            )
+            if route_rule.get("const") == availability:
+                return set(rule["then"]["properties"]["review_extent"]["enum"])
+        return all_reviews
+
+    def test_metadata_route_cannot_support_section_or_full_text_review(self):
+        for name in (
+            "source-record.schema.json",
+            "candidate-source-record.schema.json",
+        ):
+            with self.subTest(schema=name):
+                schema = self.load(name)
+                self.assertEqual(
+                    {"metadata_verified", "not_reviewed"},
+                    self.allowed_reviews_for_retrieval_route(
+                        schema, "metadata_only"
+                    ),
+                )
 
     def approved_plan_type_for_status(self, schema, status):
         for rule in schema.get("allOf", []):
@@ -46,7 +163,8 @@ class SchemaTests(unittest.TestCase):
                 "subquestions",
                 "authority_class",
                 "collection_tier",
-                "access_status",
+                "availability",
+                "review_extent",
                 "language",
                 "description",
                 "inclusion_reason",
@@ -58,17 +176,30 @@ class SchemaTests(unittest.TestCase):
         self.assertNotIn("discovery", schema["properties"])
         self.assertEqual(
             [
-                "Full text read",
-                "Abstract only",
-                "Metadata only",
-                "Full text not read",
-                "Access failed",
+                "open_full_text",
+                "subscription_full_text",
+                "identified_inaccessible",
+                "abstract_available",
+                "metadata_only",
+                "access_failure",
             ],
-            schema["properties"]["access_status"]["enum"],
+            schema["properties"]["availability"]["enum"],
         )
         self.assertEqual(
-            ["full_text", "abstract", "metadata"],
-            schema["properties"]["description_basis"]["enum"],
+            [
+                "full_text_substantively_reviewed",
+                "selected_sections_reviewed",
+                "abstract_reviewed",
+                "metadata_verified",
+                "not_reviewed",
+            ],
+            schema["properties"]["review_extent"]["enum"],
+        )
+        self.assertEqual(
+            ["full_text", "selected_sections", "abstract", "metadata"],
+            schema["properties"]["description_basis"]["properties"]["kind"][
+                "enum"
+            ],
         )
         self.assertEqual(
             "object", schema["properties"]["merge_conflicts"]["type"]
@@ -82,7 +213,8 @@ class SchemaTests(unittest.TestCase):
             {
                 "candidate_id",
                 "discovery_history",
-                "access_status",
+                "availability",
+                "review_extent",
                 "description_basis",
                 "description",
                 "description_retrieval_id",
@@ -105,20 +237,24 @@ class SchemaTests(unittest.TestCase):
             with self.subTest(field=field):
                 self.assertIn("null", schema["properties"][field]["type"])
 
-    def test_candidate_description_basis_preserves_limited_access_leads(self):
+    def test_candidate_description_basis_matches_review_evidence(self):
         schema = self.load("candidate-source-record.schema.json")
 
         self.assertEqual(
-            {"Full text read"},
-            self.allowed_accesses_for_description_basis(schema, "full_text"),
+            {"full_text_substantively_reviewed"},
+            self.allowed_reviews_for_description_basis(schema, "full_text"),
         )
         self.assertEqual(
-            {"Abstract only", "Full text not read", "Full text read"},
-            self.allowed_accesses_for_description_basis(schema, "abstract"),
+            {
+                "full_text_substantively_reviewed",
+                "selected_sections_reviewed",
+                "abstract_reviewed",
+            },
+            self.allowed_reviews_for_description_basis(schema, "abstract"),
         )
-        self.assertIn(
-            "Access failed",
-            self.allowed_accesses_for_description_basis(schema, "metadata"),
+        self.assertNotIn(
+            "not_reviewed",
+            self.allowed_reviews_for_description_basis(schema, "metadata"),
         )
 
     def test_candidate_description_links_to_a_retrieval_event(self):
@@ -152,30 +288,44 @@ class SchemaTests(unittest.TestCase):
                 "event_id",
                 "platform",
                 "retrieved_at",
-                "access_status",
+                "availability",
+                "review_extent",
                 "stable_url",
                 "local_path",
             }.issubset(event["required"])
         )
         self.assertEqual(
-            schema["properties"]["access_status"]["enum"],
-            event["properties"]["access_status"]["enum"],
+            schema["properties"]["availability"]["enum"],
+            event["properties"]["availability"]["enum"],
+        )
+        self.assertEqual(
+            schema["properties"]["review_extent"]["enum"],
+            event["properties"]["review_extent"]["enum"],
         )
 
-    def test_description_basis_is_compatible_with_canonical_access(self):
+    def test_description_basis_is_compatible_with_review_extent(self):
         schema = self.load("source-record.schema.json")
 
         self.assertEqual(
-            {"Full text read"},
-            self.allowed_accesses_for_description_basis(schema, "full_text"),
+            {"full_text_substantively_reviewed"},
+            self.allowed_reviews_for_description_basis(schema, "full_text"),
         )
         self.assertEqual(
-            {"Abstract only", "Full text not read", "Full text read"},
-            self.allowed_accesses_for_description_basis(schema, "abstract"),
+            {
+                "full_text_substantively_reviewed",
+                "selected_sections_reviewed",
+                "abstract_reviewed",
+            },
+            self.allowed_reviews_for_description_basis(schema, "abstract"),
         )
         self.assertEqual(
-            set(schema["properties"]["access_status"]["enum"]),
-            self.allowed_accesses_for_description_basis(schema, "metadata"),
+            {
+                "full_text_substantively_reviewed",
+                "selected_sections_reviewed",
+                "abstract_reviewed",
+                "metadata_verified",
+            },
+            self.allowed_reviews_for_description_basis(schema, "metadata"),
         )
 
     def test_source_schema_preserves_aliases_and_attributed_conflicts(self):

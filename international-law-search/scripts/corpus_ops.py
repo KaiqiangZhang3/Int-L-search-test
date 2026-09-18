@@ -5,12 +5,21 @@ from typing import Optional
 import unicodedata
 
 
-ACCESS_RANK = {
-    "Access failed": 0,
-    "Metadata only": 1,
-    "Abstract only": 2,
-    "Full text not read": 3,
-    "Full text read": 4,
+AVAILABILITY_RANK = {
+    "access_failure": 0,
+    "metadata_only": 1,
+    "abstract_available": 2,
+    "identified_inaccessible": 3,
+    "subscription_full_text": 4,
+    "open_full_text": 5,
+}
+
+REVIEW_RANK = {
+    "not_reviewed": 0,
+    "metadata_verified": 1,
+    "abstract_reviewed": 2,
+    "selected_sections_reviewed": 3,
+    "full_text_substantively_reviewed": 4,
 }
 
 IDENTITY_FIELDS = {"title", "creators", "date", "publication"}
@@ -21,11 +30,27 @@ UNION_FIELDS = (
     "discovery_history",
 )
 DESCRIPTION_FIELDS = (
-    "access_status",
     "description",
     "description_basis",
     "description_retrieval_id",
 )
+ACCESS_AXIS_FIELDS = ("availability", "review_extent")
+
+DESCRIPTION_MINIMUM_REVIEW = {
+    "metadata": "metadata_verified",
+    "abstract": "abstract_reviewed",
+    "selected_sections": "selected_sections_reviewed",
+    "full_text": "full_text_substantively_reviewed",
+}
+
+ROUTE_MAXIMUM_REVIEW = {
+    "access_failure": "not_reviewed",
+    "metadata_only": "metadata_verified",
+    "abstract_available": "abstract_reviewed",
+    "identified_inaccessible": "abstract_reviewed",
+    "subscription_full_text": "full_text_substantively_reviewed",
+    "open_full_text": "full_text_substantively_reviewed",
+}
 
 
 def normalize_text(value: str) -> str:
@@ -84,6 +109,18 @@ def validate_retrieval_links(record: dict) -> None:
         event_id = event.get("event_id")
         if event_id in events_by_id:
             raise ValueError(f"Duplicate retrieval event_id: {event_id!r}")
+        event_availability = event.get("availability")
+        event_review = event.get("review_extent")
+        maximum_review = ROUTE_MAXIMUM_REVIEW.get(event_availability)
+        if (
+            maximum_review is None
+            or event_review not in REVIEW_RANK
+            or REVIEW_RANK[event_review] > REVIEW_RANK[maximum_review]
+        ):
+            raise ValueError(
+                f"Retrieval route {event_availability!r} cannot support "
+                f"review extent {event_review!r}"
+            )
         events_by_id[event_id] = event
 
     description_id = record["description_retrieval_id"]
@@ -92,31 +129,39 @@ def validate_retrieval_links(record: dict) -> None:
         raise ValueError(
             "description_retrieval_id must resolve to exactly one retrieval event"
         )
-    event_access = event.get("access_status")
-    canonical_access = record.get("access_status")
-    if event_access != canonical_access and (
-        event_access not in ACCESS_RANK
-        or canonical_access not in ACCESS_RANK
-        or ACCESS_RANK[event_access] > ACCESS_RANK[canonical_access]
+    event_availability = event.get("availability")
+    canonical_availability = record.get("availability")
+    if event_availability != canonical_availability and (
+        event_availability not in AVAILABILITY_RANK
+        or canonical_availability not in AVAILABILITY_RANK
+        or AVAILABILITY_RANK[event_availability]
+        > AVAILABILITY_RANK[canonical_availability]
     ):
         raise ValueError(
-            "Description retrieval access_status cannot exceed canonical access_status"
+            "Description retrieval availability cannot exceed canonical availability"
         )
 
-    basis = record.get("description_basis")
-    access_status = record.get("access_status")
-    if access_status == "Access failed" and basis != "metadata":
-        raise ValueError("Access failed descriptions require metadata basis")
-    if basis == "full_text" and access_status != "Full text read":
-        raise ValueError("full_text descriptions require Full text read access")
-    if basis == "abstract" and access_status not in {
-        "Abstract only",
-        "Full text not read",
-        "Full text read",
-    }:
+    event_review = event.get("review_extent")
+    canonical_review = record.get("review_extent")
+    if event_review != canonical_review and (
+        event_review not in REVIEW_RANK
+        or canonical_review not in REVIEW_RANK
+        or REVIEW_RANK[event_review] > REVIEW_RANK[canonical_review]
+    ):
         raise ValueError(
-            "abstract descriptions require Abstract only, Full text not read, "
-            "or Full text read access"
+            "Description retrieval review_extent cannot exceed canonical review_extent"
+        )
+
+    basis = record.get("description_basis", {})
+    basis_kind = basis.get("kind") if isinstance(basis, dict) else None
+    minimum_review = DESCRIPTION_MINIMUM_REVIEW.get(basis_kind)
+    if minimum_review is None:
+        raise ValueError("description_basis must identify supported material")
+    if event_review not in REVIEW_RANK or (
+        REVIEW_RANK[event_review] < REVIEW_RANK[minimum_review]
+    ):
+        raise ValueError(
+            f"{basis_kind} descriptions require matching reviewed evidence"
         )
 
 
@@ -226,13 +271,18 @@ def merge_records(left: dict, right: dict) -> dict:
             has_conflict = True
             has_identity_conflict = True
 
-    left_rank = ACCESS_RANK.get(left.get("access_status"), -1)
-    right_rank = ACCESS_RANK.get(right.get("access_status"), -1)
-    if right_rank > left_rank:
-        merged["access_status"] = deepcopy(right["access_status"])
+    left_availability_rank = AVAILABILITY_RANK.get(left.get("availability"), -1)
+    right_availability_rank = AVAILABILITY_RANK.get(right.get("availability"), -1)
+    if right_availability_rank > left_availability_rank:
+        merged["availability"] = deepcopy(right["availability"])
+
+    left_review_rank = REVIEW_RANK.get(left.get("review_extent"), -1)
+    right_review_rank = REVIEW_RANK.get(right.get("review_extent"), -1)
+    if right_review_rank > left_review_rank:
+        merged["review_extent"] = deepcopy(right["review_extent"])
         right_description = right.get("description")
         if isinstance(right_description, str) and right_description.strip():
-            for field in DESCRIPTION_FIELDS[1:]:
+            for field in DESCRIPTION_FIELDS:
                 if field in right:
                     merged[field] = deepcopy(right[field])
 
@@ -240,6 +290,7 @@ def merge_records(left: dict, right: dict) -> dict:
         if (
             field in UNION_FIELDS
             or field in DESCRIPTION_FIELDS
+            or field in ACCESS_AXIS_FIELDS
             or field
             in {
                 "id",

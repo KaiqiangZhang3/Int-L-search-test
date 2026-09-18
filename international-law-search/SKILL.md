@@ -37,15 +37,16 @@ Use the checkpoint templates for short, concrete decisions. Do not expose intern
 
 ## Access Records
 
-Assign exactly one mutually exclusive access status per source:
+Record two independent fields for every source. `availability` states the best verified access route:
 
-- `Full text read`
-- `Full text not read`
-- `Abstract only`
-- `Metadata only`
-- `Access failed`
+- `open_full_text`
+- `subscription_full_text`
+- `identified_inaccessible`
+- `abstract_available`
+- `metadata_only`
+- `access_failure`
 
-Apply these labels in the displayed precedence; read [access-and-privacy.md](references/access-and-privacy.md) for the definitions and examples. Store a separate description basis as full text, abstract, or metadata. Do not derive one field from the other.
+`review_extent` states what was actually examined: `full_text_substantively_reviewed`, `selected_sections_reviewed`, `abstract_reviewed`, `metadata_verified`, or `not_reviewed`. Do not derive one axis from the other. Store `description_basis` with the evidence kind and locations that support the reader-facing description. Read [access-and-privacy.md](references/access-and-privacy.md) for route-level rules and examples.
 
 ## Routing
 

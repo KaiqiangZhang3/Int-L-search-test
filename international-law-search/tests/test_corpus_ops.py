@@ -15,16 +15,45 @@ def load_module():
 
 
 class CorpusOpsTests(unittest.TestCase):
+    def test_merge_improves_availability_without_overwriting_review_evidence(self):
+        module = load_module()
+        left = {
+            "id": "left",
+            "external_ids": {"doi": "10.1000/lotus"},
+            "availability": "abstract_available",
+            "review_extent": "abstract_reviewed",
+            "description": "Database abstract",
+            "description_basis": {
+                "kind": "abstract",
+                "locations": ["Database abstract"],
+            },
+        }
+        right = {
+            "id": "right",
+            "external_ids": {"doi": "10.1000/lotus"},
+            "availability": "subscription_full_text",
+            "review_extent": "not_reviewed",
+        }
+
+        merged = module.merge_records(left, right)
+
+        self.assertEqual("subscription_full_text", merged["availability"])
+        self.assertEqual("abstract_reviewed", merged["review_extent"])
+        self.assertEqual("Database abstract", merged["description"])
+        self.assertNotIn("merge_conflicts", merged)
+
     def test_validate_retrieval_links_rejects_dangling_description_event(self):
         module = load_module()
         record = {
-            "access_status": "Metadata only",
-            "description_basis": "metadata",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
+            "description_basis": {"kind": "metadata", "locations": ["Catalog"]},
             "description_retrieval_id": "missing-event",
             "retrieval_history": [
                 {
                     "event_id": "retrieval-1",
-                    "access_status": "Metadata only",
+                    "availability": "metadata_only",
+                    "review_extent": "metadata_verified",
                 }
             ],
         }
@@ -36,28 +65,32 @@ class CorpusOpsTests(unittest.TestCase):
         left = {
             "id": "left",
             "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Metadata only",
-            "description_basis": "metadata",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
+            "description_basis": {"kind": "metadata", "locations": ["Catalog"]},
             "description_retrieval_id": "shared-event",
             "retrieval_history": [
                 {
                     "event_id": "shared-event",
                     "platform": "Catalog A",
-                    "access_status": "Metadata only",
+                    "availability": "metadata_only",
+                    "review_extent": "metadata_verified",
                 }
             ],
         }
         right = {
             "id": "right",
             "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Metadata only",
-            "description_basis": "metadata",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
+            "description_basis": {"kind": "metadata", "locations": ["Catalog"]},
             "description_retrieval_id": "shared-event",
             "retrieval_history": [
                 {
                     "event_id": "shared-event",
                     "platform": "Catalog B",
-                    "access_status": "Metadata only",
+                    "availability": "metadata_only",
+                    "review_extent": "metadata_verified",
                 }
             ],
         }
@@ -67,133 +100,101 @@ class CorpusOpsTests(unittest.TestCase):
     def test_validate_retrieval_links_rejects_duplicate_event_ids(self):
         module = load_module()
         record = {
-            "access_status": "Metadata only",
-            "description_basis": "metadata",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
+            "description_basis": {"kind": "metadata", "locations": ["Catalog"]},
             "description_retrieval_id": "duplicate",
             "retrieval_history": [
-                {"event_id": "duplicate", "access_status": "Metadata only"},
-                {"event_id": "duplicate", "access_status": "Metadata only"},
+                {
+                    "event_id": "duplicate",
+                    "availability": "metadata_only",
+                    "review_extent": "metadata_verified",
+                },
+                {
+                    "event_id": "duplicate",
+                    "availability": "metadata_only",
+                    "review_extent": "metadata_verified",
+                },
             ],
         }
         with self.assertRaisesRegex(ValueError, "Duplicate retrieval event_id"):
             module.validate_retrieval_links(record)
 
-    def test_validate_retrieval_links_enforces_access_and_basis(self):
+    def test_validate_retrieval_links_enforces_canonical_axes_and_basis(self):
         module = load_module()
-        mismatched_access = {
-            "access_status": "Metadata only",
-            "description_basis": "metadata",
+        mismatched_availability = {
+            "availability": "metadata_only",
+            "review_extent": "abstract_reviewed",
+            "description_basis": {"kind": "abstract", "locations": ["Abstract"]},
             "description_retrieval_id": "event-1",
             "retrieval_history": [
-                {"event_id": "event-1", "access_status": "Abstract only"}
+                {
+                    "event_id": "event-1",
+                    "availability": "abstract_available",
+                    "review_extent": "abstract_reviewed",
+                }
             ],
         }
-        with self.assertRaisesRegex(ValueError, "canonical access_status"):
-            module.validate_retrieval_links(mismatched_access)
+        with self.assertRaisesRegex(ValueError, "canonical availability"):
+            module.validate_retrieval_links(mismatched_availability)
 
         incompatible_basis = {
-            "access_status": "Metadata only",
-            "description_basis": "full_text",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
+            "description_basis": {"kind": "full_text", "locations": ["Part I"]},
             "description_retrieval_id": "event-1",
             "retrieval_history": [
-                {"event_id": "event-1", "access_status": "Metadata only"}
+                {
+                    "event_id": "event-1",
+                    "availability": "metadata_only",
+                    "review_extent": "metadata_verified",
+                }
             ],
         }
-        with self.assertRaisesRegex(ValueError, "full_text descriptions"):
+        with self.assertRaisesRegex(ValueError, "matching reviewed evidence"):
             module.validate_retrieval_links(incompatible_basis)
 
-    def test_access_failed_requires_metadata_basis(self):
-        module = load_module()
-        metadata_record = {
-            "access_status": "Access failed",
-            "description_basis": "metadata",
-            "description_retrieval_id": "failed-event",
-            "retrieval_history": [
-                {"event_id": "failed-event", "access_status": "Access failed"}
-            ],
-        }
-        module.validate_retrieval_links(metadata_record)
-
-        abstract_record = deepcopy(metadata_record)
-        abstract_record["description_basis"] = "abstract"
-        with self.assertRaisesRegex(ValueError, "metadata basis"):
-            module.validate_retrieval_links(abstract_record)
-
-    def test_full_text_not_read_allows_abstract_basis(self):
+    def test_failed_route_cannot_claim_review(self):
         module = load_module()
         record = {
-            "access_status": "Full text not read",
-            "description_basis": "abstract",
-            "description_retrieval_id": "abstract-event",
+            "availability": "access_failure",
+            "review_extent": "abstract_reviewed",
+            "description_basis": {"kind": "abstract", "locations": ["Abstract"]},
+            "description_retrieval_id": "failed-event",
             "retrieval_history": [
                 {
-                    "event_id": "abstract-event",
-                    "access_status": "Full text not read",
+                    "event_id": "failed-event",
+                    "availability": "access_failure",
+                    "review_extent": "abstract_reviewed",
                 }
             ],
         }
-        module.validate_retrieval_links(record)
-
-    def test_merge_prefers_full_text_not_read_over_abstract_only(self):
-        module = load_module()
-        left = {
-            "id": "left",
-            "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Abstract only",
-            "description": "Database abstract",
-            "description_basis": "abstract",
-            "description_retrieval_id": "abstract-only-event",
-            "retrieval_history": [
-                {
-                    "event_id": "abstract-only-event",
-                    "access_status": "Abstract only",
-                }
-            ],
-        }
-        right = {
-            "id": "right",
-            "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Full text not read",
-            "description": "Publisher abstract",
-            "description_basis": "abstract",
-            "description_retrieval_id": "full-text-gap-event",
-            "retrieval_history": [
-                {
-                    "event_id": "full-text-gap-event",
-                    "access_status": "Full text not read",
-                }
-            ],
-        }
-
-        merged = module.merge_records(left, right)
-
-        self.assertEqual("Full text not read", merged["access_status"])
-        self.assertEqual("Publisher abstract", merged["description"])
-        self.assertEqual("abstract", merged["description_basis"])
-        self.assertEqual("full-text-gap-event", merged["description_retrieval_id"])
-        self.assertEqual(2, len(merged["retrieval_history"]))
-        module.validate_retrieval_links(merged)
+        with self.assertRaisesRegex(ValueError, "cannot support"):
+            module.validate_retrieval_links(record)
 
     def test_valid_retrieval_link_merge_deduplicates_identical_event(self):
         module = load_module()
         event = {
             "event_id": "shared-event",
             "platform": "Catalog",
-            "access_status": "Metadata only",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
         }
         left = {
             "id": "left",
             "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Metadata only",
-            "description_basis": "metadata",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
+            "description_basis": {"kind": "metadata", "locations": ["Catalog"]},
             "description_retrieval_id": "shared-event",
             "retrieval_history": [deepcopy(event)],
         }
         right = {
             "id": "right",
             "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Metadata only",
-            "description_basis": "metadata",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
+            "description_basis": {"kind": "metadata", "locations": ["Catalog"]},
             "description_retrieval_id": "shared-event",
             "retrieval_history": [deepcopy(event)],
         }
@@ -275,30 +276,35 @@ class CorpusOpsTests(unittest.TestCase):
             )
         )
 
-    def test_merge_preserves_stronger_access_and_provenance(self):
+    def test_merge_preserves_stronger_review_and_provenance(self):
         module = load_module()
         left = {
             "id": "left",
             "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Metadata only",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
             "description": "Metadata description",
-            "description_basis": "metadata",
+            "description_basis": {"kind": "metadata", "locations": ["Catalog"]},
             "discovery_history": [{"method": "query", "value": "lotus"}],
         }
         right = {
             "id": "right",
             "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Full text read",
+            "availability": "open_full_text",
+            "review_extent": "full_text_substantively_reviewed",
             "description": "Full-text description",
-            "description_basis": "full_text",
+            "description_basis": {"kind": "full_text", "locations": ["Article"]},
             "discovery_history": [
                 {"method": "footnote", "value": "note 4"}
             ],
         }
         merged = module.merge_records(left, right)
-        self.assertEqual("Full text read", merged["access_status"])
+        self.assertEqual("open_full_text", merged["availability"])
+        self.assertEqual(
+            "full_text_substantively_reviewed", merged["review_extent"]
+        )
         self.assertEqual("Full-text description", merged["description"])
-        self.assertEqual("full_text", merged["description_basis"])
+        self.assertEqual("full_text", merged["description_basis"]["kind"])
         self.assertEqual(2, len(merged["discovery_history"]))
 
     def test_merge_preserves_conflicts_for_human_review(self):
@@ -365,14 +371,16 @@ class CorpusOpsTests(unittest.TestCase):
                     "event_id": "retrieval-1",
                     "platform": "Catalog",
                     "retrieved_at": "2026-01-01T00:00:00Z",
-                    "access_status": "Metadata only",
+                    "availability": "metadata_only",
+                    "review_extent": "metadata_verified",
                     "stable_url": "https://example.test/catalog",
                     "local_path": None,
                 }
             ],
-            "access_status": "Metadata only",
+            "availability": "metadata_only",
+            "review_extent": "metadata_verified",
             "description": "Metadata description",
-            "description_basis": "metadata",
+            "description_basis": {"kind": "metadata", "locations": ["Catalog"]},
             "description_retrieval_id": "retrieval-1",
             "stable_url": "https://example.test/canonical",
             "local_path": "/local/canonical.pdf",
@@ -391,14 +399,16 @@ class CorpusOpsTests(unittest.TestCase):
                     "event_id": "retrieval-2",
                     "platform": "Repository",
                     "retrieved_at": "2026-01-02T00:00:00Z",
-                    "access_status": "Full text read",
+                    "availability": "open_full_text",
+                    "review_extent": "full_text_substantively_reviewed",
                     "stable_url": "https://example.test/full-text",
                     "local_path": "/local/candidate.pdf",
                 }
             ],
-            "access_status": "Full text read",
+            "availability": "open_full_text",
+            "review_extent": "full_text_substantively_reviewed",
             "description": "Full-text description",
-            "description_basis": "full_text",
+            "description_basis": {"kind": "full_text", "locations": ["Article"]},
             "description_retrieval_id": "retrieval-2",
             "stable_url": "https://example.test/full-text",
             "local_path": "/local/candidate.pdf",
@@ -418,9 +428,12 @@ class CorpusOpsTests(unittest.TestCase):
         self.assertEqual(2, len(merged["discovery_history"]))
         self.assertEqual(2, len(merged["retrieval_history"]))
         self.assertEqual("Series A No. 10", merged["external_ids"]["document_number"])
-        self.assertEqual("Full text read", merged["access_status"])
+        self.assertEqual("open_full_text", merged["availability"])
+        self.assertEqual(
+            "full_text_substantively_reviewed", merged["review_extent"]
+        )
         self.assertEqual("Full-text description", merged["description"])
-        self.assertEqual("full_text", merged["description_basis"])
+        self.assertEqual("full_text", merged["description_basis"]["kind"])
         self.assertEqual("retrieval-2", merged["description_retrieval_id"])
         self.assertEqual("https://example.test/canonical", merged["stable_url"])
         self.assertEqual("/local/canonical.pdf", merged["local_path"])
@@ -432,14 +445,16 @@ class CorpusOpsTests(unittest.TestCase):
         left = {
             "id": "left",
             "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Abstract only",
+            "availability": "abstract_available",
+            "review_extent": "abstract_reviewed",
             "description": "Abstract description",
-            "description_basis": "abstract",
+            "description_basis": {"kind": "abstract", "locations": ["Abstract"]},
             "description_retrieval_id": "abstract-event",
             "retrieval_history": [
                 {
                     "event_id": "abstract-event",
-                    "access_status": "Abstract only",
+                    "availability": "abstract_available",
+                    "review_extent": "abstract_reviewed",
                 }
             ],
         }
@@ -448,23 +463,31 @@ class CorpusOpsTests(unittest.TestCase):
                 right = {
                     "id": "right",
                     "external_ids": {"doi": "10.1000/lotus"},
-                    "access_status": "Full text read",
+                    "availability": "open_full_text",
+                    "review_extent": "full_text_substantively_reviewed",
                     "description": blank_description,
-                    "description_basis": "full_text",
+                    "description_basis": {
+                        "kind": "full_text",
+                        "locations": ["Article"],
+                    },
                     "description_retrieval_id": "full-text-event",
                     "retrieval_history": [
                         {
                             "event_id": "full-text-event",
-                            "access_status": "Full text read",
+                            "availability": "open_full_text",
+                            "review_extent": "full_text_substantively_reviewed",
                         }
                     ],
                 }
 
                 merged = module.merge_records(left, right)
 
-                self.assertEqual("Full text read", merged["access_status"])
+                self.assertEqual("open_full_text", merged["availability"])
+                self.assertEqual(
+                    "full_text_substantively_reviewed", merged["review_extent"]
+                )
                 self.assertEqual("Abstract description", merged["description"])
-                self.assertEqual("abstract", merged["description_basis"])
+                self.assertEqual("abstract", merged["description_basis"]["kind"])
                 self.assertEqual(
                     "abstract-event", merged["description_retrieval_id"]
                 )

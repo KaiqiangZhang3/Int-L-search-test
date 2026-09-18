@@ -17,7 +17,8 @@
     "authority_class",
     "collection_tier",
     "relevance",
-    "access_status",
+    "availability",
+    "review_extent",
     "stable_url",
     "local_path",
     "retrieval_history",
@@ -111,13 +112,23 @@
         "low"
       ]
     },
-    "access_status": {
+    "availability": {
       "enum": [
-        "Full text read",
-        "Abstract only",
-        "Metadata only",
-        "Full text not read",
-        "Access failed"
+        "open_full_text",
+        "subscription_full_text",
+        "identified_inaccessible",
+        "abstract_available",
+        "metadata_only",
+        "access_failure"
+      ]
+    },
+    "review_extent": {
+      "enum": [
+        "full_text_substantively_reviewed",
+        "selected_sections_reviewed",
+        "abstract_reviewed",
+        "metadata_verified",
+        "not_reviewed"
       ]
     },
     "stable_url": {
@@ -142,7 +153,8 @@
           "event_id",
           "platform",
           "retrieved_at",
-          "access_status",
+          "availability",
+          "review_extent",
           "stable_url",
           "local_path"
         ],
@@ -158,13 +170,23 @@
           "retrieved_at": {
             "type": "string"
           },
-          "access_status": {
+          "availability": {
             "enum": [
-              "Full text read",
-              "Abstract only",
-              "Metadata only",
-              "Full text not read",
-              "Access failed"
+              "open_full_text",
+              "subscription_full_text",
+              "identified_inaccessible",
+              "abstract_available",
+              "metadata_only",
+              "access_failure"
+            ]
+          },
+          "review_extent": {
+            "enum": [
+              "full_text_substantively_reviewed",
+              "selected_sections_reviewed",
+              "abstract_reviewed",
+              "metadata_verified",
+              "not_reviewed"
             ]
           },
           "stable_url": {
@@ -179,7 +201,21 @@
               "null"
             ]
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"availability": {"const": "access_failure"}}},
+            "then": {"properties": {"review_extent": {"enum": ["not_reviewed"]}}}
+          },
+          {
+            "if": {"properties": {"availability": {"const": "metadata_only"}}},
+            "then": {"properties": {"review_extent": {"enum": ["metadata_verified", "not_reviewed"]}}}
+          },
+          {
+            "if": {"properties": {"availability": {"enum": ["abstract_available", "identified_inaccessible"]}}},
+            "then": {"properties": {"review_extent": {"enum": ["abstract_reviewed", "metadata_verified", "not_reviewed"]}}}
+          }
+        ]
       }
     },
     "language": {
@@ -195,11 +231,31 @@
       "minLength": 1
     },
     "description_basis": {
-      "enum": [
-        "full_text",
-        "abstract",
-        "metadata"
-      ]
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "locations"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "full_text",
+            "selected_sections",
+            "abstract",
+            "metadata"
+          ]
+        },
+        "locations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
     },
     "description_retrieval_id": {
       "type": "string",
@@ -288,15 +344,19 @@
       "if": {
         "properties": {
           "description_basis": {
-            "const": "full_text"
+            "properties": {
+              "kind": {
+                "const": "full_text"
+              }
+            }
           }
         }
       },
       "then": {
         "properties": {
-          "access_status": {
+          "review_extent": {
             "enum": [
-              "Full text read"
+              "full_text_substantively_reviewed"
             ]
           }
         }
@@ -306,17 +366,69 @@
       "if": {
         "properties": {
           "description_basis": {
-            "const": "abstract"
+            "properties": {
+              "kind": {
+                "const": "selected_sections"
+              }
+            }
           }
         }
       },
       "then": {
         "properties": {
-          "access_status": {
+          "review_extent": {
             "enum": [
-              "Abstract only",
-              "Full text not read",
-              "Full text read"
+              "full_text_substantively_reviewed",
+              "selected_sections_reviewed"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "description_basis": {
+            "properties": {
+              "kind": {
+                "const": "abstract"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "review_extent": {
+            "enum": [
+              "full_text_substantively_reviewed",
+              "selected_sections_reviewed",
+              "abstract_reviewed"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "description_basis": {
+            "properties": {
+              "kind": {
+                "const": "metadata"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "review_extent": {
+            "enum": [
+              "full_text_substantively_reviewed",
+              "selected_sections_reviewed",
+              "abstract_reviewed",
+              "metadata_verified"
             ]
           }
         }
