@@ -12,6 +12,7 @@
     "approved_plan",
     "branches",
     "rounds",
+    "coverage",
     "deduplication",
     "stopping"
   ],
@@ -492,6 +493,34 @@
         }
       }
     },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subquestions",
+        "platforms",
+        "languages",
+        "periods",
+        "authority_classes"
+      ],
+      "properties": {
+        "subquestions": {
+          "$ref": "#/$defs/coverageDimension"
+        },
+        "platforms": {
+          "$ref": "#/$defs/coverageDimension"
+        },
+        "languages": {
+          "$ref": "#/$defs/coverageDimension"
+        },
+        "periods": {
+          "$ref": "#/$defs/coverageDimension"
+        },
+        "authority_classes": {
+          "$ref": "#/$defs/coverageDimension"
+        }
+      }
+    },
     "deduplication": {
       "type": "object",
       "additionalProperties": false,
@@ -543,6 +572,32 @@
           "minLength": 1
         },
         "open_high_value_branches": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "coverageDimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "searched",
+        "unsearched"
+      ],
+      "properties": {
+        "searched": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "unsearched": {
           "type": "array",
           "items": {
             "type": "string"

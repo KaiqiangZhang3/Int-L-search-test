@@ -204,6 +204,14 @@ class SchemaTests(unittest.TestCase):
             schema["properties"]["relevance"]["enum"],
         )
 
+    def test_canonical_source_requires_nonempty_reader_descriptions(self):
+        schema = self.load("source-record.schema.json")
+
+        self.assertEqual(1, schema["properties"]["description"]["minLength"])
+        self.assertEqual(
+            1, schema["properties"]["inclusion_reason"]["minLength"]
+        )
+
     def test_edge_schema_requires_evidence_only_for_verified_edges(self):
         schema = self.load("edge-record.schema.json")
 
@@ -224,6 +232,26 @@ class SchemaTests(unittest.TestCase):
         self.assertIn("evidence", verified_rule["then"]["required"])
         self.assertNotIn("required", candidate_rule["then"])
 
+    def test_edge_schema_separates_candidate_and_canonical_storage(self):
+        schema = self.load("edge-record.schema.json")
+
+        self.assertIn("record_scope", schema["required"])
+        self.assertEqual(
+            ["candidate", "canonical"],
+            schema["properties"]["record_scope"]["enum"],
+        )
+        canonical_rule = next(
+            rule
+            for rule in schema["allOf"]
+            if rule["if"]["properties"].get("record_scope", {}).get("const")
+            == "canonical"
+        )
+        self.assertNotIn(
+            "cited_by",
+            canonical_rule["then"]["properties"]["relation"]["enum"],
+        )
+        self.assertIn("cited_by", schema["properties"]["relation"]["enum"])
+
     def test_state_schema_tracks_approval_rounds_branches_and_stopping(self):
         schema = self.load("project-state.schema.json")
         required = set(schema["required"])
@@ -239,6 +267,30 @@ class SchemaTests(unittest.TestCase):
             "open_high_value_branches",
             schema["properties"]["stopping"]["required"],
         )
+
+    def test_state_schema_requires_cumulative_searched_and_unsearched_coverage(self):
+        schema = self.load("project-state.schema.json")
+
+        self.assertIn("coverage", schema["required"])
+        coverage = schema["properties"]["coverage"]
+        dimensions = {
+            "subquestions",
+            "platforms",
+            "languages",
+            "periods",
+            "authority_classes",
+        }
+        self.assertEqual(dimensions, set(coverage["required"]))
+        for dimension in dimensions:
+            with self.subTest(dimension=dimension):
+                entry = coverage["properties"][dimension]
+                if "$ref" in entry:
+                    entry = schema["$defs"][entry["$ref"].rsplit("/", 1)[-1]]
+                self.assertEqual(
+                    {"searched", "unsearched"}, set(entry["required"])
+                )
+                self.assertEqual("array", entry["properties"]["searched"]["type"])
+                self.assertEqual("array", entry["properties"]["unsearched"]["type"])
 
     def test_state_schema_enforces_the_approval_gate(self):
         schema = self.load("project-state.schema.json")

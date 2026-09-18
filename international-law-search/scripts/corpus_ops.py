@@ -92,9 +92,15 @@ def validate_retrieval_links(record: dict) -> None:
         raise ValueError(
             "description_retrieval_id must resolve to exactly one retrieval event"
         )
-    if event.get("access_status") != record.get("access_status"):
+    event_access = event.get("access_status")
+    canonical_access = record.get("access_status")
+    if event_access != canonical_access and (
+        event_access not in ACCESS_RANK
+        or canonical_access not in ACCESS_RANK
+        or ACCESS_RANK[event_access] > ACCESS_RANK[canonical_access]
+    ):
         raise ValueError(
-            "Description retrieval access_status must equal canonical access_status"
+            "Description retrieval access_status cannot exceed canonical access_status"
         )
 
     basis = record.get("description_basis")
@@ -223,9 +229,12 @@ def merge_records(left: dict, right: dict) -> dict:
     left_rank = ACCESS_RANK.get(left.get("access_status"), -1)
     right_rank = ACCESS_RANK.get(right.get("access_status"), -1)
     if right_rank > left_rank:
-        for field in DESCRIPTION_FIELDS:
-            if field in right:
-                merged[field] = deepcopy(right[field])
+        merged["access_status"] = deepcopy(right["access_status"])
+        right_description = right.get("description")
+        if isinstance(right_description, str) and right_description.strip():
+            for field in DESCRIPTION_FIELDS[1:]:
+                if field in right:
+                    merged[field] = deepcopy(right[field])
 
     for field, value in right.items():
         if (

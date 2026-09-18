@@ -31,7 +31,7 @@ Repeat this specification for every branch. A vertical branch cannot execute unl
 
 - Branch ID: {{branch_id}}
 - Search subquestion: {{subquestion}}
-- `source_track`: {{primary_or_secondary}}
+- `source_track`: {{primary_secondary_or_mixed}}
 - `retrieval_mode`: {{horizontal_discovery_or_vertical_tracing}}
 - Starting depth: {{starting_depth}}
 - Maximum authorized depth: {{maximum_authorized_depth}}

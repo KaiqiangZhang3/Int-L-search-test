@@ -7,6 +7,7 @@
   "required": [
     "source_id",
     "target_id",
+    "record_scope",
     "relation",
     "status"
   ],
@@ -18,6 +19,12 @@
     "target_id": {
       "type": "string",
       "minLength": 1
+    },
+    "record_scope": {
+      "enum": [
+        "candidate",
+        "canonical"
+      ]
     },
     "relation": {
       "enum": [
@@ -95,6 +102,29 @@
             "type": [
               "object",
               "null"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_scope": {
+            "const": "canonical"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "relation": {
+            "enum": [
+              "cites",
+              "interprets",
+              "same_case_series",
+              "same_issue",
+              "response_to",
+              "discovered_from"
             ]
           }
         }

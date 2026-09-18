@@ -44,6 +44,9 @@ List each edge separately. Candidate status must remain visible even when an evi
 
 ## Coverage and gaps
 
+Populate this table from the cumulative `coverage` object in project state at
+the export checkpoint.
+
 | Dimension | Searched | Not searched |
 | --- | --- | --- |
 | Approved subquestion | {{searched_subquestions}} | {{not_searched_subquestions}} |

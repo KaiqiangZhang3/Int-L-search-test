@@ -33,8 +33,9 @@ Return only:
 
 1. Candidate nodes conforming to the candidate node schema. Do not assign a
    canonical ID or collection tier.
-2. Candidate edges conforming to the edge schema; keep `status` as
-   `candidate` even when evidence is supplied. Each `source_id` and
+2. Candidate edges conforming to the edge schema; set `record_scope` to
+   `candidate` and keep `status` as `candidate` even when evidence is supplied.
+   Each `source_id` and
    `target_id` may independently reference either a known canonical ID from
    this brief or a `candidate_id submitted in the same return`. The main agent
    resolves each endpoint and remaps candidate IDs.

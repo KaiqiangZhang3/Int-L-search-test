@@ -97,6 +97,27 @@ class WorkspaceTests(unittest.TestCase):
             self.assertEqual("planning", state["status"])
             self.assertIsNone(state["approved_plan"])
 
+    def test_initializer_records_empty_cumulative_coverage(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "pil-search"
+            module.initialize(target, "pil-search")
+            state = json.loads((target / "state.json").read_text(encoding="utf-8"))
+
+            self.assertEqual(
+                {
+                    dimension: {"searched": [], "unsearched": []}
+                    for dimension in (
+                        "subquestions",
+                        "platforms",
+                        "languages",
+                        "periods",
+                        "authority_classes",
+                    )
+                },
+                state["coverage"],
+            )
+
     def test_cli_reports_existing_target_without_traceback(self):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "pil-search"

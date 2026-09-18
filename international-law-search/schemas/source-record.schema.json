@@ -187,10 +187,12 @@
       "minLength": 2
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "inclusion_reason": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "description_basis": {
       "enum": [

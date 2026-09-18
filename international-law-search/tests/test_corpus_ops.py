@@ -427,7 +427,7 @@ class CorpusOpsTests(unittest.TestCase):
         self.assertEqual(original_left, left)
         self.assertEqual(original_right, right)
 
-    def test_description_fields_stay_with_stronger_acquisition(self):
+    def test_blank_description_does_not_replace_existing_description_binding(self):
         module = load_module()
         left = {
             "id": "left",
@@ -443,27 +443,31 @@ class CorpusOpsTests(unittest.TestCase):
                 }
             ],
         }
-        right = {
-            "id": "right",
-            "external_ids": {"doi": "10.1000/lotus"},
-            "access_status": "Full text read",
-            "description": "",
-            "description_basis": "full_text",
-            "description_retrieval_id": "full-text-event",
-            "retrieval_history": [
-                {
-                    "event_id": "full-text-event",
+        for blank_description in ("", " \t\n"):
+            with self.subTest(description=repr(blank_description)):
+                right = {
+                    "id": "right",
+                    "external_ids": {"doi": "10.1000/lotus"},
                     "access_status": "Full text read",
+                    "description": blank_description,
+                    "description_basis": "full_text",
+                    "description_retrieval_id": "full-text-event",
+                    "retrieval_history": [
+                        {
+                            "event_id": "full-text-event",
+                            "access_status": "Full text read",
+                        }
+                    ],
                 }
-            ],
-        }
 
-        merged = module.merge_records(left, right)
+                merged = module.merge_records(left, right)
 
-        self.assertEqual("Full text read", merged["access_status"])
-        self.assertEqual("", merged["description"])
-        self.assertEqual("full_text", merged["description_basis"])
-        self.assertEqual("full-text-event", merged["description_retrieval_id"])
+                self.assertEqual("Full text read", merged["access_status"])
+                self.assertEqual("Abstract description", merged["description"])
+                self.assertEqual("abstract", merged["description_basis"])
+                self.assertEqual(
+                    "abstract-event", merged["description_retrieval_id"]
+                )
 
     def test_external_id_conflict_is_provenanced_identity_conflict(self):
         module = load_module()

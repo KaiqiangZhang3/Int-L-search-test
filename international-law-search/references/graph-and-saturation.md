@@ -12,13 +12,15 @@ directions:
 - **Lateral:** inspect the same issue, case or procedural series, author
   network, or identifiable scholarly exchange.
 
-Use only the canonical relationships: `cites`, `cited_by`, `interprets`,
-`same_case_series`, `same_issue`, `response_to`, and `discovered_from`.
-Thematic resemblance alone is not evidence of a relationship.
+Candidate submissions may use these relationships: `cites`, `cited_by`,
+`interprets`, `same_case_series`, `same_issue`, `response_to`, and
+`discovered_from`. Thematic resemblance alone is not evidence of a
+relationship.
 
 ## Edge status and evidence
 
-Subagents submit every relationship as a `candidate` edge. The main agent may
+Subagents submit every relationship with `record_scope=candidate` and
+`status=candidate`. The main agent may
 mark it `verified` only after checking an evidence location. Acceptable
 locations include a page, paragraph, footnote, reference entry, or database
 citation record. Store the evidence source and precise location in the edge
@@ -30,6 +32,8 @@ or `cited_by`, canonical graph storage stores only `citing_node cites cited_node
 It derives `cited_node cited_by citing_node` for inverse navigation; the
 derived relationship is never a second stored edge and never another
 discovery. A citation does not by itself support `interprets` or `response_to`.
+After endpoint resolution and inverse normalization, the main agent sets
+`record_scope=canonical`; canonical records never use `cited_by`.
 
 ## Depth guardrail
 
@@ -54,6 +58,13 @@ After each retrieval round, record:
 - Important sources without full-text access.
 - Untraced high-value citation branches.
 - Branch depth, queries or paths attempted, and access failures.
+
+After recording the round, update the cumulative `coverage` object in project
+state. For subquestions, platforms, languages, periods, and authority classes,
+move completed approved surfaces to `searched`, retain approved but unfinished
+surfaces in `unsearched`, and preserve both arrays across rounds. Round-level
+`coverage_additions` is evidence for this update, not a replacement for the
+cumulative object.
 
 Inputs to `$SKILL_ROOT/scripts/round_metrics.py` are already canonicalized
 source records, and comparison uses their canonical `id`. The script returns

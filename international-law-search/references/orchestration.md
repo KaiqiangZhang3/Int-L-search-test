@@ -44,13 +44,14 @@ subagent:
 A subagent returns only candidate nodes conforming to
 `$SKILL_ROOT/schemas/candidate-source-record.schema.json` and candidate edges
 conforming to `$SKILL_ROOT/schemas/edge-record.schema.json` with `status` set
-to `candidate`. It also returns exact discovery provenance, evidence
-locations, access attempts, unresolved citations, coverage additions, and
-remaining high-value branches. It must not edit the canonical corpus, declare
-an edge verified, assign a collection tier, decide saturation, or publish a
-user-facing conclusion. Each candidate edge endpoint may independently use a
-known canonical ID supplied in the brief or a `candidate_id submitted in the
-same return`. One endpoint may be canonical while the other is a candidate.
+to `candidate` and `record_scope` set to `candidate`. It also returns exact
+discovery provenance, evidence locations, access attempts, unresolved
+citations, coverage additions, and remaining high-value branches. It must not
+edit the canonical corpus, declare an edge verified, assign a collection tier,
+decide saturation, or publish a user-facing conclusion. Each candidate edge
+endpoint may independently use a known canonical ID supplied in the brief or a
+`candidate_id submitted in the same return`. One endpoint may be canonical
+while the other is a candidate.
 
 Subagents must not fabricate records, describe unread material as full text,
 synthesize legal rules, resolve scholarly disputes, choose an argument, or
@@ -72,11 +73,19 @@ returns, the main agent:
 4. Preserves conflicting metadata and flags unresolved identity questions for
    human review.
 5. Checks edge evidence before changing an edge from `candidate` to
-   `verified`.
+   `verified`. It normalizes inverse `cited_by` submissions to `cites`, sets
+   accepted graph records to `record_scope=canonical`, and never stores
+   `cited_by` in the canonical graph.
 6. Confirms every accepted canonical record has both `relevance` and
-   `collection_tier` before running round metrics, then records round evidence
-   and updates branch state.
-7. Decides, with a written reason, whether to continue, reassign, pause for
+   `collection_tier` before running round metrics, then records round evidence,
+   updates branch state, and updates cumulative searched and unsearched
+   coverage in project state.
+7. After each canonical merge and at every checkpoint, runs
+   `$SKILL_ROOT/scripts/validate_corpus.py` with the canonical source and edge
+   JSONL paths. A failed validation blocks metrics, state advancement, and
+   export until the line-specific errors are corrected. Candidate edges stay
+   outside these final-corpus files.
+8. Decides, with a written reason, whether to continue, reassign, pause for
    reapproval, or stop.
 
 No subagent maintains a competing final graph. If multiple branches return the

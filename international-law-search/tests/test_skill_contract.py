@@ -24,9 +24,21 @@ class SkillContractTests(unittest.TestCase):
             "templates/search-plan.md",
             "templates/reader-report.md",
             "templates/subagent-brief.md",
+            "scripts/validate_corpus.py",
         ]
         missing = [path for path in required if not (ROOT / path).is_file()]
         self.assertEqual([], missing)
+
+    def test_final_corpus_validation_is_an_operational_gate(self):
+        orchestration = (ROOT / "references/orchestration.md").read_text(encoding="utf-8")
+        deliverables = (ROOT / "references/deliverables.md").read_text(encoding="utf-8")
+
+        self.assertIn("scripts/validate_corpus.py", orchestration)
+        self.assertIn("after each canonical merge", orchestration.lower())
+        self.assertIn("at every checkpoint", orchestration.lower())
+        self.assertIn("scripts/validate_corpus.py", deliverables)
+        self.assertIn("before export", deliverables.lower())
+        self.assertIn("schema validation alone", deliverables.lower())
 
     def test_frontmatter_is_minimal_and_trigger_is_specific(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
@@ -200,6 +212,8 @@ class SkillContractTests(unittest.TestCase):
             "Maximum authorized depth:",
         ]:
             self.assertIn(field, appendix.group(1))
+
+        self.assertIn("{{primary_secondary_or_mixed}}", appendix.group(1))
 
         self.assertIn("Status: `{{pending_or_approved}}`", approval.group(1))
         self.assertNotIn("Status: `pending`", approval.group(1))

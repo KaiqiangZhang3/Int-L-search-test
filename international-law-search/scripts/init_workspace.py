@@ -19,6 +19,16 @@ def _build_workspace(target: Path, project_id: str, now: str) -> None:
         "approved_plan": None,
         "branches": [],
         "rounds": [],
+        "coverage": {
+            dimension: {"searched": [], "unsearched": []}
+            for dimension in (
+                "subquestions",
+                "platforms",
+                "languages",
+                "periods",
+                "authority_classes",
+            )
+        },
         "deduplication": {
             "identity_index": {},
             "unresolved_record_ids": [],

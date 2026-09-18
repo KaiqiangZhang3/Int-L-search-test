@@ -24,7 +24,7 @@ Use [`../templates/reader-report.md`](../templates/reader-report.md) as the cont
 - Concise navigation by approved subquestion, theme, source type, chronology, and selected citation path.
 - For each selected source, its stable ID, citation, access status, description basis, what the source addresses, and why it was included.
 - Selected key citation paths and each path's retrieval value. List each edge separately with from ID, canonical relation, to ID, status, and evidence location. Candidate status must remain shown even when an evidence location exists; evidence does not upgrade the edge.
-- Coverage showing what was searched and not searched by approved subquestion, platform, language, period or chronology, and source class.
+- Coverage showing what was searched and not searched by approved subquestion, platform, language, period or chronology, and source class. Derive this table directly from the cumulative `coverage` object in project state; do not reconstruct it from the latest round or hand-edit it.
 - Full-text gaps, verification gaps, unresolved identities, and candidate edges that materially affect review.
 - The stopping reason and a constrained coverage conclusion. Use `Approaches saturation within the approved scope` only when the reasoned saturation review supports it. Otherwise use a clear `Paused—not saturated` or `In progress—not saturated` status and state the reason. The report must not claim exhaustive or comprehensive coverage.
 
@@ -44,7 +44,13 @@ Do not turn thematic navigation into a literature review.
 
 ## Traceability check
 
-Before delivery, confirm that:
+Before export, run `$SKILL_ROOT/scripts/validate_corpus.py` with `--sources`
+and `--edges` pointing to the exact canonical checkpoint used to generate the
+deliverables. Schema validation alone is not sufficient because it cannot
+enforce corpus-wide identity, endpoint, edge direction, and retrieval-link
+invariants. Do not export while the script reports any error.
+
+After that validation succeeds, confirm that:
 
 1. Each reported source resolves by stable ID to one canonical source record.
 2. Each reported path resolves to canonical nodes and graph edges. Relationship traceability uses endpoint IDs, relation, and status; verified edges retain their evidence locations and candidate edges remain labeled.
