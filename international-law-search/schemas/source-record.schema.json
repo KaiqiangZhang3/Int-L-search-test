@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/international-law-search/source-record.schema.json",
+  "title": "International Law Search Source Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "external_ids",
+    "title",
+    "creators",
+    "date",
+    "publication",
+    "source_type",
+    "fields",
+    "subquestions",
+    "authority_class",
+    "collection_tier",
+    "access_status",
+    "stable_url",
+    "local_path",
+    "retrieval_history",
+    "language",
+    "description",
+    "inclusion_reason",
+    "description_basis",
+    "description_retrieval_id",
+    "discovery_history",
+    "verification"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "external_ids": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "creators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "subquestions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "authority_class": {
+      "enum": [
+        "primary",
+        "authoritative_secondary",
+        "general_academic",
+        "gray_literature",
+        "discovery_only"
+      ]
+    },
+    "collection_tier": {
+      "enum": [
+        "core/canonical",
+        "supplementary/emerging"
+      ]
+    },
+    "access_status": {
+      "enum": [
+        "Full text read",
+        "Abstract only",
+        "Metadata only",
+        "Full text not read",
+        "Access failed"
+      ]
+    },
+    "stable_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "local_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "retrieval_history": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "event_id",
+          "platform",
+          "retrieved_at",
+          "access_status",
+          "stable_url",
+          "local_path"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "platform": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieved_at": {
+            "type": "string"
+          },
+          "access_status": {
+            "enum": [
+              "Full text read",
+              "Abstract only",
+              "Metadata only",
+              "Full text not read",
+              "Access failed"
+            ]
+          },
+          "stable_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "local_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "language": {
+      "type": "string",
+      "minLength": 2
+    },
+    "description": {
+      "type": "string"
+    },
+    "inclusion_reason": {
+      "type": "string"
+    },
+    "description_basis": {
+      "enum": [
+        "full_text",
+        "abstract",
+        "metadata"
+      ]
+    },
+    "description_retrieval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "discovery_history": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "method",
+          "value"
+        ],
+        "properties": {
+          "method": {
+            "enum": [
+              "query",
+              "source",
+              "footnote",
+              "reference",
+              "subagent",
+              "local_seed"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity",
+        "metadata_cross_checked",
+        "human_review_required"
+      ],
+      "properties": {
+        "identity": {
+          "enum": [
+            "verified",
+            "candidate",
+            "conflict"
+          ]
+        },
+        "metadata_cross_checked": {
+          "type": "boolean"
+        },
+        "human_review_required": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "merge_conflicts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 2,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "value",
+            "source_record_id"
+          ],
+          "properties": {
+            "value": {},
+            "source_record_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "description_basis": {
+            "const": "full_text"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "access_status": {
+            "enum": [
+              "Full text read"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "description_basis": {
+            "const": "abstract"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "access_status": {
+            "enum": [
+              "Abstract only",
+              "Full text read"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
