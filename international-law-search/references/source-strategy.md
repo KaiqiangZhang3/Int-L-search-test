@@ -2,7 +2,7 @@
 
 Run primary international-law materials and secondary academic literature as separate, coordinated tracks. Search each approved subquestion in both tracks where relevant, and pass verified identifiers and citations between them without collapsing their authority classes.
 
-## Version 1 scope
+## Subject scope
 
 Version 1 covers general public international law, international human rights law, international humanitarian law, international criminal law, international investment law, the law of the sea, international environmental law, and international economic law.
 
@@ -39,8 +39,10 @@ Preserve relevant regional practice, minority positions, multilingual materials,
 
 ## Gray literature
 
-Retain authoritative institutional reports and working papers as gray literature in a distinct source class when they meet the approved criteria. Treat blogs, news, and ordinary web pages as discovery-only leads unless the item itself is the research object. Promote a lead only after resolving and verifying the underlying source.
+Retain authoritative institutional reports and working papers as gray literature in a distinct source class when they meet the approved criteria. High-quality international-law blogs and practitioner analysis may appear as a labeled commentary class when useful for current developments or debate mapping; do not present them as binding authority or peer-reviewed scholarship. Treat news and ordinary web pages as discovery-only leads unless the item itself is the research object. Promote a lead only after resolving and verifying the underlying source.
+
+Read [`international-law-sources.md`](international-law-sources.md) before normalizing type-specific metadata, legal-status context, versions, or links.
 
 ## Languages
 
-Use English as the baseline. Propose additional languages when justified by official languages, relevant state practice, regional scholarship, or field-specific academic traditions. State the retrieval purpose and expected coverage value of each language in the search plan and obtain user approval before adding it. A newly necessary language after approval triggers reapproval.
+There is no fixed English baseline. Select each substantive language for its approved research purpose, relevant state practice, institutional languages, regional scholarship, or field-specific academic traditions. Follow [`multilingual-retrieval.md`](multilingual-retrieval.md) for vocabulary, platforms, access assumptions, budgets, authority relationships, and coverage reporting. A newly necessary substantive language after approval requires user direction.

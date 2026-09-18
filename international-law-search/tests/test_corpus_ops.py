@@ -341,6 +341,29 @@ class CorpusOpsTests(unittest.TestCase):
         self.assertEqual("conflict", merged["verification"]["identity"])
         self.assertTrue(merged["verification"]["human_review_required"])
 
+    def test_title_capitalization_does_not_create_an_identity_conflict(self):
+        module = load_module()
+        left = {
+            "id": "left",
+            "external_ids": {"doi": "10.1000/lotus"},
+            "title": "Customary International Law in the Nicaragua Case",
+            "verification": {
+                "identity": "verified",
+                "metadata_cross_checked": True,
+                "human_review_required": False,
+            },
+        }
+        right = {
+            "id": "right",
+            "external_ids": {"doi": "10.1000/lotus"},
+            "title": "CUSTOMARY INTERNATIONAL LAW IN THE NICARAGUA CASE",
+        }
+
+        merged = module.merge_records(left, right)
+
+        self.assertNotIn("merge_conflicts", merged)
+        self.assertEqual("verified", merged["verification"]["identity"])
+
     def test_merge_rejects_absent_or_mismatched_identity(self):
         module = load_module()
         with self.assertRaisesRegex(ValueError, "identity key"):

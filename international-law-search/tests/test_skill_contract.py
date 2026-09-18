@@ -260,7 +260,9 @@ class SkillContractTests(unittest.TestCase):
             "regional",
             "minority",
             "global south",
-            "user approval",
+            "user direction",
+            "no fixed english baseline",
+            "labeled commentary class",
         ]:
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, text)
@@ -271,7 +273,8 @@ class SkillContractTests(unittest.TestCase):
         )
         self.assertRegex(
             text,
-            r"blogs, news, and ordinary (?:web pages|webpages).*discovery-only",
+            r"blogs and practitioner analysis.*commentary.*news and ordinary "
+            r"(?:web pages|webpages).*discovery-only",
         )
 
     def test_source_strategy_uses_schema_vocabulary_without_prestige_overload(self):

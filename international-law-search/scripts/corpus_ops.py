@@ -199,6 +199,12 @@ def _external_id_value(key: str, value: str) -> str:
     return normalize_text(str(value))
 
 
+def _values_equivalent(field: str, left_value, right_value) -> bool:
+    if field == "title" and isinstance(left_value, str) and isinstance(right_value, str):
+        return normalize_text(left_value) == normalize_text(right_value)
+    return left_value == right_value
+
+
 def _merge_retrieval_history(merged: dict, right: dict) -> None:
     if "retrieval_history" not in right:
         return
@@ -305,7 +311,7 @@ def merge_records(left: dict, right: dict) -> dict:
             merged[field] = deepcopy(value)
         elif field in {"stable_url", "local_path"}:
             continue
-        elif merged[field] != value:
+        elif not _values_equivalent(field, merged[field], value):
             has_conflict = True
             _add_conflict(
                 merged,

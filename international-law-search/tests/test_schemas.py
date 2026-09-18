@@ -205,6 +205,54 @@ class SchemaTests(unittest.TestCase):
             "object", schema["properties"]["merge_conflicts"]["type"]
         )
 
+    def test_case_extension_records_procedural_context(self):
+        schema = self.load("source-record.schema.json")
+        case = schema["$defs"]["case_details"]
+
+        self.assertTrue(
+            {"court", "decision_date", "procedural_stage"}.issubset(
+                case["required"]
+            )
+        )
+
+    def test_source_schema_exposes_type_specific_details(self):
+        schema = self.load("source-record.schema.json")
+        expected = {
+            "case_details",
+            "treaty_details",
+            "international_organization_document_details",
+            "article_details",
+            "book_details",
+            "chapter_details",
+            "working_paper_details",
+            "institutional_report_details",
+            "commentary_details",
+        }
+
+        self.assertTrue(expected.issubset(schema["$defs"]))
+        article = schema["$defs"]["article_details"]
+        self.assertIn("journal", article["required"])
+        self.assertTrue(
+            {"journal", "volume", "issue", "pages"}.issubset(
+                article["properties"]
+            )
+        )
+        self.assertIn("source_details", schema["properties"])
+        self.assertIn("legal_status_context", schema["properties"])
+        self.assertIn("version_relationships", schema["properties"])
+        self.assertIn("links", schema["properties"])
+
+    def test_lightweight_ledger_preserves_type_details_for_mode_upgrades(self):
+        schema = self.load("source-ledger-record.schema.json")
+
+        self.assertIn("source_details", schema["properties"])
+        self.assertIn("article_details", schema["$defs"])
+        self.assertIn(
+            "journal", schema["$defs"]["article_details"]["required"]
+        )
+        self.assertIn("case_details", schema["$defs"])
+        self.assertIn("legal_status_context", schema["properties"])
+
     def test_candidate_source_schema_accepts_unresolved_submissions(self):
         schema = self.load("candidate-source-record.schema.json")
         required = set(schema["required"])

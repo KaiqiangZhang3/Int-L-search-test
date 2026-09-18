@@ -75,6 +75,62 @@
       "type": "string",
       "minLength": 1
     },
+    "source_details": {
+      "oneOf": [
+        {"$ref": "#/$defs/case_details"},
+        {"$ref": "#/$defs/treaty_details"},
+        {"$ref": "#/$defs/international_organization_document_details"},
+        {"$ref": "#/$defs/article_details"},
+        {"$ref": "#/$defs/book_details"},
+        {"$ref": "#/$defs/chapter_details"},
+        {"$ref": "#/$defs/working_paper_details"},
+        {"$ref": "#/$defs/institutional_report_details"},
+        {"$ref": "#/$defs/commentary_details"}
+      ]
+    },
+    "legal_status_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_category": {"type": "string", "minLength": 1},
+        "issuing_authority": {"type": ["string", "null"]},
+        "addressees_or_parties": {"$ref": "#/$defs/string_array"},
+        "procedural_posture": {"type": ["string", "null"]},
+        "jurisdictional_context": {"type": ["string", "null"]},
+        "status_date": {"type": ["string", "null"]}
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "url"],
+        "properties": {
+          "kind": {"enum": ["official", "publisher", "open_access", "database", "other"]},
+          "url": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "version_relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relation", "target"],
+        "properties": {
+          "relation": {
+            "enum": [
+              "version_of", "revises", "consolidates", "corrects",
+              "has_protocol", "has_annex", "interprets_decision",
+              "implements", "supersedes", "translated_as", "other"
+            ]
+          },
+          "target": {"type": "string", "minLength": 1},
+          "evidence": {"type": ["string", "null"]}
+        }
+      }
+    },
     "fields": {
       "type": "array",
       "items": {
@@ -337,6 +393,117 @@
           }
         }
       }
+    }
+  },
+  "$defs": {
+    "case_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["court", "decision_date", "procedural_stage"],
+      "properties": {
+        "court": {"type": "string", "minLength": 1},
+        "decision_date": {"type": "string", "minLength": 1},
+        "procedural_stage": {"type": "string", "minLength": 1},
+        "case_number": {"type": ["string", "null"]},
+        "parties": {"$ref": "#/$defs/string_array"},
+        "jurisdictional_context": {"type": ["string", "null"]},
+        "relevant_paragraphs": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "treaty_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adoption_date", "status_date"],
+      "properties": {
+        "adoption_date": {"type": "string", "minLength": 1},
+        "signature_date": {"type": ["string", "null"]},
+        "entry_into_force_date": {"type": ["string", "null"]},
+        "status_date": {"type": "string", "minLength": 1},
+        "depositary": {"type": ["string", "null"]},
+        "parties_or_applicability": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "international_organization_document_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["organization", "organ", "document_number"],
+      "properties": {
+        "organization": {"type": "string", "minLength": 1},
+        "organ": {"type": "string", "minLength": 1},
+        "document_number": {"type": "string", "minLength": 1},
+        "session": {"type": ["string", "null"]},
+        "version": {"type": ["string", "null"]},
+        "addressees": {"$ref": "#/$defs/string_array"},
+        "status_date": {"type": ["string", "null"]}
+      }
+    },
+    "article_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["journal"],
+      "properties": {
+        "journal": {"type": "string", "minLength": 1},
+        "volume": {"type": ["string", "null"]},
+        "issue": {"type": ["string", "null"]},
+        "pages": {"type": ["string", "null"]}
+      }
+    },
+    "book_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publisher"],
+      "properties": {
+        "publisher": {"type": "string", "minLength": 1},
+        "edition": {"type": ["string", "null"]},
+        "place": {"type": ["string", "null"]}
+      }
+    },
+    "chapter_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["book_title", "publisher"],
+      "properties": {
+        "book_title": {"type": "string", "minLength": 1},
+        "publisher": {"type": "string", "minLength": 1},
+        "editors": {"$ref": "#/$defs/string_array"},
+        "edition": {"type": ["string", "null"]},
+        "pages": {"type": ["string", "null"]}
+      }
+    },
+    "working_paper_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["series_or_institution"],
+      "properties": {
+        "series_or_institution": {"type": "string", "minLength": 1},
+        "number": {"type": ["string", "null"]},
+        "version_date": {"type": ["string", "null"]}
+      }
+    },
+    "institutional_report_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issuing_institution"],
+      "properties": {
+        "issuing_institution": {"type": "string", "minLength": 1},
+        "report_number": {"type": ["string", "null"]},
+        "status_date": {"type": ["string", "null"]}
+      }
+    },
+    "commentary_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outlet"],
+      "properties": {
+        "outlet": {"type": "string", "minLength": 1},
+        "editorial_or_practitioner_context": {"type": ["string", "null"]},
+        "publication_date": {"type": ["string", "null"]}
+      }
+    },
+    "string_array": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
     }
   },
   "allOf": [
