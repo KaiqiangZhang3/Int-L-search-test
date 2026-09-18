@@ -35,6 +35,17 @@
       "type": "string",
       "minLength": 1
     },
+    "legacy_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "migration_review_required": {
+      "type": "boolean"
+    },
     "external_ids": {
       "type": "object",
       "additionalProperties": {

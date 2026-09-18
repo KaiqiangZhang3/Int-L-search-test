@@ -205,6 +205,22 @@ class SchemaTests(unittest.TestCase):
             "object", schema["properties"]["merge_conflicts"]["type"]
         )
 
+    def test_source_schema_supports_non_destructive_migration_markers(self):
+        schema = self.load("source-record.schema.json")
+
+        self.assertEqual(
+            {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1},
+                "uniqueItems": True,
+            },
+            schema["properties"]["legacy_ids"],
+        )
+        self.assertEqual(
+            {"type": "boolean"},
+            schema["properties"]["migration_review_required"],
+        )
+
     def test_case_extension_records_procedural_context(self):
         schema = self.load("source-record.schema.json")
         case = schema["$defs"]["case_details"]

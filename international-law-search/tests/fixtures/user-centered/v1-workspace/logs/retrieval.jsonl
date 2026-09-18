@@ -1,0 +1,2 @@
+{"event_id":"retrieval-001","recorded_at":"2026-09-02T10:00:00+00:00","platform":"HeinOnline","source_id":"source-001","access_status":"Full text read","stable_url":"https://example.test/article","round_id":"round-1"}
+{"event_id":"retrieval-002","recorded_at":"2026-09-02T11:00:00+00:00","platform":"Publisher","source_id":"source-002","access_status":"Abstract only","stable_url":"https://example.test/abstract","round_id":"round-1"}

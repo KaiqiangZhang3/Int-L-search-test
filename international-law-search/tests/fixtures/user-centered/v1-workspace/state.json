@@ -1,0 +1,30 @@
+{
+  "project_id": "legacy-corporate-role-search",
+  "created_at": "2026-09-01T12:00:00+00:00",
+  "updated_at": "2026-09-02T12:00:00+00:00",
+  "status": "paused",
+  "approved_plan": {
+    "approved_by": "Fixture user",
+    "approved_at": "2026-09-01T12:30:00+00:00",
+    "plan_path": "plan/search-plan.md"
+  },
+  "branches": [],
+  "rounds": [],
+  "coverage": {
+    "subquestions": {"searched": ["Corporate roles"], "unsearched": ["Corporate governance"]},
+    "platforms": {"searched": ["HeinOnline"], "unsearched": ["Scopus"]},
+    "languages": {"searched": ["English"], "unsearched": ["Chinese"]},
+    "periods": {"searched": ["2000-2026"], "unsearched": ["Before 2000"]},
+    "authority_classes": {"searched": ["general_academic"], "unsearched": ["primary"]}
+  },
+  "deduplication": {
+    "identity_index": {"doi-10.0000-example": "source-001"},
+    "unresolved_record_ids": [],
+    "last_merged_at": "2026-09-02T12:00:00+00:00"
+  },
+  "stopping": {
+    "decision": "pause_for_user",
+    "reason": "Waiting for the user to select seeds.",
+    "open_high_value_branches": ["Corporate governance"]
+  }
+}

@@ -7,11 +7,15 @@ import shutil
 import tempfile
 
 
-def _build_workspace(target: Path, project_id: str, now: str) -> None:
+def _build_workspace(
+    target: Path, project_id: str, now: str, graph_enabled: bool = False
+) -> None:
     for relative in ["plan", "corpus", "logs", "exports"]:
         (target / relative).mkdir(parents=True, exist_ok=False)
 
     state = {
+        "schema_version": 2,
+        "graph_enabled": graph_enabled,
         "project_id": project_id,
         "created_at": now,
         "updated_at": now,
@@ -48,14 +52,17 @@ def _build_workspace(target: Path, project_id: str, now: str) -> None:
     )
     for relative in [
         "corpus/sources.jsonl",
-        "corpus/edges.jsonl",
         "logs/retrieval.jsonl",
         "exports/.gitkeep",
     ]:
         (target / relative).touch()
+    if graph_enabled:
+        (target / "corpus" / "edges.jsonl").touch()
 
 
-def initialize(target: Path, project_id: str, *, _builder=None) -> None:
+def initialize(
+    target: Path, project_id: str, *, graph_enabled: bool = False, _builder=None
+) -> None:
     project_id = project_id.strip()
     if not project_id:
         raise ValueError("Project ID must not be empty or whitespace.")
@@ -70,10 +77,12 @@ def initialize(target: Path, project_id: str, *, _builder=None) -> None:
             prefix=f".{target.name}.", suffix=".tmp", dir=target.parent
         )
     )
-    builder = _builder or _build_workspace
     try:
         now = datetime.now(timezone.utc).isoformat()
-        builder(staging, project_id, now)
+        if _builder is None:
+            _build_workspace(staging, project_id, now, graph_enabled)
+        else:
+            _builder(staging, project_id, now)
         if target.exists():
             raise FileExistsError(f"Refusing to overwrite existing path: {target}")
         staging.rename(target)
@@ -88,9 +97,12 @@ def main() -> None:
     )
     parser.add_argument("target", type=Path)
     parser.add_argument("--project-id", required=True)
+    parser.add_argument(
+        "--graph", action="store_true", help="Create optional graph storage."
+    )
     args = parser.parse_args()
     try:
-        initialize(args.target, args.project_id)
+        initialize(args.target, args.project_id, graph_enabled=args.graph)
     except (FileExistsError, ValueError) as error:
         parser.error(str(error))
 

@@ -28,15 +28,27 @@ class WorkspaceTests(unittest.TestCase):
                 "state.json",
                 "plan/search-plan.md",
                 "corpus/sources.jsonl",
-                "corpus/edges.jsonl",
                 "logs/retrieval.jsonl",
                 "exports/.gitkeep",
             ]
             self.assertTrue(all((target / path).exists() for path in expected))
+            self.assertFalse((target / "corpus" / "edges.jsonl").exists())
             state = json.loads((target / "state.json").read_text(encoding="utf-8"))
+            self.assertEqual(2, state["schema_version"])
+            self.assertFalse(state["graph_enabled"])
             self.assertEqual("planning", state["status"])
             with self.assertRaises(FileExistsError):
                 module.initialize(target, "pil-search")
+
+    def test_initializer_creates_graph_file_only_when_selected(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "pil-search"
+            module.initialize(target, "pil-search", graph_enabled=True)
+
+            state = json.loads((target / "state.json").read_text(encoding="utf-8"))
+            self.assertTrue(state["graph_enabled"])
+            self.assertTrue((target / "corpus" / "edges.jsonl").is_file())
 
     def test_initializer_uses_utc_timestamps(self):
         module = load_module()
