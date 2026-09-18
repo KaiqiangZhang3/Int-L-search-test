@@ -161,5 +161,141 @@
       "Turns thematic navigation into substantive legal analysis or a literature review"
     ],
     "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "vague-corporate-role-readiness",
+    "kind": "research_readiness",
+    "prompt": "I want to research the role of corporations in public international law, perhaps something related to corporate governance.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Treats corporate personality, direct rights, direct obligations, business and human rights, investment law, global governance, and international corporate governance as distinct candidate directions",
+      "Asks one material readiness question at a time and allows the user to accept recommended defaults or request a bounded exploratory round",
+      "Obtains approval for a concise scope card covering the next round before external retrieval"
+    ],
+    "prohibited": [
+      "Expands the ambiguous topic into all adjacent corporate international-law fields without user direction",
+      "Presents a fully preselected research design for binary approval",
+      "Begins a large retrieval run before the user can shape the research question"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "standard-round-1-checkpoint",
+    "kind": "round_checkpoint",
+    "prompt": "Use standard interactive mode. Start with a breadth-first map of the role of corporations in public international law, then pause so I can choose where to go deeper.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Runs a bounded breadth-first round without systematic citation tracing",
+      "Returns a field map, an initial annotated bibliography, five to ten candidate seeds, and planned-versus-actual budget use",
+      "Stops after Stage 1 and gives concrete controls for selecting, deleting, or expanding branches"
+    ],
+    "prohibited": [
+      "Begins Stage 2 before the user selects or confirms seeds",
+      "Collects a large near-final corpus before the first substantive checkpoint",
+      "Treats a generic invitation to continue as a concrete decision panel"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "user-selected-seeds",
+    "kind": "seed_control",
+    "prompt": "For the depth round, trace only the UN Guiding Principles and the two articles I selected. Remove the investment-law branch, and read the Barcelona Traction judgment without tracing it.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Traces only the user-confirmed seeds within the approved per-seed budget",
+      "Removes the investment-law branch from further expansion",
+      "Reviews Barcelona Traction without converting it into a tracing seed"
+    ],
+    "prohibited": [
+      "Lets the agent choose additional final seeds",
+      "Continues the deleted investment-law branch",
+      "Automatically traces every source designated for full-text review"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "quick-mode-upgrade",
+    "kind": "mode_upgrade",
+    "prompt": "Give me 10-15 reliable sources on corporate international legal personality, then let me deepen selected sources.",
+    "approved_mode": "quick",
+    "required": [
+      "Treats quick-scope approval as authorization to deliver the bounded bibliography",
+      "Produces the quick result without a mandatory graph or deep-audit workspace",
+      "Offers an upgrade that reuses the existing source ledger, provenance, review labels, and user decisions"
+    ],
+    "prohibited": [
+      "Restarts retrieval after the user upgrades",
+      "Silently begins citation tracing before the user selects seeds",
+      "Requires canonical JSONL, project state, round metrics, and relationship edges for the quick result"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "independent-chinese-branch",
+    "kind": "multilingual_branch",
+    "prompt": "Include a substantive Chinese-language branch on corporate international legal personality and tell me what it adds beyond the English literature.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Defines the Chinese branch's research purpose and expected coverage contribution",
+      "Uses an independent Chinese conceptual vocabulary and identifies relevant Chinese databases and access assumptions",
+      "Assigns a separate query, candidate, and review budget and reports the branch's marginal contribution"
+    ],
+    "prohibited": [
+      "Implements Chinese retrieval only by translating English queries",
+      "Adds a few Chinese search results without a separate coverage account",
+      "Treats unofficial translations as equivalent to authoritative texts"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "reader-first-report",
+    "kind": "reader_report",
+    "prompt": "Prepare the final Chinese research report for a human reader. I need to understand the field and know what to read first.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Leads with the question, field development, major debates, and a recommended reading path in consistent natural Chinese",
+      "Explains what each source does, why it is included, and when it should be read",
+      "Keeps stable IDs, English enums, graph edges, state, and validation details in secondary attachments"
+    ],
+    "prohibited": [
+      "Leads with machine identifiers, edge tables, or audit status",
+      "Uses unexplained English system labels as the main report language",
+      "Makes machine artifacts coequal with the reader-facing report by default"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "retrieval-archive-boundary",
+    "kind": "output_boundary",
+    "prompt": "Deliver a retrieval archive only. Organize and annotate the sources, but do not synthesize positions across them.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Provides thematic navigation, source annotations, reading priorities, coverage, and limitations",
+      "Faithfully describes each source within the material actually reviewed",
+      "Omits cross-source synthesis"
+    ],
+    "prohibited": [
+      "Infers a field-wide trend from multiple sources",
+      "Selects the user's thesis or recommends an argumentative position",
+      "Presents an unverified literature gap as established"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "research-report-boundary",
+    "kind": "output_boundary",
+    "prompt": "Prepare a research report from the verified corpus. Explain the development of the field, major positions, debates, and research gaps with citations.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Allows cited descriptive synthesis grounded in reviewed sources",
+      "Distinguishes source-stated positions, multi-source trends, and cautious inferences",
+      "Keeps every synthesis claim within the recorded review basis"
+    ],
+    "prohibited": [
+      "Treats disputed propositions as settled law",
+      "Chooses the user's thesis or preferred scholarly position",
+      "Drafts argumentative academic prose on the user's behalf"
+    ],
+    "evaluation_mode": "behavioral_review"
   }
 ]

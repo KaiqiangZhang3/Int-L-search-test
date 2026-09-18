@@ -54,26 +54,32 @@ class SkillContractTests(unittest.TestCase):
         self.assertNotIn("approve", frontmatter.lower())
         self.assertNotIn("citation-network", frontmatter.lower())
 
-    def test_approval_survives_urgency_and_scope_stays_retrieval_only(self):
+    def test_scope_approval_survives_urgency_and_modes_preserve_boundaries(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8").lower()
-        approval = re.search(r"(?m)^- .*approv.*search plan.*$", text)
+        approval = re.search(r"(?m)^- .*approv.*(?:scope|next round).*$", text)
         self.assertIsNotNone(approval)
         self.assertIn("urgency", approval.group(0))
         self.assertRegex(approval.group(0), r"(does not|must not|cannot).*(bypass|override)")
 
-        boundaries = {
-            "legal-rule synthesis": r"do not synthesize legal rules",
-            "scholarly-dispute resolution": r"(do not|must not).*resolve scholarly disputes",
-            "argument selection": r"(do not|must not).*(choose|select) an argument",
-            "research drafting": r"(do not|must not).*draft.*(literature review|memorandum|article section|paper)",
-        }
-        for boundary, pattern in boundaries.items():
-            with self.subTest(boundary=boundary):
-                self.assertRegex(text, pattern)
+        for phrase in [
+            "quick mode",
+            "standard interactive mode",
+            "deep-audit mode",
+            "mode choice belongs to the user",
+            "retrieval archive",
+            "research report",
+            "source-grounded descriptive synthesis",
+        ]:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+
+        self.assertRegex(text, r"research report.*(?:may|allows?).*descriptive synthesis")
+        self.assertRegex(text, r"(?:do not|must not).*(?:choose|select).*(?:user(?:'s)? thesis|argumentative position)")
+        self.assertRegex(text, r"(?:do not|must not).*draft.*argumentative academic prose")
+        self.assertRegex(text, r"(?:do not|must not).*present.*disput.*settled")
 
         self.assertRegex(text, r"user-facing.*concise")
         self.assertRegex(text, r"structured (records|files|artifacts).*(provenance|detail)|provenance.*structured")
-        self.assertIn("dynamic saturation", text)
         self.assertIn("main agent", text)
 
     def test_approval_gate_allows_only_authorized_local_intake_inspection(self):
@@ -125,15 +131,13 @@ class SkillContractTests(unittest.TestCase):
             r"(?m)^\d+\. Read \[([^]]+)\]\((references/[^)]+)\)([^\n]*)$",
             routing.group(1),
         )
-        expected_targets = {
-            "references/intake-and-approval.md",
-            "references/source-strategy.md",
+        required_targets = {
+            "references/modes-and-rounds.md",
             "references/access-and-privacy.md",
             "references/orchestration.md",
-            "references/graph-and-saturation.md",
             "references/deliverables.md",
         }
-        self.assertEqual(expected_targets, {target for _, target, _ in entries})
+        self.assertTrue(required_targets.issubset({target for _, target, _ in entries}))
         for label, target, timing in entries:
             with self.subTest(target=target):
                 self.assertEqual(label, Path(target).name)
@@ -159,20 +163,14 @@ class SkillContractTests(unittest.TestCase):
         self.assertLessEqual(len(values["short_description"]), 64)
         self.assertIn("$international-law-search", values["default_prompt"])
 
-    def test_intake_requires_adaptive_questions_and_explicit_approval(self):
+    def test_intake_compatibility_file_routes_to_mode_contract(self):
         intake = (ROOT / "references/intake-and-approval.md").read_text(encoding="utf-8").lower()
         for phrase in [
-            "ask one material question at a time",
-            "topic, question, draft, or seed corpus",
-            "read `access-and-privacy.md` before inspecting",
-            "wait for explicit approval",
-            "atomically set",
+            "compatibility",
+            "modes-and-rounds.md",
+            "access-and-privacy.md",
         ]:
             self.assertIn(phrase, intake)
-        self.assertRegex(
-            intake,
-            r"do not begin external retrieval, database search(?:ing)?, or citation expansion before approval",
-        )
 
     def test_search_plan_separates_approved_choices_from_execution_detail(self):
         template = (ROOT / "templates/search-plan.md").read_text(encoding="utf-8")
@@ -222,21 +220,7 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("Update all three fields atomically before execution.", approval.group(1))
 
     def test_approval_checkpoint_requires_plan_and_workspace_state_agreement(self):
-        intake = (ROOT / "references/intake-and-approval.md").read_text(encoding="utf-8").lower()
         template = (ROOT / "templates/search-plan.md").read_text(encoding="utf-8").lower()
-
-        for phrase in [
-            "one coordinated checkpoint",
-            "`state.json`",
-            "`state.status` to `approved`",
-            "`state.approved_plan`",
-            "`approved_by`, `approved_at`, and `plan_path`",
-            "re-read the plan artifact and `state.json`",
-            "verify that both artifacts agree",
-            "interrupted or inconsistent",
-            "do not execute",
-        ]:
-            self.assertIn(phrase, intake)
 
         approval = re.search(r"## approval\n\n(.*)$", template, re.DOTALL)
         self.assertIsNotNone(approval)

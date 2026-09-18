@@ -31,12 +31,21 @@ class BenchmarkFixtureTests(unittest.TestCase):
 
     def test_each_case_has_an_evaluable_behavioral_contract(self):
         allowed_modes = {"behavioral_review", "retrieval_benchmark"}
-        required_fields = {
+        legacy_fields = {
             "id",
             "kind",
             "prompt",
             "expected_behaviors",
             "forbidden_behaviors",
+            "evaluation_mode",
+        }
+        user_centered_fields = {
+            "id",
+            "kind",
+            "prompt",
+            "approved_mode",
+            "required",
+            "prohibited",
             "evaluation_mode",
         }
 
@@ -46,19 +55,21 @@ class BenchmarkFixtureTests(unittest.TestCase):
 
         for case in self.cases:
             with self.subTest(case=case.get("id")):
-                self.assertEqual(required_fields, set(case))
+                self.assertIn(set(case), [legacy_fields, user_centered_fields])
                 self.assertIsInstance(case["id"], str)
                 self.assertTrue(case["id"].strip())
                 self.assertIsInstance(case["kind"], str)
                 self.assertTrue(case["kind"].strip())
                 self.assertIsInstance(case["prompt"], str)
                 self.assertTrue(case["prompt"].strip())
-                self.assertIsInstance(case["expected_behaviors"], list)
-                self.assertTrue(case["expected_behaviors"])
-                self.assertTrue(all(item.strip() for item in case["expected_behaviors"]))
-                self.assertIsInstance(case["forbidden_behaviors"], list)
-                self.assertTrue(case["forbidden_behaviors"])
-                self.assertTrue(all(item.strip() for item in case["forbidden_behaviors"]))
+                required = case.get("required", case.get("expected_behaviors"))
+                prohibited = case.get("prohibited", case.get("forbidden_behaviors"))
+                self.assertIsInstance(required, list)
+                self.assertTrue(required)
+                self.assertTrue(all(item.strip() for item in required))
+                self.assertIsInstance(prohibited, list)
+                self.assertTrue(prohibited)
+                self.assertTrue(all(item.strip() for item in prohibited))
                 self.assertIn(case["evaluation_mode"], allowed_modes)
 
     def test_known_nicaragua_case_requires_retrieval_without_legal_synthesis(self):
