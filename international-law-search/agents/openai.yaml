@@ -1,0 +1,4 @@
+interface:
+  display_name: "International Law Search"
+  short_description: "Retrieve and trace international-law sources"
+  default_prompt: "Use $international-law-search to plan an auditable international-law source search for my approval, then retrieve and organize the sources without substantive legal synthesis."
