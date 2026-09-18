@@ -24,6 +24,34 @@ Every ledger record requires:
 
 Identifiers, links, local paths, source type, language, ranking factors, reading priority, version relationships, and retrieval events are optional at first and added when known. Do not invent empty facts merely to make a record look complete.
 
+Version 3 also supports the following optional research-management fields:
+
+- `scholarly_importance`: a closed level (`foundational`, `major`, `useful`, `peripheral`, or `not_assessed`) plus a concise evidence-based reason. Importance is independent from current access.
+- `acquisition_priority`: `must_obtain`, `should_obtain`, `optional`, or `not_assessed`.
+- `acquisition_routes`: typed open, subscription, publisher, library-holding, physical-copy, purchase, document-delivery, or unavailable routes. A route containing a local path must set `externalizable` to `false`.
+- `round_membership`: the stable round ID and whether the source was discovered, acquired, reviewed, used as a seed, used as evidence, or retained as background in that round.
+
+Use `identifiers.isbn`, `isbn_10`, or `isbn_13` for ISBNs and `oclc`, `lccn`, or `worldcat` for library identifiers. Keep edition information in the type-specific book or chapter details so ISBN matching can remain edition-aware.
+
+## Deterministic Upsert
+
+Use `scripts/ledger_ops.py` whenever a source enters or re-enters a Standard ledger. Its public operations are:
+
+- `normalized_identity_keys(record)`: returns strongest-first, type-aware identity keys.
+- `upsert_source(path, record)`: atomically inserts or merges one record and returns its action and stable source key.
+
+Identity matching uses DOI first, followed by namespaced official document, case, treaty, stable publisher, and ISBN-plus-edition identifiers. Only when strong identifiers do not conflict may normalized title, creators, publication date, and source type provide a conservative fallback. Capitalization, punctuation, DOI URL prefixes, and creator ordering do not create separate identities. Conflicting strong identifiers remain separate even when their descriptive metadata matches.
+
+An upsert preserves the existing `source_key` and records a different incoming key in `source_key_aliases`. It unions discovery provenance, user decisions, acquisition routes, round membership, retrieval history, links, paths, version relationships, and citation aliases without duplicating identical values. Repeating an identical upsert is a no-op. The ledger is written through a sibling temporary file and replaced atomically.
+
+Run the Standard-ledger validator before rendering or migration:
+
+```bash
+python3 scripts/validate_source_ledger.py path/to/sources.jsonl
+```
+
+Exit code `0` means valid, `1` means readable input with invalid content, and `2` means that the ledger or bundled schema could not be read. The validator checks every JSONL row against the record schema, then rejects duplicate stable keys, duplicate strong identities, descriptions exceeding their review evidence, and local paths marked for externalization.
+
 ## Availability and Review Are Separate
 
 `availability` describes the best verified route, not the latest attempt. `review_extent` describes actual examination, not theoretical access. A subscription route can coexist with substantive review, while an open route can coexist with `not_reviewed`.
