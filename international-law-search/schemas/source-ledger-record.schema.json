@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/international-law-search/source-ledger-record.schema.json",
+  "title": "International Law Search Lightweight Source Ledger Record",
+  "description": "The shared, upgrade-safe source record used by quick and standard-interactive modes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_key",
+    "identity_evidence",
+    "discovery_provenance",
+    "availability",
+    "review_extent",
+    "description_basis",
+    "description",
+    "inclusion_reason",
+    "user_decisions"
+  ],
+  "properties": {
+    "source_key": {
+      "description": "A stable project-local key preserved during mode upgrades.",
+      "type": "string",
+      "minLength": 1
+    },
+    "identity_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["normalized_title", "identity_status", "evidence"],
+      "properties": {
+        "normalized_title": {"type": "string", "minLength": 1},
+        "creators": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "publication_date": {"type": ["string", "null"]},
+        "publication": {"type": ["string", "null"]},
+        "raw_citation": {"type": ["string", "null"]},
+        "identity_status": {"enum": ["verified", "candidate", "conflict"]},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "value"],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "official_record",
+                  "publisher_record",
+                  "database_record",
+                  "document_text",
+                  "user_supplied_public_citation",
+                  "other"
+                ]
+              },
+              "value": {"type": "string", "minLength": 1},
+              "locator": {"type": ["string", "null"]},
+              "checked_at": {"type": ["string", "null"]}
+            }
+          }
+        }
+      }
+    },
+    "identifiers": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "url"],
+        "properties": {
+          "kind": {
+            "enum": ["official", "publisher", "open_access", "database", "other"]
+          },
+          "url": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "local_paths": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "source_type": {"type": ["string", "null"], "minLength": 1},
+    "language": {"type": ["string", "null"], "minLength": 2},
+    "discovery_provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["method", "value"],
+        "properties": {
+          "method": {
+            "enum": [
+              "query",
+              "platform",
+              "source",
+              "footnote",
+              "reference",
+              "cited_by",
+              "subagent",
+              "local_seed"
+            ]
+          },
+          "value": {"type": "string", "minLength": 1},
+          "platform": {"type": ["string", "null"]},
+          "branch_id": {"type": ["string", "null"]},
+          "parent_source_key": {"type": ["string", "null"]},
+          "locator": {"type": ["string", "null"]},
+          "discovered_at": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "availability": {
+      "enum": [
+        "open_full_text",
+        "subscription_full_text",
+        "identified_inaccessible",
+        "abstract_available",
+        "metadata_only",
+        "access_failure"
+      ]
+    },
+    "review_extent": {
+      "enum": [
+        "full_text_substantively_reviewed",
+        "selected_sections_reviewed",
+        "abstract_reviewed",
+        "metadata_verified",
+        "not_reviewed"
+      ]
+    },
+    "description_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "locations"],
+      "properties": {
+        "kind": {
+          "enum": ["full_text", "selected_sections", "abstract", "metadata", "none"]
+        },
+        "locations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      }
+    },
+    "description": {"type": "string", "minLength": 1},
+    "inclusion_reason": {"type": "string", "minLength": 1},
+    "ranking_factors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "direct_relevance": {"$ref": "#/$defs/factor"},
+        "legal_or_institutional_authority": {"$ref": "#/$defs/factor"},
+        "scholarly_influence": {"$ref": "#/$defs/factor"},
+        "citation_network_position": {"$ref": "#/$defs/factor"},
+        "unique_viewpoint": {"$ref": "#/$defs/factor"},
+        "recency": {"$ref": "#/$defs/factor"},
+        "regional_or_linguistic_representation": {"$ref": "#/$defs/factor"},
+        "verification_strength": {"$ref": "#/$defs/factor"},
+        "introductory_value": {"$ref": "#/$defs/factor"},
+        "research_issue_utility": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      }
+    },
+    "reading_priority": {
+      "enum": [
+        "priority_reading",
+        "read_by_research_direction",
+        "background_or_supplementary"
+      ]
+    },
+    "version_relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relation", "target"],
+        "properties": {
+          "relation": {
+            "enum": [
+              "version_of",
+              "revised_as",
+              "published_as",
+              "corrected_as",
+              "consolidated_as",
+              "translated_as",
+              "superseded_by",
+              "other"
+            ]
+          },
+          "target": {"type": "string", "minLength": 1},
+          "evidence": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "user_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["decision", "decided_at"],
+        "properties": {
+          "decision": {
+            "enum": [
+              "include",
+              "exclude",
+              "select_seed",
+              "review_without_tracing",
+              "trace",
+              "hold",
+              "stop_tracing",
+              "prioritize_full_text"
+            ]
+          },
+          "decided_at": {"type": "string", "minLength": 1},
+          "round_id": {"type": ["string", "null"]},
+          "note": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "retrieval_history": {
+      "description": "Optional deep-audit enrichment; quick and standard records do not require it.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_id", "platform", "retrieved_at"],
+        "properties": {
+          "event_id": {"type": "string", "minLength": 1},
+          "platform": {"type": "string", "minLength": 1},
+          "retrieved_at": {"type": "string", "minLength": 1},
+          "result": {"type": ["string", "null"]},
+          "link": {"type": ["string", "null"]},
+          "local_path": {"type": ["string", "null"]}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "factor": {
+      "enum": ["high", "medium", "low", "unknown", "not_assessed"]
+    }
+  }
+}
