@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/international-law-search/round-bundle.schema.json",
+  "title": "International Law Search Shared Round Bundle",
+  "description": "The externalizable source of truth used to render one research round.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "checkpoint_id",
+    "round_id",
+    "generated_at",
+    "reader_language",
+    "research_question",
+    "narrative_sections",
+    "featured_source_keys",
+    "claim_ids",
+    "budget_summary",
+    "gaps",
+    "next_round_options",
+    "bibliography_selection",
+    "privacy_classification",
+    "externalizable"
+  ],
+  "properties": {
+    "checkpoint_id": {"type": "string", "minLength": 1},
+    "round_id": {
+      "type": "string",
+      "pattern": "^R[1-9][0-9]*(\\.S[1-9][0-9]*)?$"
+    },
+    "generated_at": {"type": "string", "minLength": 1},
+    "reader_language": {"type": "string", "minLength": 2},
+    "research_question": {"type": "string", "minLength": 1},
+    "narrative_sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/narrative_section"}
+    },
+    "featured_source_keys": {"$ref": "#/$defs/string_array"},
+    "claim_ids": {"$ref": "#/$defs/string_array"},
+    "budget_summary": {"$ref": "#/$defs/budget_summary"},
+    "gaps": {"$ref": "#/$defs/string_array"},
+    "next_round_options": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/next_round_option"}
+    },
+    "bibliography_selection": {"$ref": "#/$defs/string_array"},
+    "privacy_classification": {
+      "enum": ["public_citation_extract", "public_research_output"]
+    },
+    "externalizable": {"const": true}
+  },
+  "$defs": {
+    "string_array": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "narrative_section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section_id", "title", "body", "source_keys", "claim_ids"],
+      "properties": {
+        "section_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "body": {"type": "string", "minLength": 1},
+        "source_keys": {"$ref": "#/$defs/string_array"},
+        "claim_ids": {"$ref": "#/$defs/string_array"}
+      }
+    },
+    "budget_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bibliographic_discovery",
+        "full_text_acquisition",
+        "substantive_review"
+      ],
+      "properties": {
+        "bibliographic_discovery": {"type": "integer", "minimum": 0},
+        "full_text_acquisition": {"type": "integer", "minimum": 0},
+        "substantive_review": {"type": "integer", "minimum": 0}
+      }
+    },
+    "research_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bibliographic_discovery",
+        "full_text_acquisition",
+        "substantive_review",
+        "platforms",
+        "query_cap",
+        "time_cap_minutes",
+        "tracing_depth",
+        "seeds",
+        "language_allocations"
+      ],
+      "properties": {
+        "bibliographic_discovery": {"type": "integer", "minimum": 0},
+        "full_text_acquisition": {"type": "integer", "minimum": 0},
+        "substantive_review": {"type": "integer", "minimum": 0},
+        "platforms": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/platform_allocation"},
+          "uniqueItems": true
+        },
+        "query_cap": {"type": "integer", "minimum": 0},
+        "time_cap_minutes": {"type": "number", "minimum": 0},
+        "tracing_depth": {"type": "integer", "minimum": 0},
+        "seeds": {"$ref": "#/$defs/string_array"},
+        "language_allocations": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/language_allocation"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "platform_allocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "purpose"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "purpose": {"type": "string", "minLength": 1}
+      }
+    },
+    "language_allocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "language",
+        "purpose",
+        "bibliographic_discovery",
+        "full_text_acquisition",
+        "substantive_review"
+      ],
+      "properties": {
+        "language": {"type": "string", "minLength": 1},
+        "purpose": {"type": "string", "minLength": 1},
+        "bibliographic_discovery": {"type": "integer", "minimum": 0},
+        "full_text_acquisition": {"type": "integer", "minimum": 0},
+        "substantive_review": {"type": "integer", "minimum": 0}
+      }
+    },
+    "next_round_option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "option_id",
+        "round_type",
+        "question_addressed",
+        "retrieval_objects",
+        "starting_seeds",
+        "method",
+        "planned_budget",
+        "expected_output",
+        "exclusions"
+      ],
+      "properties": {
+        "option_id": {"type": "string", "minLength": 1},
+        "round_type": {
+          "enum": [
+            "breadth",
+            "breadth_expansion",
+            "depth",
+            "primary_materials",
+            "state_practice",
+            "doctrinal",
+            "gap_filling",
+            "verification",
+            "synthesis"
+          ]
+        },
+        "question_addressed": {"type": "string", "minLength": 1},
+        "retrieval_objects": {"$ref": "#/$defs/string_array"},
+        "starting_seeds": {"$ref": "#/$defs/string_array"},
+        "method": {"type": "string", "minLength": 1},
+        "planned_budget": {"$ref": "#/$defs/research_budget"},
+        "expected_output": {"type": "string", "minLength": 1},
+        "exclusions": {"$ref": "#/$defs/string_array"}
+      }
+    }
+  }
+}

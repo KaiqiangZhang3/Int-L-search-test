@@ -6,6 +6,8 @@ from pathlib import Path
 import re
 import sys
 
+from validate_round_bundle import validate_bundle_files
+
 
 FORBIDDEN_MARKERS = ("{{", "}}", "TODO", "TBD")
 MANUAL_REVIEW = re.compile(
@@ -83,6 +85,10 @@ def parse_args(argv=None):
     parser.add_argument("report", type=Path)
     parser.add_argument("--language", default="zh")
     parser.add_argument("--final", action="store_true")
+    parser.add_argument("--bundle", type=Path)
+    parser.add_argument("--sources", type=Path)
+    parser.add_argument("--claims", type=Path)
+    parser.add_argument("--rounds", type=Path)
     return parser.parse_args(argv)
 
 
@@ -95,6 +101,22 @@ def main(argv=None) -> int:
         return 2
 
     errors = validate_report(text, language=args.language, final=args.final)
+    bundle_arguments = (args.bundle, args.sources, args.claims, args.rounds)
+    if any(bundle_arguments):
+        if not all(bundle_arguments):
+            errors.append(
+                "Bundle-aware validation requires --bundle, --sources, --claims, "
+                "and --rounds together"
+            )
+        else:
+            errors.extend(
+                validate_bundle_files(
+                    args.bundle,
+                    source_path=args.sources,
+                    claim_path=args.claims,
+                    round_path=args.rounds,
+                )
+            )
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
