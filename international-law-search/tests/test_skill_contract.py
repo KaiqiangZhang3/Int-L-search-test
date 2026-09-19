@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class SkillContractTests(unittest.TestCase):
-    def test_entrypoint_routes_references_by_stage_and_mode(self):
+    def test_entrypoint_routes_references_by_round_and_mode(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         for target in [
             "references/modes-and-rounds.md",
@@ -47,16 +47,20 @@ class SkillContractTests(unittest.TestCase):
         missing = [path for path in required if not (ROOT / path).is_file()]
         self.assertEqual([], missing)
 
-    def test_final_corpus_validation_is_an_operational_gate(self):
+    def test_validated_checkpoint_is_an_operational_gate(self):
         orchestration = (ROOT / "references/orchestration.md").read_text(encoding="utf-8")
         deliverables = (ROOT / "references/deliverables.md").read_text(encoding="utf-8")
 
-        self.assertIn("scripts/validate_corpus.py", orchestration)
-        self.assertIn("after each canonical merge", orchestration.lower())
-        self.assertIn("at every checkpoint", orchestration.lower())
-        self.assertIn("scripts/validate_corpus.py", deliverables)
+        for validator in [
+            "validate_source_ledger.py",
+            "validate_claim_ledger.py",
+            "validate_round_bundle.py",
+        ]:
+            self.assertIn(validator, orchestration)
+            self.assertIn(validator, deliverables)
+        self.assertIn("validated checkpoint", orchestration.lower())
         self.assertIn("before export", deliverables.lower())
-        self.assertIn("schema validation alone", deliverables.lower())
+        self.assertIn("same checkpoint", deliverables.lower())
 
     def test_frontmatter_is_minimal_and_trigger_is_specific(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
@@ -83,7 +87,7 @@ class SkillContractTests(unittest.TestCase):
             "quick mode",
             "standard interactive mode",
             "deep-audit mode",
-            "mode choice belongs to the user",
+            "mode, research scale, interaction cadence, outputs, and stopping belong to the user",
             "retrieval archive",
             "research report",
             "source-grounded descriptive synthesis",
@@ -111,7 +115,7 @@ class SkillContractTests(unittest.TestCase):
         routing = re.search(r"## routing\n\n(.*?)(?=\n## )", text, re.DOTALL)
         self.assertIsNotNone(routing)
         access_position = routing.group(1).index("references/access-and-privacy.md")
-        intake_position = routing.group(1).index("references/intake-and-approval.md")
+        intake_position = routing.group(1).index("references/readiness-and-scale.md")
         self.assertLess(access_position, intake_position)
         self.assertRegex(
             routing.group(1),
@@ -139,7 +143,7 @@ class SkillContractTests(unittest.TestCase):
         ]:
             with self.subTest(value=value):
                 self.assertIn(value, access_section.group(1))
-        self.assertIn("two independent fields", access_section.group(1))
+        self.assertRegex(access_section.group(1), r"two independent fields")
         self.assertIn("Do not derive one axis from the other", access_section.group(1))
         self.assertIn("description_basis", access_section.group(1))
         self.assertIn("references/access-and-privacy.md", access_section.group(1))
@@ -155,6 +159,9 @@ class SkillContractTests(unittest.TestCase):
         required_targets = {
             "references/modes-and-rounds.md",
             "references/access-and-privacy.md",
+            "references/readiness-and-scale.md",
+            "references/research-rounds.md",
+            "references/knowledge-and-synthesis.md",
             "references/orchestration.md",
             "references/deliverables.md",
         }
@@ -162,7 +169,7 @@ class SkillContractTests(unittest.TestCase):
         for label, target, timing in entries:
             with self.subTest(target=target):
                 self.assertEqual(label, Path(target).name)
-                self.assertRegex(timing, r"^ before ")
+                self.assertRegex(timing, r"^ (?:before|only when) ")
 
     def test_openai_metadata_is_quoted_and_invokes_the_skill(self):
         text = (ROOT / "agents/openai.yaml").read_text(encoding="utf-8")

@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/benchmark_cases.json"
 USER_CENTERED_FIXTURES = ROOT / "tests/fixtures/user-centered"
 MODES_AND_ROUNDS = ROOT / "references/modes-and-rounds.md"
+READINESS_AND_SCALE = ROOT / "references/readiness-and-scale.md"
+RESEARCH_ROUNDS = ROOT / "references/research-rounds.md"
 MULTILINGUAL_RETRIEVAL = ROOT / "references/multilingual-retrieval.md"
 SCOPE_CARD = ROOT / "templates/scope-card.md"
 BREADTH_CHECKPOINT = ROOT / "templates/breadth-checkpoint.md"
@@ -71,11 +73,12 @@ class ModesAndRoundsContractTests(unittest.TestCase):
         self.assertIn("project-level decisions", text)
 
     def test_hard_deadline_uses_a_single_compact_approval_step(self):
-        text = MODES_AND_ROUNDS.read_text(encoding="utf-8").lower()
+        text = READINESS_AND_SCALE.read_text(encoding="utf-8").lower()
         self.assertIn("hard deadline", text)
-        self.assertIn("single compact scope card", text)
-        self.assertIn("candidate count", text)
-        self.assertIn("full-text review count", text)
+        self.assertIn("one concise scope card", text)
+        self.assertIn("discovery", text)
+        self.assertIn("acquisition", text)
+        self.assertIn("review", text)
 
     def test_scope_card_exposes_delivery_multilingual_and_access_choices(self):
         text = (ROOT / "templates/scope-card.md").read_text(encoding="utf-8")
@@ -103,56 +106,54 @@ class ModesAndRoundsContractTests(unittest.TestCase):
         )
         return MODES_AND_ROUNDS.read_text(encoding="utf-8")
 
-    def test_standard_mode_requires_user_seed_selection_before_depth(self):
-        text = self.read_contract()
+    def test_main_rounds_do_not_silently_authorize_depth(self):
+        text = RESEARCH_ROUNDS.read_text(encoding="utf-8")
         lower = text.lower()
 
-        self.assertIn("Stage 1", text)
-        self.assertIn("must stop", lower)
-        self.assertIn("user-confirmed seeds", lower)
-        self.assertRegex(
-            lower,
-            r"stage 2.*(?:cannot|must not).*until.*user.*(?:selects|confirms)",
-        )
+        self.assertIn("repeatable main rounds", lower)
+        self.assertIn("starting seeds", lower)
+        self.assertIn("approval authorizes only that specification", lower)
+        self.assertRegex(lower, r"new decision before changing.*seed")
 
     def test_depth_round_honors_branch_and_source_decisions(self):
-        text = self.read_contract().lower()
+        text = RESEARCH_ROUNDS.read_text(encoding="utf-8").lower()
 
-        self.assertIn("delete", text)
-        self.assertIn("review without tracing", text)
-        self.assertRegex(text, r"trace only.*user-confirmed seeds")
-        self.assertRegex(text, r"new(?:ly)? suggested seeds.*user confirmation")
+        self.assertIn("depth", text)
+        self.assertIn("review without new discovery", text)
+        self.assertIn("selected-seed tracing", text)
+        self.assertRegex(text, r"new(?:ly)? suggested seed.*requires approval")
 
     def test_quick_mode_is_upgradeable_without_restart(self):
         text = self.read_contract()
         lower = text.lower()
 
-        self.assertIn("Quick mode", text)
+        self.assertIn("Quick", text)
         self.assertIn("reuse", lower)
         self.assertIn("existing source ledger", lower)
         self.assertIn("must not restart", lower)
-        self.assertRegex(lower, r"quick.*(?:does not require|without).*(?:graph|audit workspace)")
+        self.assertRegex(lower, r"quick.*(?:no durable|without).*(?:workspace|handoff)")
 
     def test_rounds_expose_multidimensional_budget_and_actual_use(self):
-        text = self.read_contract().lower()
+        text = RESEARCH_ROUNDS.read_text(encoding="utf-8").lower()
 
         for dimension in [
-            "search time",
+            "time cap",
             "platform",
             "query",
-            "candidate",
-            "full-text",
+            "bibliographic_discovery",
+            "full_text_acquisition",
+            "substantive_review",
             "seed",
             "tracing depth",
             "language",
         ]:
             with self.subTest(dimension=dimension):
                 self.assertIn(dimension, text)
-        self.assertIn("planned and actual", text)
-        self.assertRegex(text, r"budget[- ](?:limited|paused).*(?:not|cannot).*saturation")
+        self.assertIn("planned and actual budgets", text)
+        self.assertIn("actual counts", text)
 
     def test_closure_rules_preserve_user_control(self):
-        text = self.read_contract().lower()
+        text = self.read_contract().lower() + RESEARCH_ROUNDS.read_text(encoding="utf-8").lower()
 
         self.assertRegex(
             text,

@@ -48,6 +48,7 @@ Before retrieval, present one concise round specification containing:
 - the stopping checkpoint.
 
 Approval authorizes only that specification. Query wording may be refined within it. Obtain a new decision before changing the question, material scope, source track, language, jurisdiction, seed, tracing direction, depth, output, or budget.
+A newly suggested seed requires approval before tracing, even when it appears highly influential.
 
 ## Allocation and persistence
 

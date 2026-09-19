@@ -1,4 +1,4 @@
 interface:
   display_name: "International Law Search"
   short_description: "User-controlled international-law research retrieval"
-  default_prompt: "Use $international-law-search as a user-controlled research assistant to clarify my international-law topic, retrieve reliable sources in approved stages, and let me choose when and how to deepen the search."
+  default_prompt: "Use $international-law-search as a user-controlled research assistant to plan and run approved international-law research rounds, preserve sources and claims across sessions, and support focused verification while I write."

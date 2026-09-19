@@ -34,3 +34,9 @@ Record the status of every relied-on text: authentic language version, instituti
 ## Reporting Rule
 
 Compare branches by their stated purpose and actual contribution, not by raw source count alone. One non-English source does not establish representative multilingual, regional, Global South, or perspective coverage.
+
+## Terminology persistence
+
+Store reusable concepts in `knowledge/terminology.jsonl`. Each entry records the language, native term, spelling or doctrinal variants, an English or project-language gloss, the legal distinction it preserves, its search function, the round that introduced or verified it, and sources supporting any equivalence claim.
+
+Do not collapse nearby terms merely because a dictionary translation is similar. For example, `obsolete`, `desuetude`, `obsolescence`, `dead letter`, and `inapplicable` may lead to different doctrinal and search paths. Record non-equivalence and context when it matters. A later round may revise a terminology entry, but it must preserve the earlier form and verification history.

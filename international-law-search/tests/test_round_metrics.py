@@ -76,8 +76,8 @@ class RoundMetricTests(unittest.TestCase):
 
         self.assertIn("known canonical ID", combined)
         self.assertIn("candidate_id submitted in the same return", combined)
-        self.assertIn("relevance and collection_tier", orchestration)
-        self.assertIn("before running round metrics", orchestration)
+        self.assertIn("deterministic source upsert", orchestration)
+        self.assertIn("actual three-axis use", orchestration)
         self.assertIn("stores only `citing_node cites cited_node`", graph)
         self.assertIn("never a second stored edge", graph)
         self.assertNotIn("external source independently supplies", graph)
@@ -204,7 +204,7 @@ class RoundMetricTests(unittest.TestCase):
         self.assertEqual(1, result["counts"]["duplicate_count"])
         self.assertEqual(0.5, result["counts"]["duplicate_ratio"])
 
-    def test_orchestration_is_mode_and_stage_aware(self):
+    def test_orchestration_is_mode_and_round_aware(self):
         orchestration = (ROOT / "references" / "orchestration.md").read_text(
             encoding="utf-8"
         )
@@ -213,11 +213,11 @@ class RoundMetricTests(unittest.TestCase):
         )
         combined = orchestration + brief
 
-        self.assertIn("Initial Stage 1", orchestration)
-        self.assertIn("must not launch vertical tracing", orchestration)
+        self.assertIn("approved main or side round", combined)
+        self.assertIn("Do not trace a seed", orchestration)
         self.assertIn("source-ledger-record.schema.json", combined)
         self.assertIn("deep-audit", combined)
-        self.assertIn("optional edges", combined)
+        self.assertIn("optional candidate edges", combined)
         self.assertIn("approved seed", combined)
 
     def test_graph_guidance_distinguishes_budget_pause_from_saturation(self):

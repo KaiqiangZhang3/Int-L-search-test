@@ -3,7 +3,7 @@
 ## Approved assignment
 
 - Project mode (`quick`, `standard`, or `deep-audit`): {{mode}}
-- Current stage: {{stage}}
+- Round ID and type: {{round_id_and_type}}
 - Approved question: {{question}}
 - Approved scope and exclusions: {{scope}}
 - Branch ID: {{branch_id}}
@@ -11,7 +11,8 @@
 - Retrieval mode (`horizontal` or `vertical`): {{retrieval_mode}}
 - Assignment: {{assignment}}
 - Platforms, languages, source types, and period: {{surfaces}}
-- Branch budget: {{budget}}
+- Three-axis branch budget: discovery {{discovery_cap}}; acquisition {{acquisition_cap}}; substantive review {{review_cap}}
+- Query, time, platform, language, and depth limits: {{other_budget_limits}}
 - Approved seed and direction, if vertical: {{seed_and_direction}}
 - Authorization decision ID, if vertical: {{authorization_decision_id}}
 - Known canonical IDs and aliases: {{known_ids}}
@@ -27,10 +28,11 @@ and path local; use only an opaque local ID in internal coordination. Never
 place non-externalizable content, a `file://` URI, or an absolute local path in
 this brief, a query, or a return package.
 
-Initial Stage 1 assignments must be horizontal. Do not trace references,
-footnotes, cited-by results, or lateral relations during Stage 1. A later
-vertical assignment requires an approved seed, direction, and budget. If a
-limit is reached, return the open path with `budget_paused`; do not continue.
+The round specification controls whether work is horizontal, vertical, or
+review-only. A vertical assignment requires an approved seed, direction, and
+budget. A breadth assignment does not authorize hidden footnote or cited-by
+tracing. If a limit is reached, return the open path with `budget_paused`; do
+not continue.
 
 ## Required contracts
 
@@ -38,6 +40,10 @@ limit is reached, return the open path with `budget_paused`; do not continue.
 
 - Quick or standard lightweight record:
   `$SKILL_ROOT/schemas/source-ledger-record.schema.json`
+- Candidate claim evidence:
+  `$SKILL_ROOT/schemas/claim-record.schema.json`
+- Round and budget contract:
+  `$SKILL_ROOT/schemas/round-record.schema.json`
 - Deep-audit candidate node:
   `$SKILL_ROOT/schemas/candidate-source-record.schema.json`
 - Deep-audit optional edges, only when graph support is enabled:
@@ -52,8 +58,12 @@ limit is reached, return the open path with `budget_paused`; do not continue.
 ## Return package
 
 For quick or standard mode, return concise candidate ledger rows with exact
-discovery provenance, access attempts, reader descriptions, inclusion
-reasons, coverage additions, and unresolved issues. Do not construct edges.
+discovery provenance, acquisition and access attempts, reader descriptions,
+inclusion reasons, coverage additions, and unresolved issues. When the
+assignment examines a proposition, also return candidate claim evidence with
+the source key, evidence function, exact locator, review basis, and whether it
+supports, qualifies, or contradicts the proposition. Do not assign final claim
+status or construct edges.
 
 For deep-audit mode, return candidate nodes. If `graph_enabled=true`, optional
 edges may also be returned with `record_scope=candidate` and
@@ -63,8 +73,8 @@ Put query, platform, seed, footnote, bibliography, and subagent discovery in
 source provenance, never in `discovered_from` edges.
 
 Always return failures, metadata conflicts, access gaps, remaining high-value
-paths, and actual budget use. Do not edit the shared ledger or canonical
-corpus, merge identities, select final seeds, verify edges, assign final
-collection tiers, decide saturation, or produce user-facing conclusions. Do
-not fabricate records, call unread material full text, resolve scholarly
-disputes, choose an argument, or draft academic prose.
+paths, and actual use on all three budget axes. Do not edit shared source,
+claim, round, or terminology ledgers; merge identities; select final seeds;
+verify edges; assign final claim status; decide saturation; or produce
+user-facing conclusions. Do not fabricate records, call unread material full
+text, resolve scholarly disputes, choose an argument, or draft academic prose.

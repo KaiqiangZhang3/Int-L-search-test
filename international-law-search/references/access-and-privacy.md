@@ -29,6 +29,12 @@ Do not derive either axis from the other. Full-text availability does not mean t
 
 Record every access attempt, successful or failed, as its own event in `retrieval_history`, including platform, time, route-level `availability`, route-level `review_extent`, and any stable URL or local path. A metadata-only or abstract-only route cannot support selected-section or full-text review. A separate authorized local, open, or subscription route can support stronger review even when another attempt failed.
 
+## Acquisition and recovery routes
+
+Discovery, acquisition, and review are separate. Record important books, chapters, theses, commentaries, and institutional materials even when no full text is available. Use typed acquisition routes for official or open copies, subscriptions, publisher pages, library holdings, physical copies, purchase, document delivery, and unavailable routes. A failed route does not lower scholarly importance.
+
+When an official or publisher route fails, record the failure and try authorized alternatives that remain inside the approved round. For United Nations materials, try another official UN document surface or stable document-number lookup before authorized library catalogues, subscriptions, or repositories. For books, verify edition and ISBN through a publisher or reliable library catalogue and record physical or document-delivery options. Never use a search snippet or indexed fragment as official full text or substantive review evidence.
+
 ## Status examples
 
 - A judgment available on an official website whose merits section was examined is `open_full_text` plus `selected_sections_reviewed`.
