@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/international-law-search/claim-record.schema.json",
+  "title": "International Law Search Claim Record",
+  "description": "An evidence-backed research proposition with stable revision history.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claim_id",
+    "claim_text",
+    "claim_type",
+    "scope",
+    "status",
+    "first_seen_round",
+    "last_verified_round",
+    "supporting_evidence",
+    "contrary_evidence",
+    "predecessor_claim_ids",
+    "successor_claim_ids",
+    "reader_qualification"
+  ],
+  "properties": {
+    "claim_id": {"type": "string", "minLength": 1},
+    "claim_text": {"type": "string", "minLength": 1},
+    "claim_type": {"type": "string", "minLength": 1},
+    "scope": {"type": "string", "minLength": 1},
+    "status": {
+      "enum": [
+        "provisional",
+        "supported",
+        "contested",
+        "revised",
+        "superseded"
+      ]
+    },
+    "first_seen_round": {"type": "string", "minLength": 1},
+    "last_verified_round": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "supporting_evidence": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "contrary_evidence": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "predecessor_claim_ids": {"$ref": "#/$defs/claim_ids"},
+    "successor_claim_ids": {"$ref": "#/$defs/claim_ids"},
+    "reader_qualification": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "supported"}}},
+      "then": {
+        "properties": {
+          "supporting_evidence": {"minItems": 1},
+          "last_verified_round": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "contested"}}},
+      "then": {
+        "properties": {
+          "supporting_evidence": {"minItems": 1},
+          "contrary_evidence": {"minItems": 1},
+          "last_verified_round": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {"enum": ["revised", "superseded"]}
+        }
+      },
+      "then": {
+        "properties": {
+          "successor_claim_ids": {"minItems": 1}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "claim_ids": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_key",
+        "locator",
+        "evidence_function",
+        "review_basis"
+      ],
+      "properties": {
+        "source_key": {"type": "string", "minLength": 1},
+        "locator": {"type": "string", "minLength": 1},
+        "evidence_function": {
+          "enum": [
+            "direct_support",
+            "interpretive_support",
+            "qualification",
+            "contrary_authority",
+            "counterexample",
+            "context"
+          ]
+        },
+        "review_basis": {
+          "enum": [
+            "full_text_substantively_reviewed",
+            "selected_sections_reviewed"
+          ]
+        }
+      }
+    }
+  }
+}
