@@ -187,10 +187,10 @@
     "required": [
       "Runs a bounded breadth-first round without systematic citation tracing",
       "Returns a field map, an initial annotated bibliography, five to ten candidate seeds, and planned-versus-actual budget use",
-      "Stops after Stage 1 and gives concrete controls for selecting, deleting, or expanding branches"
+      "Stops after the approved round and gives concrete controls for selecting, deleting, or expanding branches, including another breadth round"
     ],
     "prohibited": [
-      "Begins Stage 2 before the user selects or confirms seeds",
+      "Begins any unapproved next round before the user selects or confirms its scope",
       "Collects a large near-final corpus before the first substantive checkpoint",
       "Treats a generic invitation to continue as a concrete decision panel"
     ],
@@ -295,6 +295,91 @@
       "Treats disputed propositions as settled law",
       "Chooses the user's thesis or preferred scholarly position",
       "Drafts argumentative academic prose on the user's behalf"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "doctoral-budget-separation",
+    "kind": "doctoral_scale",
+    "prompt": "Build a doctoral-scale bibliography, but distinguish what you can discover from what you can obtain and actually read.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Sets separate bibliographic-discovery, full-text-acquisition, and substantive-review budgets",
+      "May discover a much larger corpus than can be acquired or reviewed in the same round",
+      "Reports planned and actual use on all three axes"
+    ],
+    "prohibited": [
+      "Treats every discovered item as acquired or reviewed",
+      "Shrinks bibliographic discovery to the full-text review cap",
+      "Claims corpus saturation merely because the review budget ended"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "repeat-breadth-expansion",
+    "kind": "round_continuation",
+    "prompt": "The first map exposed missing regions and source types. Run another breadth round before depth work.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Offers and records a breadth-expansion round with its own approved question and budget",
+      "Preserves the first round report as an immutable checkpoint",
+      "Updates the cumulative source ledger and living synthesis without assuming a fixed stage sequence"
+    ],
+    "prohibited": [
+      "Forces depth work because one breadth round has already occurred",
+      "Overwrites the first round report",
+      "Treats source-type expansion as an unapproved continuation"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "writing-time-side-round",
+    "kind": "side_round",
+    "prompt": "While drafting from the R2 corpus, verify one contested sentence without changing the planned R3 corpus-expansion round.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Creates an approved side round attached to R2 and keeps the next main round number unchanged",
+      "Records supporting and contrary reviewed evidence with exact locators",
+      "Updates the claim ledger and living synthesis while preserving the side-round report"
+    ],
+    "prohibited": [
+      "Counts the side round as the next main round",
+      "Presents a contested claim as settled",
+      "Expands the side round into unrelated corpus retrieval"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "inaccessible-foundational-book",
+    "kind": "access_gap",
+    "prompt": "A foundational book has a verified ISBN and library holding, but no readable full text. Keep it in the project and tell me what to do next.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Keeps the book in the source ledger as must obtain with not reviewed status",
+      "Records the verified ISBN, holding, and lawful acquisition routes",
+      "Limits description to verified identity, access, and inclusion evidence"
+    ],
+    "prohibited": [
+      "Infers the book's thesis or contents from its reputation",
+      "Drops the book because it cannot be read immediately",
+      "Labels catalogue metadata as full-text review"
+    ],
+    "evaluation_mode": "behavioral_review"
+  },
+  {
+    "id": "synthesis-only-round",
+    "kind": "synthesis_round",
+    "prompt": "Do not retrieve anything new. Rebuild the reader-facing synthesis from the current verified corpus.",
+    "approved_mode": "standard_interactive",
+    "required": [
+      "Runs a bounded synthesis round with zero discovery and acquisition budgets",
+      "Uses only current non-superseded claims and their recorded review basis",
+      "Produces versioned synthesis and presentation outputs without changing source identities"
+    ],
+    "prohibited": [
+      "Silently retrieves new sources",
+      "Converts provisional or contested propositions into settled conclusions",
+      "Overwrites prior synthesis versions or immutable round reports"
     ],
     "evaluation_mode": "behavioral_review"
   }

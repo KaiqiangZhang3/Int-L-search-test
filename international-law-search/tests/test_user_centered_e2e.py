@@ -29,7 +29,8 @@ class UserCenteredE2ETests(unittest.TestCase):
         self.assertEqual(
             quick["user_decisions"], standard["inherited_user_decisions"]
         )
-        self.assertEqual("round_1_waiting_for_user", standard["stage"])
+        self.assertFalse(standard["restart_performed"])
+        self.assertEqual([], standard["selected_seeds"])
 
     def test_quick_fixture_has_approved_scope_upgrade_checkpoint_and_ledger(self):
         session = load_json("quick-upgrade/quick-session.json")
@@ -61,12 +62,16 @@ class UserCenteredE2ETests(unittest.TestCase):
             with self.subTest(source_key=record["source_key"]):
                 self.assertTrue(required.issubset(record))
 
-    def test_standard_fixture_cannot_enter_depth_without_selected_seeds(self):
+    def test_standard_fixture_requires_a_user_choice_before_any_next_round(self):
         round_1 = load_json("standard-corporate-role/round-1.json")
 
-        self.assertEqual("round_1_waiting_for_user", round_1["stage"])
         self.assertEqual([], round_1["selected_seeds"])
         self.assertEqual([], round_1["vertical_branches"])
+        self.assertTrue(
+            {"select_seed", "expand_branch", "stop_and_deliver"}.issubset(
+                round_1["decision_panel"]["allowed_actions"]
+            )
+        )
 
     def test_standard_breadth_result_is_bounded_and_reviewable(self):
         round_1 = load_json("standard-corporate-role/round-1.json")

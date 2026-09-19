@@ -24,6 +24,10 @@ class BenchmarkFixtureTests(unittest.TestCase):
             "known_benchmark",
             "retrieval_only_boundary",
             "concise_human_review",
+            "doctoral_scale",
+            "round_continuation",
+            "side_round",
+            "synthesis_round",
         }
 
         kinds = {case["kind"] for case in self.cases}
@@ -87,6 +91,29 @@ class BenchmarkFixtureTests(unittest.TestCase):
         self.assertTrue(
             any("governing customary-law rule" in item for item in case["forbidden_behaviors"])
         )
+
+    def test_v3_cases_replace_fixed_stages_with_repeatable_round_behaviors(self):
+        by_id = {case["id"]: case for case in self.cases}
+
+        self.assertIn("repeat-breadth-expansion", by_id)
+        self.assertIn("writing-time-side-round", by_id)
+        self.assertIn("inaccessible-foundational-book", by_id)
+        self.assertIn("synthesis-only-round", by_id)
+        serialized = json.dumps(self.cases)
+        self.assertNotIn("Stage 1", serialized)
+        self.assertNotIn("Stage 2", serialized)
+
+    def test_v3_benchmarks_retain_safety_and_non_exhaustiveness_controls(self):
+        by_id = {case["id"]: case for case in self.cases}
+
+        privacy = by_id["mixed-local-corpus-privacy"]
+        access = by_id["subscription-access-gap"]
+        depth = by_id["depth-five-high-yield"]
+        doctoral = by_id["doctoral-budget-separation"]
+        self.assertTrue(any("confidential" in item for item in privacy["forbidden_behaviors"]))
+        self.assertTrue(any("full-text review" in item for item in access["forbidden_behaviors"]))
+        self.assertTrue(any("approved depth" in item for item in depth["forbidden_behaviors"]))
+        self.assertTrue(any("saturation" in item for item in doctoral["prohibited"]))
 
 
 if __name__ == "__main__":
