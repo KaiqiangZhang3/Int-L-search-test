@@ -59,8 +59,8 @@ def _load_state(path: Path) -> tuple[Optional[dict], list[str]]:
         return None, [f"{path.name}: project state must be an object"]
 
     errors = []
-    if state.get("schema_version") != 2:
-        errors.append(f"{path.name}: schema_version must be 2")
+    if state.get("schema_version") not in {2, 3}:
+        errors.append(f"{path.name}: schema_version must be 2 or 3")
     if not isinstance(state.get("graph_enabled"), bool):
         errors.append(f"{path.name}: graph_enabled must be a boolean")
     if not isinstance(state.get("saturation_enabled"), bool):
@@ -239,19 +239,23 @@ def validate_corpus(
     source_records, errors = _load_jsonl(sources_path)
     edge_records = []
 
+    graph_enabled = edges_path is not None
     if state_path is not None:
         state, state_errors = _load_state(state_path)
         errors.extend(state_errors)
-        if state is not None and state.get("graph_enabled") is True and edges_path is None:
-            errors.append(f"{state_path.name}: graph_enabled requires --edges")
+        if state is not None:
+            graph_enabled = state.get("graph_enabled") is True
+            if graph_enabled and edges_path is None:
+                errors.append(f"{state_path.name}: graph_enabled requires --edges")
 
-    if edges_path is not None:
+    if graph_enabled and edges_path is not None:
         edge_records, edge_load_errors = _load_jsonl(edges_path)
         errors.extend(edge_load_errors)
 
     source_ids, source_errors = _validate_sources(sources_path, source_records)
     errors.extend(source_errors)
-    errors.extend(_validate_edges(edges_path, edge_records, source_ids))
+    if graph_enabled:
+        errors.extend(_validate_edges(edges_path, edge_records, source_ids))
     return len(source_records), len(edge_records), errors
 
 

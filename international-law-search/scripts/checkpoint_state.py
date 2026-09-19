@@ -54,7 +54,6 @@ RECOVERY_FIELDS = {
     "open_paths",
     "reason",
     "occurred_at",
-    "round",
 }
 ROUND_REQUIRED = {
     "round_id",
@@ -149,19 +148,39 @@ def _record_recovery_checkpoint(
         raise ValueError("Recovery field reason must be non-empty")
     if not isinstance(payload["occurred_at"], str) or not payload["occurred_at"]:
         raise ValueError("Recovery field occurred_at must be non-empty")
-    round_record = payload["round"]
-    if not isinstance(round_record, dict) or not round_record.get("round_id"):
-        raise ValueError("Recovery round evidence requires round_id")
-    missing_round_fields = sorted(ROUND_REQUIRED - set(round_record))
-    if missing_round_fields:
-        raise ValueError(
-            "Recovery round evidence is missing fields: "
-            + ", ".join(missing_round_fields)
-        )
-    if expected_budget_status is not None and round_record.get("budget_status") != expected_budget_status:
-        raise ValueError(
-            f"Recovery round budget_status must be {expected_budget_status}"
-        )
+    schema_version = state.get("schema_version", 2)
+    if payload.get("saturation_claimed") is True and expected_budget_status == "budget_paused":
+        raise ValueError("A budget_paused checkpoint cannot claim saturation")
+    if schema_version >= 3:
+        round_id = payload.get("round_id")
+        if not isinstance(round_id, str) or not round_id:
+            raise ValueError("Recovery checkpoint requires an authoritative round_id")
+        if (
+            expected_budget_status is not None
+            and payload.get("budget_status") != expected_budget_status
+        ):
+            raise ValueError(
+                f"Recovery round budget_status must be {expected_budget_status}"
+            )
+        state.pop("rounds", None)
+        state["current_checkpoint"] = round_id
+    else:
+        round_record = payload.get("round")
+        if not isinstance(round_record, dict) or not round_record.get("round_id"):
+            raise ValueError("Recovery round evidence requires round_id")
+        missing_round_fields = sorted(ROUND_REQUIRED - set(round_record))
+        if missing_round_fields:
+            raise ValueError(
+                "Recovery round evidence is missing fields: "
+                + ", ".join(missing_round_fields)
+            )
+        if (
+            expected_budget_status is not None
+            and round_record.get("budget_status") != expected_budget_status
+        ):
+            raise ValueError(
+                f"Recovery round budget_status must be {expected_budget_status}"
+            )
 
     branch["last_checkpoint"] = payload["last_checkpoint"]
     branch["pending_items"] = copy.deepcopy(payload["pending_items"])
@@ -171,13 +190,53 @@ def _record_recovery_checkpoint(
     branch["status_reason"] = payload["reason"]
     branch["status_changed_at"] = payload["occurred_at"]
 
-    rounds = state.setdefault("rounds", [])
-    for index, existing in enumerate(rounds):
-        if existing.get("round_id") == round_record["round_id"]:
-            rounds[index] = copy.deepcopy(round_record)
-            break
-    else:
-        rounds.append(copy.deepcopy(round_record))
+    if schema_version < 3:
+        rounds = state.setdefault("rounds", [])
+        for index, existing in enumerate(rounds):
+            if existing.get("round_id") == round_record["round_id"]:
+                rounds[index] = copy.deepcopy(round_record)
+                break
+        else:
+            rounds.append(copy.deepcopy(round_record))
+
+
+def _authoritative_round_path(state_path: Path, state: dict) -> Path:
+    artifacts = state.get("artifacts")
+    relative = artifacts.get("rounds") if isinstance(artifacts, dict) else None
+    if not isinstance(relative, str) or not relative:
+        raise ValueError("Version 3 state must reference its authoritative round ledger")
+    candidate = Path(relative)
+    if candidate.is_absolute():
+        raise ValueError("Authoritative round ledger must be workspace-relative")
+    workspace = state_path.parent.resolve()
+    resolved = (workspace / candidate).resolve()
+    try:
+        resolved.relative_to(workspace)
+    except ValueError as exc:
+        raise ValueError("Authoritative round ledger must stay within the workspace") from exc
+    return resolved
+
+
+def _require_authoritative_round(state_path: Path, state: dict, round_id: str) -> None:
+    round_path = _authoritative_round_path(state_path, state)
+    try:
+        lines = round_path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError) as exc:
+        raise ValueError(f"Unable to read authoritative round ledger: {exc}") from exc
+    for line_number, raw_line in enumerate(lines, start=1):
+        if not raw_line.strip():
+            continue
+        try:
+            record = json.loads(raw_line)
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                f"Authoritative round ledger line {line_number} is invalid JSON"
+            ) from exc
+        if isinstance(record, dict) and record.get("round_id") == round_id:
+            return
+    raise ValueError(
+        f"Round {round_id!r} is absent from the authoritative round ledger"
+    )
 
 
 def apply_transition(state: dict, transition: str, payload: dict) -> dict:
@@ -285,6 +344,11 @@ def checkpoint(path: Path, transition: str, payload: dict) -> dict:
     """Apply a transition and atomically replace the state file."""
     state = json.loads(path.read_text(encoding="utf-8"))
     updated = apply_transition(state, transition, payload)
+    if state.get("schema_version", 2) >= 3 and transition in {
+        "budget_paused",
+        "failed",
+    }:
+        _require_authoritative_round(path, state, payload.get("round_id"))
     descriptor, temporary_name = tempfile.mkstemp(
         prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
     )

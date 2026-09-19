@@ -128,6 +128,23 @@ class ValidateCorpusCliTests(unittest.TestCase):
 
         self.assert_failure(result, "state.json", "graph_enabled requires --edges")
 
+    def test_graph_disabled_v3_state_does_not_validate_optional_edges(self):
+        invalid_edge = verified_edge(target_id="missing")
+        result = self.run_validator(
+            [source_record("source-1")],
+            [invalid_edge],
+            state={
+                "schema_version": 3,
+                "graph_enabled": False,
+                "saturation_enabled": False,
+                "decision_log": [],
+                "branches": [],
+            },
+        )
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("0 verified edges", result.stdout)
+
     def test_vertical_branch_requires_matching_trace_authorization(self):
         state = {
             "schema_version": 2,

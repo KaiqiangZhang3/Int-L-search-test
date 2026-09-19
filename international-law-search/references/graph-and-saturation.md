@@ -3,9 +3,11 @@
 ## Enable deliberately
 
 The relationship graph is optional, including in deep-audit mode. Enable it
-only when the user approves citation tracing or network coverage. Stage 1 does
-not construct it. Set `graph_enabled=true` only after graph work is selected;
-otherwise validate the canonical sources without an edge file.
+only when the user approves citation tracing or network coverage. A main or
+side round does not construct it unless graph work is part of that round's
+approved specification. Set `graph_enabled=true` only after graph work is
+selected. When it is false, edge files are outside validation scope; validate
+the canonical sources without requiring or interpreting edges.
 
 Formal saturation review is separately optional. Set
 `saturation_enabled=true` only when the approved project calls for multi-round
@@ -63,6 +65,12 @@ After every authorized round record:
 - Access gaps and platform failures.
 - Open high-value branches, branch depth, and attempted paths.
 - `budget_status` as `within_budget` or `budget_paused`.
+
+In a version-3 workspace, `knowledge/rounds.jsonl` is the authoritative round
+ledger. `state.json` stores only `current_checkpoint` and the artifact pointer;
+it must not embed a second rounds array. Recovery checkpoints must reference an
+existing `round_id` in that ledger. Version-2 workspaces may retain embedded
+round evidence until they are migrated.
 
 `$SKILL_ROOT/scripts/round_metrics.py` returns only counts, coverage additions,
 access gaps, and open paths from canonicalized source IDs. The caller adds

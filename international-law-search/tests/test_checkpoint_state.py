@@ -35,6 +35,14 @@ def base_state():
     }
 
 
+def base_v3_state():
+    state = base_state()
+    state["schema_version"] = 3
+    state["current_checkpoint"] = None
+    state["artifacts"] = {"rounds": "knowledge/rounds.jsonl"}
+    return state
+
+
 def vertical_branch():
     return {
         "branch_id": "vertical-1",
@@ -298,3 +306,99 @@ class CheckpointStateTests(unittest.TestCase):
                 )
 
             self.assertEqual(before, path.read_text(encoding="utf-8"))
+
+    def test_v3_budget_pause_references_authoritative_round_ledger(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            rounds_path = root / "knowledge" / "rounds.jsonl"
+            rounds_path.parent.mkdir()
+            rounds_path.write_text(
+                json.dumps({"round_id": "R1", "status": "paused"}) + "\n",
+                encoding="utf-8",
+            )
+            path = self.write_state(root, base_v3_state())
+
+            module.checkpoint(
+                path,
+                "budget_paused",
+                {
+                    "decision_id": "pause-budget",
+                    "decided_by": "system",
+                    "decided_at": "2026-09-18T00:00:00Z",
+                    "round_id": "R1",
+                    "branch_id": "breadth",
+                    "last_checkpoint": "cursor-10",
+                    "pending_items": ["source-next"],
+                    "unresolved_items": ["citation-next"],
+                    "platform_errors": [],
+                    "open_paths": ["forward:source-next"],
+                    "reason": "Approved source cap reached.",
+                    "occurred_at": "2026-09-18T00:00:00Z",
+                    "budget_status": "budget_paused",
+                    "saturation_claimed": False,
+                },
+            )
+
+            updated = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual("R1", updated["current_checkpoint"])
+            self.assertNotIn("rounds", updated)
+            self.assertEqual(
+                [{"round_id": "R1", "status": "paused"}],
+                [json.loads(line) for line in rounds_path.read_text().splitlines()],
+            )
+
+    def test_v3_checkpoint_rejects_unknown_round_reference_atomically(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            rounds_path = root / "knowledge" / "rounds.jsonl"
+            rounds_path.parent.mkdir()
+            rounds_path.write_text("", encoding="utf-8")
+            path = self.write_state(root, base_v3_state())
+            before = path.read_text(encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "authoritative round ledger"):
+                module.checkpoint(
+                    path,
+                    "budget_paused",
+                    {
+                        "decision_id": "pause-budget",
+                        "decided_by": "system",
+                        "decided_at": "2026-09-18T00:00:00Z",
+                        "round_id": "R1",
+                        "branch_id": "breadth",
+                        "last_checkpoint": "cursor-10",
+                        "pending_items": [],
+                        "unresolved_items": [],
+                        "platform_errors": [],
+                        "open_paths": [],
+                        "reason": "Approved source cap reached.",
+                        "occurred_at": "2026-09-18T00:00:00Z",
+                        "budget_status": "budget_paused",
+                    },
+                )
+
+            self.assertEqual(before, path.read_text(encoding="utf-8"))
+
+    def test_budget_pause_cannot_claim_saturation(self):
+        module = load_module()
+        payload = {
+            "decision_id": "pause-budget",
+            "decided_by": "system",
+            "decided_at": "2026-09-18T00:00:00Z",
+            "round_id": "round-1",
+            "branch_id": "breadth",
+            "last_checkpoint": "cursor-10",
+            "pending_items": [],
+            "unresolved_items": [],
+            "platform_errors": [],
+            "open_paths": [],
+            "reason": "Approved source cap reached.",
+            "occurred_at": "2026-09-18T00:00:00Z",
+            "round": round_evidence("round-1", "budget_paused"),
+            "saturation_claimed": True,
+        }
+
+        with self.assertRaisesRegex(ValueError, "saturation"):
+            module.apply_transition(base_state(), "budget_paused", payload)

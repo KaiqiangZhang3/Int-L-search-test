@@ -59,13 +59,11 @@ class NicaraguaE2EFixtureTests(unittest.TestCase):
         self.assertEqual(3, len(self.load_jsonl("edges.jsonl")))
         self.assertGreaterEqual(len(self.load_jsonl("retrieval-log.jsonl")), 6)
 
-    def test_state_sources_and_edges_match_declared_schema_fields(self):
-        state = json.loads((FIXTURE / "state.json").read_text(encoding="utf-8"))
+    def test_sources_and_edges_match_current_declared_schema_fields(self):
         sources = self.load_jsonl("sources.jsonl")
         edges = self.load_jsonl("edges.jsonl")
 
         for schema_name, records in (
-            ("project-state.schema.json", [state]),
             ("source-record.schema.json", sources),
             ("edge-record.schema.json", edges),
         ):

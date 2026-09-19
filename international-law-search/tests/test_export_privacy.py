@@ -113,6 +113,20 @@ class ExportPrivacyGuardTests(unittest.TestCase):
 
                 self.assertTrue(any("absolute local path" in error for error in errors))
 
+    def test_reader_bundle_rejects_local_path_in_narrative_text(self):
+        record = {
+            "privacy_classification": "public_research_output",
+            "externalizable": True,
+            "narrative_sections": [
+                {"text": "/Users/example/private-note.pdf"}
+            ],
+        }
+        path = self.write_manifest(".jsonl", json.dumps(record) + "\n")
+
+        errors = validate_export_manifest(path)
+
+        self.assertTrue(any("local path" in error for error in errors))
+
     def test_jsonl_rejects_nested_non_externalizable_content(self):
         record = {
             "export_item_id": "item-nested",
