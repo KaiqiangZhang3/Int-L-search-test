@@ -216,6 +216,23 @@ class LedgerOpsV3Tests(unittest.TestCase):
 
         self.assertTrue(any("unsupported description evidence" in error for error in errors))
 
+    def test_validator_allows_identity_only_note_for_unreviewed_source(self):
+        validator = load_validator()
+        ledger = self.tmp_path / "sources.jsonl"
+        record = source_record("SRC-001", title="Inaccessible Treatise")
+        record["availability"] = "identified_inaccessible"
+        record["review_extent"] = "not_reviewed"
+        record["description_basis"] = {
+            "kind": "none",
+            "locations": ["No text or table of contents was reviewed"],
+        }
+        record["description"] = (
+            "Identity and library holding verified; contents not reviewed."
+        )
+        ledger.write_text(json.dumps(record) + "\n", encoding="utf-8")
+
+        self.assertEqual([], validator.validate_source_ledger(ledger))
+
     def test_validator_rejects_externalizable_local_acquisition_path(self):
         validator = load_validator()
         ledger = self.tmp_path / "sources.jsonl"

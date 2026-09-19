@@ -186,10 +186,16 @@ def _record_errors(record: dict, schema: dict, line_number: int) -> list[str]:
         kind = basis.get("kind")
         minimum = DESCRIPTION_MINIMUM_REVIEW.get(kind)
         actual = record.get("review_extent")
-        if minimum is None:
+        if kind == "none" and actual != "not_reviewed":
             errors.append(
                 f"{prefix}: unsupported description evidence; "
-                f"{kind!r} does not support a description"
+                "'none' requires 'not_reviewed'"
+            )
+        elif kind == "none":
+            pass
+        elif minimum is None:
+            errors.append(
+                f"{prefix}: unsupported description evidence; unknown basis {kind!r}"
             )
         elif (
             actual not in REVIEW_RANK or REVIEW_RANK[actual] < REVIEW_RANK[minimum]

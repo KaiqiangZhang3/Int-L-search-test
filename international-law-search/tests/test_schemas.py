@@ -508,7 +508,7 @@ class SchemaTests(unittest.TestCase):
             "object", rule["then"]["properties"]["evidence"]["type"]
         )
 
-    def test_state_schema_tracks_approval_rounds_branches_and_stopping(self):
+    def test_state_schema_tracks_approval_round_pointer_branches_and_stopping(self):
         schema = self.load("project-state.schema.json")
         required = set(schema["required"])
 
@@ -519,11 +519,17 @@ class SchemaTests(unittest.TestCase):
                 "saturation_enabled",
                 "approved_plan",
                 "branches",
-                "rounds",
+                "current_checkpoint",
+                "artifacts",
                 "stopping",
             }.issubset(required)
         )
-        self.assertEqual(2, schema["properties"]["schema_version"]["const"])
+        self.assertNotIn("rounds", required)
+        self.assertEqual(
+            {"const": "knowledge/rounds.jsonl"},
+            schema["properties"]["artifacts"]["properties"]["rounds"],
+        )
+        self.assertEqual(3, schema["properties"]["schema_version"]["const"])
         self.assertEqual("boolean", schema["properties"]["graph_enabled"]["type"])
         self.assertEqual(
             "boolean", schema["properties"]["saturation_enabled"]["type"]
