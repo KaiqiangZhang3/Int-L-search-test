@@ -391,7 +391,7 @@ class SkillContractTests(unittest.TestCase):
 
         for phrase in [
             "word, markdown, or html",
-            "same source records",
+            "same source set",
             "chronology",
             "theme",
             "source type",

@@ -72,6 +72,15 @@
 
 {{user_selected_bibliography_table_timeline_or_machine_exports}}
 
+## 本轮交付文件
+
+- 本轮不可变报告：`reports/{{round_id}}.md`
+- 当前研究综合：`synthesis/current-synthesis.md`
+- 项目阅读入口：`presentations/index.html`
+- 书目数据：`exports/bibliography.csv`
+
+以上文件必须由同一份已验证的 round bundle 生成，所用来源、主张和 checkpoint 不得各自选择。Standard 与 Deep-audit 模式在每个已完成的主轮或侧轮后默认更新；Quick 模式仅在用户要求持久报告或升级项目时生成。HTML 必须可离线阅读，不得加载远程字体、脚本、样式表或图片，也不得自动打开浏览器。
+
 ---
 
 # 国际法检索档案
@@ -111,3 +120,10 @@
 ## 档案附件
 
 {{user_selected_structured_exports}}
+
+## 档案交付文件
+
+- 本轮不可变档案：`reports/{{round_id}}.md`
+- 当前档案综合：`synthesis/current-synthesis.md`
+- 项目阅读入口：`presentations/index.html`
+- 书目数据：`exports/bibliography.csv`

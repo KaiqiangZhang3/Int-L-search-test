@@ -1,6 +1,22 @@
 # Deliverables
 
-Use the shared source ledger as the single source of truth. Reader-facing and structured outputs must describe the same source records at the same export checkpoint. Deep-audit outputs additionally derive graph, coverage, and event details from canonical project state; quick and standard outputs do not require a graph or audit workspace.
+Use one validated round bundle as the single rendering checkpoint. Its source and claim selections resolve against the canonical ledgers, so reader-facing and structured outputs describe the same source set, current claims, round, budget, gaps, and next-round options. Deep-audit outputs additionally derive graph, coverage, and event details from canonical project state; quick and standard outputs do not require a graph or audit workspace.
+
+## Default round artifact set
+
+After every completed main or side round in Standard or Deep-audit mode, run `scripts/render_research_outputs.py` and publish all of the following from the same validated bundle:
+
+- an **immutable round report** at `reports/<round-id>.md`;
+- an immutable round presentation at `presentations/rounds/<round-id>.html`;
+- a versioned **living synthesis** at `synthesis/synthesis-<checkpoint-id>.md` and the current pointer at `synthesis/current-synthesis.md`;
+- a versioned static presentation at `presentations/versions/<checkpoint-id>.html` and the project hub at `presentations/index.html`; and
+- the current `exports/bibliography.csv`.
+
+The HTML must be a self-contained static file with embedded CSS, semantic headings, accessible tables, print rules, and no remote fonts, scripts, stylesheets, images, or other network-loaded assets. It may contain ordinary stable source hyperlinks. Generation must never open a browser automatically.
+
+Quick mode renders this durable set only when the user asks for a durable report or upgrades the project. A later upgrade uses the existing ledgers and checkpoint history; it does not discard the quick result. The rendering script accepts only a completed round and writes all files through a sibling staging directory. It publishes immutable versions first and updates `current-synthesis.md` and `index.html` last. A validation or preflight failure must leave the last valid current files unchanged.
+
+The bibliography CSV columns are stable source key, citation, type, language, scholarly importance, acquisition priority, availability, review extent, reading priority, stable links, and round membership. Do not add local paths, private-note identifiers, raw retrieval logs, or non-externalizable acquisition data.
 
 ## Confirm the user's output choices
 
@@ -73,6 +89,11 @@ local paths. Do not export when it reports an error, and do not weaken or omit
 the manifest to obtain a passing result.
 
 Before export, run `$SKILL_ROOT/scripts/validate_reader_report.py REPORT --language LANGUAGE --final`. It deterministically rejects unresolved template markers, unresolved manual-review items, declared synthesis without source citations, and a Chinese report that opens with machine-state sections. It does not judge legal correctness.
+
+For a v3 checkpoint, first run `scripts/validate_source_ledger.py`,
+`scripts/validate_claim_ledger.py`, and `scripts/validate_round_bundle.py`.
+Rendering and export may proceed only when all applicable validators pass and
+all selected formats come from that same checkpoint.
 
 In deep-audit mode, also run `$SKILL_ROOT/scripts/validate_corpus.py` with `--sources` and, when graph data is enabled, the applicable edge input at the exact canonical checkpoint. Schema validation alone is not sufficient because it cannot enforce corpus-wide identity, endpoint, relationship, and retrieval-link invariants. Do not export while an applicable validator reports an error.
 
