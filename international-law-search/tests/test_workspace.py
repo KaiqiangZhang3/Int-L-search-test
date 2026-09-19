@@ -9,6 +9,8 @@ import unittest
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "init_workspace.py"
+STATE_SCHEMA = Path(__file__).resolve().parents[1] / "schemas" / "project-state.schema.json"
+HANDOFF_TEMPLATE = Path(__file__).resolve().parents[1] / "templates" / "session-handoff.md"
 
 
 def load_module():
@@ -19,6 +21,38 @@ def load_module():
 
 
 class WorkspaceTests(unittest.TestCase):
+    def test_session_handoff_points_to_v3_knowledge_and_reader_artifacts(self):
+        handoff = HANDOFF_TEMPLATE.read_text(encoding="utf-8")
+
+        for field in (
+            "Current main round",
+            "Current side round",
+            "Source ledger",
+            "Claim ledger",
+            "Round index",
+            "Decision log",
+            "Current synthesis",
+            "Latest round report",
+            "Presentation hub",
+            "Bibliography CSV",
+            "Next authorized action",
+        ):
+            self.assertIn(field, handoff)
+
+    def test_initializer_and_state_schema_share_the_v3_contract(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "pil-search"
+            module.initialize(target, "pil-search")
+            state = json.loads((target / "state.json").read_text(encoding="utf-8"))
+            schema = json.loads(STATE_SCHEMA.read_text(encoding="utf-8"))
+
+            self.assertEqual(3, schema["properties"]["schema_version"]["const"])
+            self.assertTrue(set(schema["required"]).issubset(state))
+            self.assertIn("current_checkpoint", schema["required"])
+            self.assertIn("artifacts", schema["required"])
+            self.assertNotIn("rounds", state)
+
     def test_initializer_creates_resumable_layout_without_overwrite(self):
         module = load_module()
         with tempfile.TemporaryDirectory() as tmp:
@@ -27,14 +61,34 @@ class WorkspaceTests(unittest.TestCase):
             expected = [
                 "state.json",
                 "plan/search-plan.md",
-                "corpus/sources.jsonl",
+                "knowledge/sources.jsonl",
+                "knowledge/claims.jsonl",
+                "knowledge/rounds.jsonl",
+                "knowledge/decisions.jsonl",
+                "knowledge/terminology.jsonl",
+                "reports",
+                "synthesis",
+                "presentations",
                 "logs/retrieval.jsonl",
-                "exports/.gitkeep",
+                "exports/bibliography.csv",
             ]
             self.assertTrue(all((target / path).exists() for path in expected))
-            self.assertFalse((target / "corpus" / "edges.jsonl").exists())
+            self.assertFalse((target / "knowledge" / "edges.jsonl").exists())
             state = json.loads((target / "state.json").read_text(encoding="utf-8"))
-            self.assertEqual(2, state["schema_version"])
+            self.assertEqual(3, state["schema_version"])
+            self.assertEqual(
+                {
+                    "sources": "knowledge/sources.jsonl",
+                    "claims": "knowledge/claims.jsonl",
+                    "rounds": "knowledge/rounds.jsonl",
+                    "decisions": "knowledge/decisions.jsonl",
+                    "terminology": "knowledge/terminology.jsonl",
+                    "current_synthesis": None,
+                    "presentation_hub": None,
+                    "bibliography": "exports/bibliography.csv",
+                },
+                state["artifacts"],
+            )
             self.assertFalse(state["graph_enabled"])
             self.assertFalse(state["saturation_enabled"])
             self.assertEqual([], state["decision_log"])
@@ -50,7 +104,7 @@ class WorkspaceTests(unittest.TestCase):
 
             state = json.loads((target / "state.json").read_text(encoding="utf-8"))
             self.assertTrue(state["graph_enabled"])
-            self.assertTrue((target / "corpus" / "edges.jsonl").is_file())
+            self.assertTrue((target / "knowledge" / "edges.jsonl").is_file())
 
     def test_initializer_uses_utc_timestamps(self):
         module = load_module()

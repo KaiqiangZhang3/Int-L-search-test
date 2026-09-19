@@ -12,17 +12,18 @@
     "created_at",
     "updated_at",
     "status",
+    "current_checkpoint",
+    "artifacts",
     "approved_plan",
     "decision_log",
     "branches",
-    "rounds",
     "coverage",
     "deduplication",
     "stopping"
   ],
   "properties": {
     "schema_version": {
-      "const": 2
+      "const": 3
     },
     "graph_enabled": {
       "type": "boolean"
@@ -48,6 +49,34 @@
         "paused",
         "complete"
       ]
+    },
+    "current_checkpoint": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sources",
+        "claims",
+        "rounds",
+        "decisions",
+        "terminology",
+        "current_synthesis",
+        "presentation_hub",
+        "bibliography"
+      ],
+      "properties": {
+        "sources": {"const": "knowledge/sources.jsonl"},
+        "claims": {"const": "knowledge/claims.jsonl"},
+        "rounds": {"const": "knowledge/rounds.jsonl"},
+        "decisions": {"const": "knowledge/decisions.jsonl"},
+        "terminology": {"const": "knowledge/terminology.jsonl"},
+        "current_synthesis": {"type": ["string", "null"], "minLength": 1},
+        "presentation_hub": {"type": ["string", "null"], "minLength": 1},
+        "bibliography": {"const": "exports/bibliography.csv"}
+      }
     },
     "approved_plan": {
       "type": [

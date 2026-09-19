@@ -1,12 +1,14 @@
 # Minimum Resumable Handoff
 
-Use this compact artifact for Quick and Standard projects. Keep user-facing wording concise and link to the source ledger rather than duplicating it.
+Use this compact artifact for Quick, Standard, and Deep-audit projects. Link to authoritative records instead of duplicating them.
 
 ## Project
 
 - Project key: {{project_key}}
 - Mode: {{quick_or_standard}}
-- Current stage or checkpoint: {{stage_or_checkpoint}}
+- Current checkpoint: {{checkpoint_id_or_none}}
+- Current main round: {{current_main_round_or_none}}
+- Current side round: {{current_side_round_or_none}}
 - Last updated: {{timestamp}}
 
 ## Approved scope
@@ -16,21 +18,24 @@ Use this compact artifact for Quick and Standard projects. Keep user-facing word
 - Excluded: {{excluded_issues}}
 - Output type, file format, and citation style: {{delivery_choices}}
 
-## Branches and budgets
+## Active round and budget
 
-{{active_deleted_and_paused_branches_with_language_purpose_and_budget}}
+{{active_round_purpose_scope_and_three_axis_budget}}
 
-## Project-level decisions
+## Knowledge records
 
-Record each decision with its round or timestamp, including mode changes, branch deletion, language changes, budget changes, stopping instructions, and closure status.
+- Source ledger: {{source_ledger_location}}
+- Claim ledger: {{claim_ledger_location}}
+- Round index: {{round_index_location}}
+- Decision log: {{decision_log_location}}
+- Terminology ledger: {{terminology_ledger_location}}
 
-{{project_level_decisions}}
+## Reader artifacts
 
-## Source ledger
-
-- Ledger path or attachment: {{source_ledger_location}}
-- Source keys retained: {{source_keys}}
-- Source-specific decisions remain in each ledger record.
+- Current synthesis: {{current_synthesis_or_none}}
+- Latest round report: {{latest_round_report_or_none}}
+- Presentation hub: {{presentation_hub_or_none}}
+- Bibliography CSV: {{bibliography_csv}}
 
 ## Resume here
 
@@ -39,4 +44,4 @@ Record each decision with its round or timestamp, including mode changes, branch
 - Open high-value paths: {{unresolved_paths}}
 - Known access or coverage gaps: {{gaps}}
 
-Do not resume external retrieval or tracing beyond the recorded authorization. If this handoff and the ledger conflict, stop and ask the user which decision controls.
+Do not resume retrieval or tracing beyond the recorded authorization. If the handoff conflicts with a knowledge record, pause and resolve the conflict with the user.

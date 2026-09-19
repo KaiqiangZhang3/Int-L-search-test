@@ -10,21 +10,39 @@ import tempfile
 def _build_workspace(
     target: Path, project_id: str, now: str, graph_enabled: bool = False
 ) -> None:
-    for relative in ["plan", "corpus", "logs", "exports"]:
+    for relative in [
+        "plan",
+        "knowledge",
+        "reports",
+        "synthesis",
+        "presentations",
+        "logs",
+        "exports",
+    ]:
         (target / relative).mkdir(parents=True, exist_ok=False)
 
     state = {
-        "schema_version": 2,
+        "schema_version": 3,
         "graph_enabled": graph_enabled,
         "saturation_enabled": False,
         "project_id": project_id,
         "created_at": now,
         "updated_at": now,
         "status": "planning",
+        "current_checkpoint": None,
+        "artifacts": {
+            "sources": "knowledge/sources.jsonl",
+            "claims": "knowledge/claims.jsonl",
+            "rounds": "knowledge/rounds.jsonl",
+            "decisions": "knowledge/decisions.jsonl",
+            "terminology": "knowledge/terminology.jsonl",
+            "current_synthesis": None,
+            "presentation_hub": None,
+            "bibliography": "exports/bibliography.csv",
+        },
         "approved_plan": None,
         "decision_log": [],
         "branches": [],
-        "rounds": [],
         "coverage": {
             dimension: {"searched": [], "unsearched": []}
             for dimension in (
@@ -53,13 +71,22 @@ def _build_workspace(
         "# Search Plan\n\nStatus: `pending`\n", encoding="utf-8"
     )
     for relative in [
-        "corpus/sources.jsonl",
+        "knowledge/sources.jsonl",
+        "knowledge/claims.jsonl",
+        "knowledge/rounds.jsonl",
+        "knowledge/decisions.jsonl",
+        "knowledge/terminology.jsonl",
         "logs/retrieval.jsonl",
-        "exports/.gitkeep",
     ]:
         (target / relative).touch()
+    (target / "exports" / "bibliography.csv").write_text(
+        "source_key,citation,source_type,language,scholarly_importance,"
+        "acquisition_priority,availability,review_extent,reading_priority,"
+        "stable_links,round_membership\n",
+        encoding="utf-8",
+    )
     if graph_enabled:
-        (target / "corpus" / "edges.jsonl").touch()
+        (target / "knowledge" / "edges.jsonl").touch()
 
 
 def initialize(

@@ -1,0 +1,82 @@
+{
+  "schema_version": 2,
+  "graph_enabled": true,
+  "saturation_enabled": true,
+  "project_id": "v2-corporate-role-search",
+  "created_at": "2026-09-01T12:00:00+00:00",
+  "updated_at": "2026-09-04T15:00:00+00:00",
+  "status": "paused",
+  "approved_plan": {
+    "approved_by": "Fixture user",
+    "approved_at": "2026-09-01T12:30:00+00:00",
+    "plan_path": "plan/search-plan.md"
+  },
+  "decision_log": [
+    {
+      "decision_id": "decision-approve-round-1",
+      "kind": "budget_change",
+      "decided_by": "Fixture user",
+      "decided_at": "2026-09-01T12:30:00+00:00",
+      "round_id": "round-1",
+      "budget": {
+        "source_cap": 20,
+        "full_text_review_cap": 5,
+        "time_minutes": 90
+      }
+    },
+    {
+      "decision_id": "decision-pause-round-1",
+      "kind": "pause",
+      "decided_by": "Fixture user",
+      "decided_at": "2026-09-04T15:00:00+00:00",
+      "round_id": "round-1"
+    }
+  ],
+  "branches": [],
+  "rounds": [
+    {
+      "round_id": "round-1",
+      "timestamp": "2026-09-04T14:30:00+00:00",
+      "budget_status": "within_budget",
+      "decision": "pause_for_user",
+      "decision_reason": "The initial breadth search is complete.",
+      "unresolved_gaps": ["French-language scholarship"],
+      "branch_depth": {},
+      "attempted_queries_or_paths": ["corporate roles international law"],
+      "access_failures": [],
+      "counts": {
+        "candidate_count": 2,
+        "new_candidate_count": 2,
+        "new_high_relevance_count": 1,
+        "new_core_material_count": 1,
+        "duplicate_count": 0,
+        "duplicate_ratio": 0
+      },
+      "coverage_additions": {
+        "source_types": ["journal_article"],
+        "themes": ["corporate roles"],
+        "languages": ["English"],
+        "platforms": ["HeinOnline", "Publisher"]
+      },
+      "access_gaps": ["source-002 full text"],
+      "open_high_value_branches": ["Corporate governance"]
+    }
+  ],
+  "coverage": {
+    "subquestions": {"searched": ["Corporate roles"], "unsearched": ["Corporate governance"]},
+    "platforms": {"searched": ["HeinOnline", "Publisher"], "unsearched": ["Scopus"]},
+    "languages": {"searched": ["English"], "unsearched": ["French"]},
+    "periods": {"searched": ["2000-2026"], "unsearched": ["Before 2000"]},
+    "authority_classes": {"searched": ["general_academic"], "unsearched": ["primary"]}
+  },
+  "deduplication": {
+    "identity_index": {"doi:10.0000/example": "source-001"},
+    "unresolved_record_ids": [],
+    "last_merged_at": "2026-09-04T14:30:00+00:00"
+  },
+  "stopping": {
+    "decision": "pause_for_user",
+    "reason": "Waiting for the user to select the next round.",
+    "open_high_value_branches": ["Corporate governance"]
+  }
+}
